@@ -61,11 +61,10 @@ describe("Color Utilities", () => {
   }
 
   const teamColors = [
-    "#ef4444",
-    "#f97316",
-    "#eab308",
+    "#f4884c",
+    "#00469d",
     "#22c55e",
-    "#3b82f6",
+    "#eab308",
     "#8b5cf6",
     "#ec4899",
     "#06b6d4",
@@ -85,10 +84,10 @@ describe("Color Utilities", () => {
   });
 
   it("should generate team colors cyclically", () => {
-    expect(generateTeamColor(0, teamColors)).toBe("#ef4444");
-    expect(generateTeamColor(1, teamColors)).toBe("#f97316");
-    expect(generateTeamColor(8, teamColors)).toBe("#ef4444"); // Cycles back
-    expect(generateTeamColor(9, teamColors)).toBe("#f97316");
+    expect(generateTeamColor(0, teamColors)).toBe("#f4884c");
+    expect(generateTeamColor(1, teamColors)).toBe("#00469d");
+    expect(generateTeamColor(7, teamColors)).toBe("#f4884c"); // Cycles back
+    expect(generateTeamColor(8, teamColors)).toBe("#00469d");
   });
 
   it("should handle all predefined team colors", () => {

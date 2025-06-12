@@ -36,16 +36,21 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
   // Default team colors
   const teamColors = [
-    "#ef4444", "#f97316", "#eab308", "#22c55e", 
-    "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4"
-  ]
+    "#f4884c",
+    "#00469d",
+    "#22c55e",
+    "#eab308",
+    "#8b5cf6",
+    "#ec4899",
+    "#06b6d4",
+  ];
 
   const loadTeams = useCallback(async () => {
     try {
       if (!isInitialized) return
-      
+
       const savedTeams = await indexedDB.getAllTeams()
-      
+
       if (savedTeams.length === 0) {
         // Create default team
         const defaultTeam: Team = {
@@ -59,12 +64,12 @@ export function TeamProvider({ children }: TeamProviderProps) {
       } else {
         setTeams(savedTeams)
       }
-      
+
       // Set initial selected team if none is set
       const savedSelectedTeamId = await indexedDB.getSetting('selectedTeamId')
       const teamExists = savedTeams.find((t: Team) => t.id === savedSelectedTeamId)
       const initialTeamId = teamExists ? savedSelectedTeamId : savedTeams[0]?.id || "default"
-      
+
       if (initialTeamId && !selectedTeamId) {
         setSelectedTeamId(initialTeamId)
         await indexedDB.setSetting('selectedTeamId', initialTeamId)
@@ -97,14 +102,14 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
   const createTeam = useCallback(async (name: string) => {
     if (!name.trim() || !isInitialized) return
-    
+
     const newTeam: Team = {
       id: Date.now().toString(),
       name: name.trim(),
       color: teamColors[teams.length % teamColors.length]!,
       createdAt: new Date()
     }
-    
+
     try {
       await indexedDB.saveTeam(newTeam)
       const updatedTeams = [...teams, newTeam]
@@ -116,15 +121,15 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
   const updateTeam = useCallback(async (id: string, name: string) => {
     if (!name.trim() || !isInitialized) return
-    
+
     try {
       const updatedTeam = teams.find(team => team.id === id)
       if (!updatedTeam) return
-      
+
       const newTeam = { ...updatedTeam, name: name.trim() }
       await indexedDB.saveTeam(newTeam)
-      
-      const updatedTeams = teams.map(team => 
+
+      const updatedTeams = teams.map(team =>
         team.id === id ? newTeam : team
       )
       setTeams(updatedTeams)
@@ -135,14 +140,14 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
   const deleteTeam = useCallback(async (id: string) => {
     if (teams.length <= 1 || !isInitialized) return // Don't allow deleting the last team
-    
+
     try {
       // IndexedDB manager handles both team and rounds deletion
       await indexedDB.deleteTeam(id)
-      
+
       const updatedTeams = teams.filter(team => team.id !== id)
       setTeams(updatedTeams)
-      
+
       // If the deleted team was selected, switch to first available team
       if (selectedTeamId === id) {
         const newSelectedId = updatedTeams[0]?.id || ""
