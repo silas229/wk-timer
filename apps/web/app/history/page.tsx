@@ -6,20 +6,29 @@ import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion"
 import { useTeam } from "@/components/team-context"
-import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, formatActivityTime, type ActivityTime } from "@/lib/lap-activities"
+import { indexedDB, type SavedRound } from "@/lib/indexeddb"
+import { calculateActivityTimes, formatActivityTime } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const formatDuration = useCallback((milliseconds: number) => {
+  const formatDurationChange = useCallback((milliseconds: number) => {
+    const isNegative = milliseconds < 0
+    milliseconds = Math.abs(milliseconds)
+    const totalSeconds = Math.floor(milliseconds / 1000)
+    const seconds = totalSeconds % 60
+    const ms = Math.floor((milliseconds % 1000) / 10)
+    return `${isNegative ? '-' : '+'}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`
+  }, [])
+
+    const formatDuration = useCallback((milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000)
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
     const ms = Math.floor((milliseconds % 1000) / 10)
-    return `${minutes.toString().padStart(2, "0")}:${seconds
+    return `${minutes.toString()}:${seconds
       .toString()
       .padStart(2, "0")}.${ms.toString().padStart(2, "0")}`
   }, [])
@@ -84,21 +93,51 @@ export default function HistoryPage() {
     }
   }, [])
 
-  const getFastestActivity = (laps: Lap[]): { activity: ActivityTime | null; time: number } => {
-    const activities = calculateActivityTimes(laps)
-    if (activities.length === 0) return { activity: null, time: Infinity }
+  const getPreviousTeamComparison = (currentRound: SavedRound) => {
+    // Find all rounds completed before this round (regardless of team)
+    const previousRounds = savedRounds
+      .filter(round => round.completedAt.getTime() < currentRound.completedAt.getTime())
+      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
     
-    let fastest: ActivityTime | null = null
-    let fastestTime = Infinity
-
-    for (const activity of activities) {
-      if (activity.time < fastestTime) {
-        fastest = activity
-        fastestTime = activity.time
-      }
+    const previousRound = previousRounds[0]
+    
+    if (!previousRound) {
+      return null
     }
 
-    return { activity: fastest, time: fastestTime }
+    const currentActivities = calculateActivityTimes(currentRound.laps)
+    const previousActivities = calculateActivityTimes(previousRound.laps)
+    
+    // Compare total time
+    const totalTimeDiff = currentRound.totalTime - previousRound.totalTime
+    
+    // Compare each activity
+    const activityComparisons: { [activityName: string]: { 
+      current: number; 
+      previous: number; 
+      diff: number; 
+      isFaster: boolean 
+    }} = {}
+    
+    currentActivities.forEach(currentActivity => {
+      const previousActivity = previousActivities.find(p => p.name === currentActivity.name)
+      if (previousActivity) {
+        const diff = currentActivity.time - previousActivity.time
+        activityComparisons[currentActivity.name] = {
+          current: currentActivity.time,
+          previous: previousActivity.time,
+          diff,
+          isFaster: diff < 0
+        }
+      }
+    })
+    
+    return {
+      previousRound,
+      totalTimeDiff,
+      isFasterOverall: totalTimeDiff < 0,
+      activityComparisons
+    }
   }
 
   // Filter rounds by selected team (only show current team's rounds)
@@ -231,20 +270,22 @@ export default function HistoryPage() {
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3 pt-2">
                 {roundsForDay.map((round) => {
-                  const fastestActivity = getFastestActivity(round.laps)
+                  const previousComparison = getPreviousTeamComparison(round)
                   const activities = calculateActivityTimes(round.laps)
                   return (
                   <Card key={round.id}>
                     <CardHeader>
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div className="w-full">
                       <div className="flex items-center gap-3 mb-1">
                         <div
                         className="w-4 h-4 rounded-full"
                         style={{ backgroundColor: getTeamColor(round.teamId) }}
                         />
                         <CardTitle className="text-lg">
-                        <span className="font-mono">{formatDuration(round.totalTime)}</span> ({formatTime(round.completedAt)} Uhr)
+                        <span className="font-mono">{formatDuration(round.totalTime)}</span>
+                        {previousComparison && (<span className={`ml-2 font-medium text-xs p-1 border rounded ${previousComparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>{formatDurationChange(previousComparison.totalTimeDiff)}</span>)}
+                        <span> ({formatTime(round.completedAt)} Uhr)</span>
                         </CardTitle>
                       </div>
                       </div>
@@ -262,24 +303,22 @@ export default function HistoryPage() {
                     <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       {activities.map((activity, index) => {
-                      const isFastest = fastestActivity && fastestActivity.activity && 
-                               activity.name === fastestActivity.activity.name
+                      const activityComparison = previousComparison?.activityComparisons[activity.name]
                       return (
                         <div
                         key={`${activity.name}-${index}`}
-                        className={`flex justify-between items-center p-2 rounded text-sm ${
-                          isFastest 
-                          ? 'bg-primary/10 border border-primary/20' 
-                          : 'bg-muted/50'
-                        }`}
-                        >
-                        <span className="font-medium">
-                          {activity.name}
-                          {isFastest && <span className="text-primary ml-1">⚡</span>}
-                        </span>
-                        <span className="font-mono">
-                          {formatActivityTime(activity.time)}
-                        </span>
+                        className={"flex justify-between items-center p-2 rounded text-sm bg-muted/50"}>
+                        <span className="font-medium">{activity.name}</span>
+                        <div className="text-right">
+                          <span className="font-mono">
+                            {formatActivityTime(activity.time)}
+                          </span>
+                          {activityComparison && (
+                            <div className={`text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
+                              {formatDurationChange(activityComparison.diff)}
+                            </div>
+                          )}
+                        </div>
                         </div>
                       )
                       })}
