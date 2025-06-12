@@ -5,26 +5,13 @@ import { Trash2, Clock, Filter } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useTeam } from "@/components/team-context"
-
-interface Lap {
-  lapNumber: number
-  time: number
-  timestamp: Date
-}
-
-interface SavedRound {
-  id: string
-  completedAt: Date
-  totalTime: number
-  laps: Lap[]
-  teamId: string
-  teamName: string
-}
+import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 
 export default function HistoryPage() {
-  const { teams } = useTeam()
+  const { teams, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [selectedTeamId, setSelectedTeamId] = useState<string>("all")
+  const [isLoading, setIsLoading] = useState(true)
 
   const formatTime = useCallback((milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000)
@@ -46,42 +33,48 @@ export default function HistoryPage() {
     }).format(date)
   }, [])
 
-  const loadSavedRounds = useCallback(() => {
+  const loadSavedRounds = useCallback(async () => {
+    if (!isInitialized) return
+    
     try {
-      const rounds = JSON.parse(localStorage.getItem('timer-rounds') || '[]')
-      // Convert date strings back to Date objects and sort by completion date (newest first)
-      const parsedRounds = rounds.map((round: any) => ({
-        ...round,
-        completedAt: new Date(round.completedAt),
-        teamId: round.teamId || "default", // Handle legacy rounds without teamId
-        teamName: round.teamName || "Default Team", // Handle legacy rounds without teamName
-        laps: round.laps.map((lap: any) => ({
-          ...lap,
-          timestamp: new Date(lap.timestamp)
-        }))
-      })).sort((a: SavedRound, b: SavedRound) => 
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      )
-      setSavedRounds(parsedRounds)
+      setIsLoading(true)
+      const rounds = await indexedDB.getAllRounds()
+      setSavedRounds(rounds)
     } catch (error) {
       console.error('Failed to load saved rounds:', error)
       setSavedRounds([])
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }, [isInitialized])
 
-  const deleteRound = useCallback((roundId: string) => {
+  // Load rounds when initialized
+  useEffect(() => {
+    if (isInitialized) {
+      loadSavedRounds()
+    }
+  }, [isInitialized]) // Remove loadSavedRounds from dependencies
+
+  // Reload rounds when teams change (e.g., when a team is deleted)
+  useEffect(() => {
+    if (isInitialized && teams.length > 0) {
+      loadSavedRounds()
+    }
+  }, [teams.length, isInitialized]) // Use teams.length instead of teams array
+
+  const deleteRound = useCallback(async (roundId: string) => {
     try {
+      await indexedDB.deleteRound(roundId)
       const updatedRounds = savedRounds.filter((round: SavedRound) => round.id !== roundId)
-      localStorage.setItem('timer-rounds', JSON.stringify(updatedRounds))
       setSavedRounds(updatedRounds)
     } catch (error) {
       console.error('Failed to delete round:', error)
     }
   }, [savedRounds])
 
-  const clearAllRounds = useCallback(() => {
+  const clearAllRounds = useCallback(async () => {
     try {
-      localStorage.removeItem('timer-rounds')
+      await indexedDB.clearAllRounds()
       setSavedRounds([])
     } catch (error) {
       console.error('Failed to clear rounds:', error)
@@ -128,24 +121,45 @@ export default function HistoryPage() {
   }
 
   useEffect(() => {
-    loadSavedRounds()
-  }, [loadSavedRounds])
+    if (isInitialized) {
+      loadSavedRounds()
+    }
+  }, [isInitialized]) // Remove loadSavedRounds from dependencies
 
   // Reload rounds when teams change (e.g., when a team is deleted)
   useEffect(() => {
-    loadSavedRounds()
-  }, [teams, loadSavedRounds])
+    if (isInitialized && teams.length > 0) {
+      loadSavedRounds()
+    }
+  }, [teams.length, isInitialized]) // Use teams.length instead of teams array
 
   return (
     <div className="flex items-start justify-center p-4">
       <div className="w-full max-w-4xl space-y-6">
-        {/* Header with Team Filter */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Round History</h1>
-              <p className="text-muted-foreground">
-                {filteredRounds.length} saved {filteredRounds.length === 1 ? 'round' : 'rounds'}
+        {/* Loading state */}
+        {(!isInitialized || isLoading) && (
+          <Card>
+            <CardContent className="flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-muted-foreground">
+                  {!isInitialized ? 'Initializing database...' : 'Loading rounds...'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Main content - only show when initialized and not loading */}
+        {isInitialized && !isLoading && (
+          <>
+            {/* Header with Team Filter */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold">Round History</h1>
+                  <p className="text-muted-foreground">
+                    {filteredRounds.length} saved {filteredRounds.length === 1 ? 'round' : 'rounds'}
                 {selectedTeamId !== "all" && (
                   <span> for {teams.find(t => t.id === selectedTeamId)?.name}</span>
                 )}
@@ -291,6 +305,8 @@ export default function HistoryPage() {
               )
             })}
           </div>
+        )}
+        </>
         )}
       </div>
     </div>

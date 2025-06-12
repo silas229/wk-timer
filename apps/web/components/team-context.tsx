@@ -1,13 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
-
-export interface Team {
-  id: string
-  name: string
-  color: string
-  createdAt: Date
-}
+import { indexedDB, initializeDB, type Team } from "@/lib/indexeddb"
 
 interface TeamContextValue {
   teams: Team[]
@@ -18,6 +12,7 @@ interface TeamContextValue {
   createTeam: (name: string) => void
   updateTeam: (id: string, name: string) => void
   deleteTeam: (id: string) => void
+  isInitialized: boolean
 }
 
 const TeamContext = createContext<TeamContextValue | undefined>(undefined)
@@ -37,6 +32,7 @@ interface TeamProviderProps {
 export function TeamProvider({ children }: TeamProviderProps) {
   const [teams, setTeams] = useState<Team[]>([])
   const [selectedTeamId, setSelectedTeamId] = useState<string>("")
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Default team colors
   const teamColors = [
@@ -44,15 +40,13 @@ export function TeamProvider({ children }: TeamProviderProps) {
     "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4"
   ]
 
-  const loadTeams = useCallback(() => {
+  const loadTeams = useCallback(async () => {
     try {
-      const savedTeams = JSON.parse(localStorage.getItem('timer-teams') || '[]')
-      const parsedTeams = savedTeams.map((team: any) => ({
-        ...team,
-        createdAt: new Date(team.createdAt)
-      }))
+      if (!isInitialized) return
       
-      if (parsedTeams.length === 0) {
+      const savedTeams = await indexedDB.getAllTeams()
+      
+      if (savedTeams.length === 0) {
         // Create default team
         const defaultTeam: Team = {
           id: "default",
@@ -60,34 +54,49 @@ export function TeamProvider({ children }: TeamProviderProps) {
           color: teamColors[0]!,
           createdAt: new Date()
         }
-        parsedTeams.push(defaultTeam)
-        localStorage.setItem('timer-teams', JSON.stringify([defaultTeam]))
+        await indexedDB.saveTeam(defaultTeam)
+        setTeams([defaultTeam])
+      } else {
+        setTeams(savedTeams)
       }
       
-      setTeams(parsedTeams)
-      
       // Set initial selected team if none is set
-      const savedSelectedTeam = localStorage.getItem('selected-team-id')
-      const teamExists = parsedTeams.find((t: Team) => t.id === savedSelectedTeam)
-      const initialTeamId = teamExists ? savedSelectedTeam! : parsedTeams[0]?.id
+      const savedSelectedTeamId = await indexedDB.getSetting('selectedTeamId')
+      const teamExists = savedTeams.find((t: Team) => t.id === savedSelectedTeamId)
+      const initialTeamId = teamExists ? savedSelectedTeamId : savedTeams[0]?.id || "default"
       
       if (initialTeamId && !selectedTeamId) {
         setSelectedTeamId(initialTeamId)
-        localStorage.setItem('selected-team-id', initialTeamId)
+        await indexedDB.setSetting('selectedTeamId', initialTeamId)
       }
     } catch (error) {
       console.error('Failed to load teams:', error)
       setTeams([])
     }
-  }, [teamColors])
+  }, [teamColors, isInitialized, selectedTeamId])
 
-  // Load teams only once on mount
+  // Initialize IndexedDB and load teams
   useEffect(() => {
-    loadTeams()
-  }, []) // Empty dependency array to run only once
+    const initDB = async () => {
+      try {
+        await initializeDB()
+        setIsInitialized(true)
+      } catch (error) {
+        console.error('Failed to initialize IndexedDB:', error)
+      }
+    }
+    initDB()
+  }, [])
 
-  const createTeam = useCallback((name: string) => {
-    if (!name.trim()) return
+  // Load teams when IndexedDB is ready
+  useEffect(() => {
+    if (isInitialized) {
+      loadTeams()
+    }
+  }, [isInitialized, loadTeams])
+
+  const createTeam = useCallback(async (name: string) => {
+    if (!name.trim() || !isInitialized) return
     
     const newTeam: Team = {
       id: Date.now().toString(),
@@ -97,59 +106,66 @@ export function TeamProvider({ children }: TeamProviderProps) {
     }
     
     try {
+      await indexedDB.saveTeam(newTeam)
       const updatedTeams = [...teams, newTeam]
       setTeams(updatedTeams)
-      localStorage.setItem('timer-teams', JSON.stringify(updatedTeams))
     } catch (error) {
       console.error('Failed to create team:', error)
     }
-  }, [teams, teamColors])
+  }, [teams, teamColors, isInitialized])
 
-  const updateTeam = useCallback((id: string, name: string) => {
-    if (!name.trim()) return
+  const updateTeam = useCallback(async (id: string, name: string) => {
+    if (!name.trim() || !isInitialized) return
     
     try {
+      const updatedTeam = teams.find(team => team.id === id)
+      if (!updatedTeam) return
+      
+      const newTeam = { ...updatedTeam, name: name.trim() }
+      await indexedDB.saveTeam(newTeam)
+      
       const updatedTeams = teams.map(team => 
-        team.id === id ? { ...team, name: name.trim() } : team
+        team.id === id ? newTeam : team
       )
       setTeams(updatedTeams)
-      localStorage.setItem('timer-teams', JSON.stringify(updatedTeams))
     } catch (error) {
       console.error('Failed to update team:', error)
     }
-  }, [teams])
+  }, [teams, isInitialized])
 
-  const deleteTeam = useCallback((id: string) => {
-    if (teams.length <= 1) return // Don't allow deleting the last team
+  const deleteTeam = useCallback(async (id: string) => {
+    if (teams.length <= 1 || !isInitialized) return // Don't allow deleting the last team
     
     try {
+      // IndexedDB manager handles both team and rounds deletion
+      await indexedDB.deleteTeam(id)
+      
       const updatedTeams = teams.filter(team => team.id !== id)
       setTeams(updatedTeams)
-      localStorage.setItem('timer-teams', JSON.stringify(updatedTeams))
-      
-      // Delete all rounds associated with the deleted team
-      // This ensures data consistency and prevents orphaned records
-      const existingRounds = JSON.parse(localStorage.getItem('timer-rounds') || '[]')
-      const filteredRounds = existingRounds.filter((round: any) => round.teamId !== id)
-      localStorage.setItem('timer-rounds', JSON.stringify(filteredRounds))
       
       // If the deleted team was selected, switch to first available team
       if (selectedTeamId === id) {
         const newSelectedId = updatedTeams[0]?.id || ""
         if (newSelectedId) {
           setSelectedTeamId(newSelectedId)
-          localStorage.setItem('selected-team-id', newSelectedId)
+          await indexedDB.setSetting('selectedTeamId', newSelectedId)
         }
       }
     } catch (error) {
       console.error('Failed to delete team:', error)
     }
-  }, [teams, selectedTeamId])
+  }, [teams, selectedTeamId, isInitialized])
 
-  const handleSetSelectedTeamId = useCallback((id: string) => {
+  const handleSetSelectedTeamId = useCallback(async (id: string) => {
     setSelectedTeamId(id)
-    localStorage.setItem('selected-team-id', id)
-  }, [])
+    if (isInitialized) {
+      try {
+        await indexedDB.setSetting('selectedTeamId', id)
+      } catch (error) {
+        console.error('Failed to save selected team:', error)
+      }
+    }
+  }, [isInitialized])
 
   const getCurrentTeam = useCallback(() => {
     return teams.find(team => team.id === selectedTeamId)
@@ -163,7 +179,8 @@ export function TeamProvider({ children }: TeamProviderProps) {
     getCurrentTeam,
     createTeam,
     updateTeam,
-    deleteTeam
+    deleteTeam,
+    isInitialized
   }
 
   return (

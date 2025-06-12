@@ -5,42 +5,31 @@ import { Save } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useTeam } from "@/components/team-context"
+import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 
 type TimerState = "stopped" | "running" | "finished"
 
-interface Lap {
-  lapNumber: number
-  time: number
-  timestamp: Date
-}
-
-interface SavedRound {
-  id: string
-  completedAt: Date
-  totalTime: number
-  laps: Lap[]
-  teamId: string
-  teamName: string
-}
-
 export default function Page() {
-  const { selectedTeamId, getCurrentTeam } = useTeam()
+  const { selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [time, setTime] = useState(0)
   const [state, setState] = useState<TimerState>("stopped")
   const [laps, setLaps] = useState<Lap[]>([])
   const [startTime, setStartTime] = useState<number | null>(null)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
 
-  // localStorage functions
-  const saveRoundToStorage = useCallback((round: SavedRound) => {
-    try {
-      const existingRounds = JSON.parse(localStorage.getItem('timer-rounds') || '[]')
-      const updatedRounds = [...existingRounds, round]
-      localStorage.setItem('timer-rounds', JSON.stringify(updatedRounds))
-    } catch (error) {
-      console.error('Failed to save round to localStorage:', error)
+  // IndexedDB functions
+  const saveRoundToStorage = useCallback(async (round: SavedRound) => {
+    if (!isInitialized) {
+      console.warn('Database not initialized, cannot save round')
+      return
     }
-  }, [])
+    
+    try {
+      await indexedDB.saveRound(round)
+    } catch (error) {
+      console.error('Failed to save round to IndexedDB:', error)
+    }
+  }, [isInitialized])
 
   const getCurrentRound = useCallback((): SavedRound => {
     const currentTeam = getCurrentTeam()
@@ -112,9 +101,9 @@ export default function Page() {
     setShowSaveDialog(false)
   }
 
-  const handleSaveRound = () => {
+  const handleSaveRound = async () => {
     const round = getCurrentRound()
-    saveRoundToStorage(round)
+    await saveRoundToStorage(round)
     setShowSaveDialog(false)
     handleRestart()
   }
