@@ -8,6 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: Uberspace
+      url: https://wk-timer.us.silas229.name
 
     steps:
       - name: Checkout code
