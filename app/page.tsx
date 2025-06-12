@@ -7,6 +7,7 @@ import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, formatTime, LAP_ACTIVITIES, compareRounds, type ActivityTime } from "@/lib/lap-activities"
 import { PWAInstallPrompt } from "@/components/pwa-install"
+import { Trash2 } from "lucide-react"
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -315,13 +316,13 @@ export default function Page() {
                             <div className="font-mono text-sm">
                               {formatTime(activity.time, 'seconds')}
                               {activityComparison && (
-                                <span className={`ml-2 text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
+                                <span className={`ml-2 ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
                                   {formatTime(activityComparison.diff, 'diff')}
                                 </span>
                               )}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {formatTime(activity.startTime)} → {formatTime(activity.endTime)}
+                              {formatTime(activity.startTime)}&nbsp;→&nbsp;{formatTime(activity.endTime)}
                             </div>
                           </div>
                         </div>
@@ -370,6 +371,7 @@ export default function Page() {
               variant="destructive"
               className="w-full"
             >
+              <Trash2 />
               Runde verwerfen
             </Button>
           )}
