@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   calculateActivityTimes,
-  formatActivityTime,
+  formatTime,
   LAP_ACTIVITIES,
 } from "../lib/lap-activities";
 
@@ -154,23 +154,100 @@ describe("Lap Activities", () => {
     });
   });
 
-  describe("formatActivityTime", () => {
-    it("should format time correctly", () => {
-      expect(formatActivityTime(0)).toBe("00:00.00");
-      expect(formatActivityTime(1000)).toBe("00:01.00");
-      expect(formatActivityTime(30000)).toBe("00:30.00");
-      expect(formatActivityTime(61500)).toBe("01:01.50");
-      expect(formatActivityTime(125750)).toBe("02:05.75");
+  describe("formatTime", () => {
+    describe("full format (default)", () => {
+      it("should format zero time correctly", () => {
+        expect(formatTime(0)).toBe("0:00.00");
+        expect(formatTime(0, "full")).toBe("0:00.00");
+      });
+
+      it("should format milliseconds correctly", () => {
+        expect(formatTime(500)).toBe("0:00.50");
+        expect(formatTime(999)).toBe("0:00.99");
+        expect(formatTime(123)).toBe("0:00.12");
+      });
+
+      it("should format seconds correctly", () => {
+        expect(formatTime(1000)).toBe("0:01.00");
+        expect(formatTime(1500)).toBe("0:01.50");
+        expect(formatTime(59999)).toBe("0:59.99");
+      });
+
+      it("should format minutes correctly", () => {
+        expect(formatTime(60000)).toBe("1:00.00");
+        expect(formatTime(90000)).toBe("1:30.00");
+        expect(formatTime(125678)).toBe("2:05.67");
+      });
+
+      it("should format large times correctly", () => {
+        expect(formatTime(600000)).toBe("10:00.00");
+        expect(formatTime(3661234)).toBe("61:01.23");
+      });
     });
 
-    it("should handle large times", () => {
-      expect(formatActivityTime(600000)).toBe("10:00.00"); // 10 minutes
-      expect(formatActivityTime(3661500)).toBe("61:01.50"); // Over 1 hour
+    describe("seconds format", () => {
+      it("should format seconds only", () => {
+        expect(formatTime(0, "seconds")).toBe("00.00");
+        expect(formatTime(1500, "seconds")).toBe("01.50");
+        expect(formatTime(59999, "seconds")).toBe("59.99");
+      });
+
+      it("should handle minutes overflow in seconds format", () => {
+        expect(formatTime(60000, "seconds")).toBe("00.00"); // 1 minute becomes 0 seconds
+        expect(formatTime(65000, "seconds")).toBe("05.00"); // 1:05 becomes 05 seconds
+        expect(formatTime(125678, "seconds")).toBe("05.67"); // 2:05.67 becomes 05.67 seconds
+      });
     });
 
-    it("should handle fractional milliseconds", () => {
-      expect(formatActivityTime(1234)).toBe("00:01.23"); // 1.234 seconds -> 1.23
-      expect(formatActivityTime(5678)).toBe("00:05.67"); // 5.678 seconds -> 5.67
+    describe("diff format", () => {
+      it("should format positive differences", () => {
+        expect(formatTime(0, "diff")).toBe("+00.00");
+        expect(formatTime(1500, "diff")).toBe("+01.50");
+        expect(formatTime(59999, "diff")).toBe("+59.99");
+      });
+
+      it("should format negative differences", () => {
+        expect(formatTime(-1500, "diff")).toBe("-01.50");
+        expect(formatTime(-59999, "diff")).toBe("-59.99");
+        expect(formatTime(-123, "diff")).toBe("-00.12");
+      });
+
+      it("should handle minutes overflow in diff format", () => {
+        expect(formatTime(65000, "diff")).toBe("+05.00"); // 1:05 becomes +05 seconds
+        expect(formatTime(-125678, "diff")).toBe("-05.67"); // -2:05.67 becomes -05.67 seconds
+      });
+    });
+
+    describe("negative values", () => {
+      it("should handle negative values in full format", () => {
+        expect(formatTime(-1500)).toBe("0:01.50"); // Absolute value
+        expect(formatTime(-60000)).toBe("1:00.00");
+        expect(formatTime(-125678)).toBe("2:05.67");
+      });
+
+      it("should handle negative values in seconds format", () => {
+        expect(formatTime(-1500, "seconds")).toBe("01.50"); // Absolute value
+        expect(formatTime(-65000, "seconds")).toBe("05.00");
+      });
+    });
+
+    describe("edge cases", () => {
+      it("should handle very small values", () => {
+        expect(formatTime(1)).toBe("0:00.00");
+        expect(formatTime(9)).toBe("0:00.00");
+        expect(formatTime(10)).toBe("0:00.01");
+      });
+
+      it("should handle rounding of milliseconds", () => {
+        expect(formatTime(1234)).toBe("0:01.23"); // 1.234s -> 1.23s
+        expect(formatTime(1235)).toBe("0:01.23"); // 1.235s -> 1.23s
+        expect(formatTime(1236)).toBe("0:01.23"); // 1.236s -> 1.23s
+      });
+
+      it("should use default format for unknown format", () => {
+        // @ts-expect-error Testing unknown format
+        expect(formatTime(1500, "unknown")).toBe("0:01.50");
+      });
     });
   });
 

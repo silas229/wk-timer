@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, formatTime, formatActivityTime } from "@/lib/lap-activities"
+import { calculateActivityTimes, formatTime } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()

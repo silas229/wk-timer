@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { TeamProvider, useTeam } from '../components/team-context'
-import { ReactNode } from 'react'
 
 // Mock the indexedDB module
 vi.mock('../lib/indexeddb', () => ({
@@ -48,6 +47,11 @@ describe('TeamProvider', () => {
     expect(screen.getByTestId('teams-count')).toHaveTextContent('0')
     expect(screen.getByTestId('selected-team')).toHaveTextContent('')
     expect(screen.getByTestId('current-team')).toHaveTextContent('none')
+
+    // Wait for initialization to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('initialized')).toHaveTextContent('true')
+    })
   })
 
   it('should throw error when useTeam is used outside provider', () => {
@@ -73,6 +77,7 @@ describe('TeamProvider', () => {
     // Wait for initialization
     await waitFor(() => {
       expect(initializeDB).toHaveBeenCalledOnce()
+      expect(screen.getByTestId('initialized')).toHaveTextContent('true')
     })
   })
 })
@@ -116,6 +121,11 @@ describe('Team Context Functionality', () => {
         <TestTeamSelection />
       </TeamProvider>
     )
+
+    // Wait for initialization first
+    await waitFor(() => {
+      expect(screen.getByTestId('teams-count')).toHaveTextContent('1')
+    })
 
     // Click to select team
     const selectButton = screen.getByTestId('select-team')
