@@ -1,20 +1,20 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Trash2, Clock, Filter } from "lucide-react"
+import { Trash2, Clock } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, formatActivityTime, type ActivityTime } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
-  const { teams, isInitialized } = useTeam()
+  const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(true)
 
-  const formatTime = useCallback((milliseconds: number) => {
+  const formatDuration = useCallback((milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000)
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
@@ -24,10 +24,15 @@ export default function HistoryPage() {
       .padStart(2, "0")}.${ms.toString().padStart(2, "0")}`
   }, [])
 
-  const formatDate = useCallback((date: Date) => {
+  const formatTime = useCallback((date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
-      dateStyle: 'short',
       timeStyle: 'short'
+    }).format(date)
+  }, [])
+
+  const formatDayHeader = useCallback((date: Date) => {
+    return new Intl.DateTimeFormat('de-DE', {
+      dateStyle: 'full'
     }).format(date)
   }, [])
 
@@ -96,10 +101,33 @@ export default function HistoryPage() {
     return { activity: fastest, time: fastestTime }
   }
 
-  // Filter rounds by selected team
-  const filteredRounds = selectedTeamId === "all" 
-    ? savedRounds 
-    : savedRounds.filter(round => round.teamId === selectedTeamId)
+  // Filter rounds by selected team (only show current team's rounds)
+  const filteredRounds = savedRounds.filter(round => round.teamId === selectedTeamId)
+
+  // Group rounds by day
+  const groupedRounds = useCallback(() => {
+    const groups: { [key: string]: SavedRound[] } = {}
+    
+    filteredRounds.forEach(round => {
+      const dateKey = round.completedAt.toDateString()
+      if (!groups[dateKey]) {
+        groups[dateKey] = []
+      }
+      groups[dateKey]!.push(round)
+    })
+    
+    // Sort each group by time (newest first)
+    Object.keys(groups).forEach(dateKey => {
+      groups[dateKey]!.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+    })
+    
+    // Sort groups by date (newest first)
+    const sortedGroups = Object.entries(groups).sort(([a], [b]) => 
+      new Date(b).getTime() - new Date(a).getTime()
+    )
+    
+    return sortedGroups
+  }, [filteredRounds])
 
   const getTeamColor = (teamId: string) => {
     const team = teams.find(t => t.id === teamId)
@@ -139,72 +167,29 @@ export default function HistoryPage() {
         {/* Main content - only show when initialized and not loading */}
         {isInitialized && !isLoading && (
           <>
-            {/* Header with Team Filter */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold">Rundenverlauf</h2>
-                  <p className="text-muted-foreground">
-                    {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Runde' : 'Runden'}
-                {selectedTeamId !== "all" && (
-                  <span> für {teams.find(t => t.id === selectedTeamId)?.name}</span>
-                )}
-              </p>
+            <div className="flex flex-col gap-4">            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Rundenverlauf</h2>
+                <p className="text-muted-foreground">
+                  {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Runde' : 'Runden'}
+                  {getCurrentTeam() && (
+                    <span> für {getCurrentTeam()?.name}</span>
+                  )}
+                </p>
+              </div>
+              {savedRounds.length > 0 && (
+                <Button
+                  onClick={clearAllRounds}
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Alle löschen
+                </Button>
+              )}
             </div>
-            {savedRounds.length > 0 && (
-              <Button
-                onClick={clearAllRounds}
-                variant="outline"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Alle löschen
-              </Button>
-            )}
           </div>
-
-          {/* Team Filter */}
-          {teams.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Filter nach Gruppe
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={() => setSelectedTeamId("all")}
-                    variant={selectedTeamId === "all" ? "default" : "secondary"}
-                    size="sm"
-                  >
-                    Alle Gruppen ({savedRounds.length})
-                  </Button>
-                  {teams.map((team) => {
-                    const teamRounds = savedRounds.filter(round => round.teamId === team.id)
-                    return (
-                      <Button
-                        key={team.id}
-                        onClick={() => setSelectedTeamId(team.id)}
-                        variant={selectedTeamId === team.id ? "default" : "secondary"}
-                        size="sm"
-                        className="flex items-center gap-2"
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: team.color }}
-                        />
-                        {team.name} ({teamRounds.length})
-                      </Button>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
 
         {/* Rounds List */}
         {filteredRounds.length === 0 ? (
@@ -212,86 +197,102 @@ export default function HistoryPage() {
             <CardContent className="text-center py-12">
               <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">
-                {selectedTeamId === "all" ? "Bisher wurden keine Runden aufgezeichnet" : "Keine Runden für dieses Team"}
+                {getCurrentTeam() ? `Keine Runden für ${getCurrentTeam()?.name}` : "Keine Gruppe ausgewählt"}
               </h3>
               <p className="text-muted-foreground">
-                {selectedTeamId === "all" 
-                  ? "Schließe eine Runde mit dem Timer-Seite, um die Historie hier zu sehen."
-                  : "Schließe eine Runde mit diesem Team aus, um sie hier zu sehen."
+                {getCurrentTeam() 
+                  ? "Schließe eine Runde mit diesem Team ab, um sie hier zu sehen."
+                  : "Wähle eine Gruppe aus der Navigation aus, um deren Runden zu sehen."
                 }
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {filteredRounds.map((round) => {
-              const fastestActivity = getFastestActivity(round.laps)
-              const activities = calculateActivityTimes(round.laps)
-              return (
-                <Card key={round.id}>
-                  <CardHeader>
+            <Accordion 
+            type="multiple" 
+            defaultValue={(() => {
+              const groups = groupedRounds()
+              return groups.length > 0 && groups[0]?.[0] ? [groups[0][0]] : []
+            })()}
+            className="space-y-4"
+            >
+            {groupedRounds().map(([dateKey, roundsForDay]) => (
+              <AccordionItem key={dateKey} value={dateKey} className="border rounded-lg">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="text-left">
+                  <h3 className="text-lg font-semibold">
+                    {formatDayHeader(new Date(dateKey))}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {roundsForDay.length} {roundsForDay.length === 1 ? 'Runde' : 'Runden'}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="space-y-3 pt-2">
+                {roundsForDay.map((round) => {
+                  const fastestActivity = getFastestActivity(round.laps)
+                  const activities = calculateActivityTimes(round.laps)
+                  return (
+                  <Card key={round.id}>
+                    <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="flex items-center gap-3 mb-1">
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: getTeamColor(round.teamId) }}
-                          />
-                          <CardTitle className="text-lg">{round.teamName}</CardTitle>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(round.completedAt)}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span>Gesamzeit: {formatTime(round.totalTime)}</span>
-                          {fastestActivity && fastestActivity.activity && (
-                            <span>
-                              Schnellste Runde: {formatActivityTime(fastestActivity.time)} ({fastestActivity.activity.name})
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: getTeamColor(round.teamId) }}
+                        />
+                        <CardTitle className="text-lg">
+                        <span className="font-mono">{formatDuration(round.totalTime)}</span> ({formatTime(round.completedAt)} Uhr)
+                        </CardTitle>
+                      </div>
                       </div>
                       <Button
-                        onClick={() => deleteRound(round.id)}
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive"
+                      onClick={() => deleteRound(round.id)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Runde löschen</span>
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Runde löschen</span>
                       </Button>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                    </CardHeader>
+                    <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       {activities.map((activity, index) => {
-                        const isFastest = fastestActivity && fastestActivity.activity && 
-                                         activity.name === fastestActivity.activity.name
-                        return (
-                          <div
-                            key={`${activity.name}-${index}`}
-                            className={`flex justify-between items-center p-2 rounded text-sm ${
-                              isFastest 
-                                ? 'bg-primary/10 border border-primary/20' 
-                                : 'bg-muted/50'
-                            }`}
-                          >
-                            <span className="font-medium">
-                              {activity.name}
-                              {isFastest && <span className="text-primary ml-1">⚡</span>}
-                            </span>
-                            <span className="font-mono">
-                              {formatActivityTime(activity.time)}
-                            </span>
-                          </div>
-                        )
+                      const isFastest = fastestActivity && fastestActivity.activity && 
+                               activity.name === fastestActivity.activity.name
+                      return (
+                        <div
+                        key={`${activity.name}-${index}`}
+                        className={`flex justify-between items-center p-2 rounded text-sm ${
+                          isFastest 
+                          ? 'bg-primary/10 border border-primary/20' 
+                          : 'bg-muted/50'
+                        }`}
+                        >
+                        <span className="font-medium">
+                          {activity.name}
+                          {isFastest && <span className="text-primary ml-1">⚡</span>}
+                        </span>
+                        <span className="font-mono">
+                          {formatActivityTime(activity.time)}
+                        </span>
+                        </div>
+                      )
                       })}
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                    </CardContent>
+                  </Card>
+                  )
+                })}
+                </div>
+              </AccordionContent>
+              </AccordionItem>
+            ))}
+            </Accordion>
         )}
         </>
         )}
