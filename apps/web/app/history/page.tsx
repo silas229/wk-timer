@@ -55,14 +55,14 @@ export default function HistoryPage() {
     if (isInitialized) {
       loadSavedRounds()
     }
-  }, [isInitialized]) // Remove loadSavedRounds from dependencies
+  }, [isInitialized, loadSavedRounds])
 
   // Reload rounds when teams change (e.g., when a team is deleted)
   useEffect(() => {
     if (isInitialized && teams.length > 0) {
       loadSavedRounds()
     }
-  }, [teams.length, isInitialized]) // Use teams.length instead of teams array
+  }, [teams.length, isInitialized, loadSavedRounds]) // Use teams.length instead of teams array
 
   const deleteRound = useCallback(async (roundId: string) => {
     try {
@@ -172,14 +172,14 @@ export default function HistoryPage() {
     if (isInitialized) {
       loadSavedRounds()
     }
-  }, [isInitialized]) // Remove loadSavedRounds from dependencies
+  }, [isInitialized, loadSavedRounds]) // Remove loadSavedRounds from dependencies
 
   // Reload rounds when teams change (e.g., when a team is deleted)
   useEffect(() => {
     if (isInitialized && teams.length > 0) {
       loadSavedRounds()
     }
-  }, [teams.length, isInitialized]) // Use teams.length instead of teams array
+  }, [teams.length, isInitialized, loadSavedRounds]) // Use teams.length instead of teams array
 
   return (
     <div className="flex items-start justify-center p-4">

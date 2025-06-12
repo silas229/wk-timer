@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, formatTime, LAP_ACTIVITIES, type ActivityTime } from "@/lib/lap-activities"
+import { PWAInstallPrompt } from "@/components/pwa-install"
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -194,6 +195,9 @@ export default function Page() {
   return (
     <div className="flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
+
         {/* Timer Display */}
         <Card>
           <CardHeader className="text-center">

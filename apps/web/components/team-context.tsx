@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react"
 import { indexedDB, initializeDB, type Team } from "@/lib/indexeddb"
 
 interface TeamContextValue {
@@ -35,7 +35,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Default team colors
-  const teamColors = [
+  const teamColors = useMemo(() => [
     "#f4884c",
     "#00469d",
     "#22c55e",
@@ -43,7 +43,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
     "#8b5cf6",
     "#ec4899",
     "#06b6d4",
-  ];
+  ], []);
 
   const loadTeams = useCallback(async () => {
     try {

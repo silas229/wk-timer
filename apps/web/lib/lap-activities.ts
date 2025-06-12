@@ -86,9 +86,11 @@ export function formatTime(
     case "seconds": // ss.ms format
       return `${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
 
-    case "diff": // +/-ss.ms format
+    case "diff": {
+      // +/-ss.ms format
       const prefix = isNegative ? "-" : "+";
       return `${prefix}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+    }
 
     default:
       return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;

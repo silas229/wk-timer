@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useState, useCallback } from "react"
-import { Settings, History, ChevronDown, Users, Plus, Edit2, Trash2 } from "lucide-react"
+import { History, ChevronDown, Users, Plus, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@workspace/ui/components/dropdown-menu"
@@ -75,7 +75,7 @@ export function Navigation() {
                     className="flex-1"
                     onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
                   />
-                  <Button 
+                  <Button
                     onClick={handleCreateTeam}
                     size="sm"
                     disabled={!newTeamName.trim()}
@@ -167,7 +167,7 @@ export function Navigation() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button 
+                <Button
                   onClick={handleManageDialogClose}
                   variant="outline"
                 >
@@ -184,7 +184,7 @@ export function Navigation() {
           <Link href="/" className="text-lg font-semibold hover:text-primary transition-colors">
             Wettkämpfe Timer
           </Link>
-          
+
           <div className="flex items-center gap-2">
             {/* Team Selector Dropdown */}
             <DropdownMenu>
@@ -230,8 +230,8 @@ export function Navigation() {
             </DropdownMenu>
 
             <Link href="/history">
-              <Button 
-                variant={pathname === "/history" ? "default" : "ghost"} 
+              <Button
+                variant={pathname === "/history" ? "default" : "ghost"}
                 size="sm"
                 className="flex items-center gap-2"
               >
@@ -239,7 +239,7 @@ export function Navigation() {
                 <span className="sr-only">Verlauf</span>
               </Button>
             </Link>
-            
+
             {/* <Button variant="ghost" size="icon">
               <Settings className="h-4 w-4" />
               <span className="sr-only">Einstellungen</span>
