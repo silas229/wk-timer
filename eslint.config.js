@@ -43,6 +43,6 @@ export default [
     },
   },
   {
-    ignores: ["dist/**", ".next/**", "coverage/**"],
+    ignores: ["dist/**", ".next/**", "coverage/**", "app/public/**"],
   },
 ];
