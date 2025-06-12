@@ -9,8 +9,9 @@ A web-based timer application built with modern technologies for precise time tr
 ### 🏃‍♂️ **Timer Functionality**
 
 - **Precision Timing**: High-accuracy stopwatch with millisecond precision
-- **Lap Recording**: Track up to 13 laps per session with individual timestamps
-- **Auto-completion**: Automatic round completion after 13 laps
+- **Competition Activities**: Specialized for German Fire Department B-Teil format with meaningful activity names
+- **Lap Recording**: Track up to 12 laps per session with individual timestamps
+- **Auto-completion**: Automatic round completion after 12 laps
 - **State Management**: Start, stop, lap, and restart functionality
 
 ### 👥 **Team Management**
@@ -32,6 +33,10 @@ A web-based timer application built with modern technologies for precise time tr
 - **Dark/Light Mode**: System-aware theme switching
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Real-time Updates**: Live timer display with smooth animations
+- **Activity-Based Interface**: Intuitive German competition activity display
+- **Current Activity Highlighting**: Visual indication of ongoing activity with live timing
+- **Auto-Scrolling**: Smart scrolling to keep current activity visible
+- **Fixed Layout**: Stable button positioning prevents UI jumping
 - **Intuitive Navigation**: Clean, modern interface with clear visual hierarchy
 
 ## 🛠️ Technologies Used
@@ -116,11 +121,13 @@ pnpm test:coverage    # Generate coverage reports
 
 ## 🧪 Testing
 
-This project includes comprehensive testing with **30 tests** across 4 test files:
+This project includes comprehensive testing with **35+ tests** across 6 test files:
 
 - **Unit Tests**: Core functionality and utilities
 - **Component Tests**: React component behavior
 - **Integration Tests**: IndexedDB operations and data flow
+- **Activity Tests**: German Fire Department competition activity logic
+- **Current Activity Tests**: Real-time activity tracking functionality
 - **Coverage Reports**: Detailed code coverage analysis
 
 For detailed testing information, see **[TESTING.md](./TESTING.md)**
@@ -143,7 +150,7 @@ pnpm test:ui
 
 ## 📁 Project Structure
 
-```
+```text
 wkt-next/
 ├── apps/
 │   └── web/               # Main application
@@ -161,6 +168,13 @@ wkt-next/
 
 ## 🏗️ Architecture Highlights
 
+### **Activity-Based Timer System**
+
+- **Activity Mapping**: Converts raw lap times into German Fire Department activities
+- **Real-time Calculations**: Live activity time calculations with millisecond precision
+- **Dynamic UI Updates**: Current activity highlighting with auto-scrolling
+- **Type-safe Configuration**: Strongly typed activity definitions and calculations
+
 ### **IndexedDB Integration**
 
 - Custom database manager with transaction safety
@@ -172,13 +186,16 @@ wkt-next/
 
 - Context-based state management
 - Custom hooks for business logic
+- Activity-aware UI components with German localization
 - Separation of concerns between UI and data
 - Type-safe prop interfaces
 
 ### **Testing Strategy**
 
 - Comprehensive mocking for external dependencies
+- Activity calculation testing with edge cases
 - Integration testing for critical user flows
+- Current activity logic validation
 - Coverage tracking and reporting
 - CI/CD integration for quality gates
 

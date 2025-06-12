@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
+import { calculateActivityTimes, formatActivityTime, type ActivityTime } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
   const { teams, isInitialized } = useTeam()
@@ -81,33 +82,21 @@ export default function HistoryPage() {
     }
   }, [])
 
-  const getLastLapTime = (currentLap: Lap, previousLap?: Lap) => {
-    if (!previousLap) return currentLap.time
-    return currentLap.time - previousLap.time
-  }
-
-  const getFastestLap = (laps: Lap[]) => {
-    if (laps.length === 0) return null
+  const getFastestActivity = (laps: Lap[]): { activity: ActivityTime | null; time: number } => {
+    const activities = calculateActivityTimes(laps)
+    if (activities.length === 0) return { activity: null, time: Infinity }
     
-    const firstLap = laps[0]
-    if (!firstLap) return null
-    
-    let fastest = firstLap
-    let fastestTime = getLastLapTime(firstLap)
+    let fastest: ActivityTime | null = null
+    let fastestTime = Infinity
 
-    for (let i = 1; i < laps.length; i++) {
-      const currentLap = laps[i]
-      const previousLap = laps[i - 1]
-      if (!currentLap || !previousLap) continue
-      
-      const lapTime = getLastLapTime(currentLap, previousLap)
-      if (lapTime < fastestTime) {
-        fastest = currentLap
-        fastestTime = lapTime
+    for (const activity of activities) {
+      if (activity.time < fastestTime) {
+        fastest = activity
+        fastestTime = activity.time
       }
     }
 
-    return { lap: fastest, time: fastestTime }
+    return { activity: fastest, time: fastestTime }
   }
 
   // Filter rounds by selected team
@@ -157,7 +146,7 @@ export default function HistoryPage() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">Round History</h1>
+                  <h2 className="text-2xl font-bold">Round History</h2>
                   <p className="text-muted-foreground">
                     {filteredRounds.length} saved {filteredRounds.length === 1 ? 'round' : 'rounds'}
                 {selectedTeamId !== "all" && (
@@ -239,7 +228,8 @@ export default function HistoryPage() {
         ) : (
           <div className="space-y-4">
             {filteredRounds.map((round) => {
-              const fastestLap = getFastestLap(round.laps)
+              const fastestActivity = getFastestActivity(round.laps)
+              const activities = calculateActivityTimes(round.laps)
               return (
                 <Card key={round.id}>
                   <CardHeader>
@@ -257,9 +247,9 @@ export default function HistoryPage() {
                         </p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                           <span>Total: {formatTime(round.totalTime)}</span>
-                          {fastestLap && fastestLap.lap && (
+                          {fastestActivity && fastestActivity.activity && (
                             <span>
-                              Fastest: {formatTime(fastestLap.time)} (Lap {fastestLap.lap.lapNumber})
+                              Fastest: {formatActivityTime(fastestActivity.time)} ({fastestActivity.activity.name})
                             </span>
                           )}
                         </div>
@@ -277,12 +267,12 @@ export default function HistoryPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {round.laps.map((lap, index) => {
-                        const lapTime = getLastLapTime(lap, round.laps[index - 1])
-                        const isFastest = fastestLap && fastestLap.lap && lap.lapNumber === fastestLap.lap.lapNumber
+                      {activities.map((activity, index) => {
+                        const isFastest = fastestActivity && fastestActivity.activity && 
+                                         activity.name === fastestActivity.activity.name
                         return (
                           <div
-                            key={lap.lapNumber}
+                            key={`${activity.name}-${index}`}
                             className={`flex justify-between items-center p-2 rounded text-sm ${
                               isFastest 
                                 ? 'bg-primary/10 border border-primary/20' 
@@ -290,11 +280,11 @@ export default function HistoryPage() {
                             }`}
                           >
                             <span className="font-medium">
-                              Lap {lap.lapNumber}
+                              {activity.name}
                               {isFastest && <span className="text-primary ml-1">⚡</span>}
                             </span>
                             <span className="font-mono">
-                              {formatTime(lapTime)}
+                              {formatActivityTime(activity.time)}
                             </span>
                           </div>
                         )
