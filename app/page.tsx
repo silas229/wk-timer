@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, formatTime, LAP_ACTIVITIES, type ActivityTime } from "@/lib/lap-activities"
+import { calculateActivityTimes, formatTime, LAP_ACTIVITIES, compareRounds, type ActivityTime } from "@/lib/lap-activities"
 import { PWAInstallPrompt } from "@/components/pwa-install"
 
 type TimerState = "stopped" | "running" | "finished"
@@ -34,6 +34,8 @@ export default function Page() {
   const [startTime, setStartTime] = useState<number | null>(null)
   const [activities, setActivities] = useState<ActivityTime[]>([])
   const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null)
+  const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
+  const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null)
   const activitiesRef = useRef<HTMLDivElement>(null)
 
   // Calculate activities whenever laps change
@@ -41,6 +43,63 @@ export default function Page() {
     const calculatedActivities = calculateActivityTimes(laps)
     setActivities(calculatedActivities)
   }, [laps])
+
+  // Load saved rounds for comparison
+  const loadSavedRounds = useCallback(async () => {
+    if (!isInitialized) return
+
+    try {
+      const rounds = await indexedDB.getAllRounds()
+      setSavedRounds(rounds)
+    } catch (error) {
+      console.error('Failed to load saved rounds:', error)
+      setSavedRounds([])
+    }
+  }, [isInitialized])
+
+  // Load rounds when initialized
+  useEffect(() => {
+    if (isInitialized) {
+      loadSavedRounds()
+    }
+  }, [isInitialized, loadSavedRounds])
+
+  // Get last completed round for current team for comparison
+  const getLastRoundForComparison = useCallback(() => {
+    if (!selectedTeamId || savedRounds.length === 0) return null
+
+    // Find the most recent completed round for the current team
+    const teamRounds = savedRounds
+      .filter(round => round.teamId === selectedTeamId)
+      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+
+    return teamRounds[0] || null
+  }, [selectedTeamId, savedRounds])
+
+  // Get comparison data for current round vs last round
+  const getCurrentRoundComparison = useCallback(() => {
+    const lastRound = previousRoundForComparison
+    if (!lastRound || activities.length === 0) return null
+
+    // For running rounds, only calculate total time diff when finished
+    const currentRoundData = {
+      totalTime: time,
+      laps: laps
+    }
+
+    const comparison = compareRounds(currentRoundData, lastRound)
+
+    // Override total time diff to only show when finished
+    if (comparison && state !== "finished") {
+      return {
+        ...comparison,
+        totalTimeDiff: null,
+        isFasterOverall: null
+      }
+    }
+
+    return comparison
+  }, [previousRoundForComparison, activities, laps, time, state])
 
   // IndexedDB functions
   const saveRoundToStorage = useCallback(async (round: SavedRound) => {
@@ -51,10 +110,12 @@ export default function Page() {
 
     try {
       await indexedDB.saveRound(round)
+      // Reload saved rounds for comparison
+      await loadSavedRounds()
     } catch (error) {
       console.error('Failed to save round to IndexedDB:', error)
     }
-  }, [isInitialized])
+  }, [isInitialized, loadSavedRounds])
 
   // Get current activity being performed
   const getCurrentActivity = useCallback(() => {
@@ -95,6 +156,10 @@ export default function Page() {
   }, [state, startTime])
 
   const handleStart = () => {
+    // Capture the current last round for comparison before starting the new round
+    const lastRound = getLastRoundForComparison()
+    setPreviousRoundForComparison(lastRound)
+
     setStartTime(Date.now() - time)
     setState("running")
   }
@@ -140,13 +205,16 @@ export default function Page() {
     }
   }
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
     setTime(0)
     setLaps([])
     setActivities([])
     setState("stopped")
     setStartTime(null)
     setLastSavedRound(null)
+    setPreviousRoundForComparison(null)
+    // Reload saved rounds to get fresh comparison data
+    await loadSavedRounds()
   }
 
   const handleDiscardRound = async () => {
@@ -154,7 +222,7 @@ export default function Page() {
       try {
         await indexedDB.deleteRound(lastSavedRound.id)
         setLastSavedRound(null)
-        handleRestart()
+        await handleRestart()
       } catch (error) {
         console.error('Failed to discard round:', error)
       }
@@ -203,6 +271,14 @@ export default function Page() {
           <CardHeader className="text-center">
             <CardTitle className="text-4xl font-mono font-bold">
               {formatTime(time, 'full')}
+              {(() => {
+                const comparison = getCurrentRoundComparison()
+                return comparison && state === "finished" && comparison.totalTimeDiff !== null ? (
+                  <div className={`mt-2 text-lg font-medium ${comparison.isFasterOverall ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatTime(comparison.totalTimeDiff, 'diff')}
+                  </div>
+                ) : null
+              })()}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               {state === "stopped" && "Bereit zu starten"}
@@ -214,9 +290,6 @@ export default function Page() {
 
         {/* Activities Display */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Aktivitäten ({laps.length}/13 Runden)</CardTitle>
-          </CardHeader>
           <CardContent>
             <div
               ref={activitiesRef}
@@ -228,22 +301,33 @@ export default function Page() {
                 </p>
               ) : (
                 <>
-                  {activities.map((activity, index) => (
-                    <div
-                      key={`${activity.name}-${index}`}
-                      className="flex justify-between items-center p-3 rounded-lg bg-muted/50"
-                    >
-                      <span className="font-medium">{activity.name}</span>
-                      <div className="text-right">
-                        <div className="font-mono text-sm">
-                          {formatTime(activity.time, 'seconds')}
+                  {(() => {
+                    const comparison = getCurrentRoundComparison()
+                    return activities.map((activity, index) => {
+                      const activityComparison = comparison?.activityComparisons[activity.name]
+                      return (
+                        <div
+                          key={`${activity.name}-${index}`}
+                          className="flex justify-between items-center p-3 rounded-lg bg-muted/50"
+                        >
+                          <span className="font-medium">{activity.name}</span>
+                          <div className="text-right">
+                            <div className="font-mono text-sm">
+                              {formatTime(activity.time, 'seconds')}
+                              {activityComparison && (
+                                <span className={`ml-2 text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
+                                  {formatTime(activityComparison.diff, 'diff')}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatTime(activity.startTime)} → {formatTime(activity.endTime)}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatTime(activity.startTime)} → {formatTime(activity.endTime)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      )
+                    })
+                  })()}
 
                   {/* Current Activity */}
                   {(() => {

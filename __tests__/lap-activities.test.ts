@@ -3,6 +3,7 @@ import {
   calculateActivityTimes,
   formatTime,
   LAP_ACTIVITIES,
+  compareRounds,
 } from "@/lib/lap-activities";
 
 describe("Lap Activities", () => {
@@ -282,6 +283,119 @@ describe("Lap Activities", () => {
           expect(previous.startTime).toBeGreaterThanOrEqual(0);
         }
       }
+    });
+  });
+
+  describe("compareRounds", () => {
+    const mockCurrentRound = {
+      totalTime: 135000, // 2:15.00
+      laps: mockLaps,
+    };
+
+    const mockPreviousRound = {
+      id: "previous-round-id",
+      totalTime: 140000, // 2:20.00 (5s slower)
+      laps: [
+        { lapNumber: 1, time: 12000, timestamp: new Date() }, // Läufer 1: 12s (2s slower)
+        { lapNumber: 2, time: 22000, timestamp: new Date() }, // Läufer 2: 10s (same)
+        { lapNumber: 3, time: 27000, timestamp: new Date() }, // Start for Läufer 3
+        { lapNumber: 4, time: 45000, timestamp: new Date() }, // Schlauchrollen: 18s (3s slower)
+        { lapNumber: 5, time: 50000, timestamp: new Date() }, // Läufer 3 total
+        { lapNumber: 6, time: 58000, timestamp: new Date() }, // Läufer 4: 8s (2s faster)
+        { lapNumber: 7, time: 73000, timestamp: new Date() }, // Anziehen: 15s (same)
+        { lapNumber: 8, time: 83000, timestamp: new Date() }, // Läufer 5: 10s (same)
+        { lapNumber: 9, time: 95000, timestamp: new Date() }, // Läufer 6: 12s (2s slower)
+        { lapNumber: 10, time: 105000, timestamp: new Date() }, // Läufer 7: 10s (same)
+        { lapNumber: 11, time: 120000, timestamp: new Date() }, // Kuppeln: 15s (same)
+        { lapNumber: 12, time: 130000, timestamp: new Date() }, // Läufer 8: 10s (same)
+        { lapNumber: 13, time: 140000, timestamp: new Date() }, // Läufer 9: 10s (same)
+      ],
+    };
+
+    it("should return null when no previous round is provided", () => {
+      const result = compareRounds(mockCurrentRound, null);
+      expect(result).toBeNull();
+    });
+
+    it("should calculate correct total time difference", () => {
+      const result = compareRounds(mockCurrentRound, mockPreviousRound);
+      expect(result).not.toBeNull();
+      expect(result!.totalTimeDiff).toBe(-5000); // 5s faster
+      expect(result!.isFasterOverall).toBe(true);
+      expect(result!.previousRound).toBe(mockPreviousRound);
+    });
+
+    it("should calculate activity comparisons correctly", () => {
+      const result = compareRounds(mockCurrentRound, mockPreviousRound);
+      expect(result).not.toBeNull();
+
+      const { activityComparisons } = result!;
+
+      // Läufer 1: 10s vs 12s = -2s (faster)
+      expect(activityComparisons["Läufer 1"]).toEqual({
+        current: 10000,
+        previous: 12000,
+        diff: -2000,
+        isFaster: true,
+      });
+
+      // Läufer 2: 10s vs 10s = 0s (same)
+      expect(activityComparisons["Läufer 2"]).toEqual({
+        current: 10000,
+        previous: 10000,
+        diff: 0,
+        isFaster: false,
+      });
+
+      // Schlauchrollen: 15s vs 18s = -3s (faster)
+      expect(activityComparisons["Schlauchrollen"]).toEqual({
+        current: 15000,
+        previous: 18000,
+        diff: -3000,
+        isFaster: true,
+      });
+
+      // Läufer 4: 10s vs 8s = +2s (slower)
+      expect(activityComparisons["Läufer 4"]).toEqual({
+        current: 10000,
+        previous: 8000,
+        diff: 2000,
+        isFaster: false,
+      });
+    });
+
+    it("should handle case where current round is slower overall", () => {
+      const slowerCurrentRound = {
+        totalTime: 145000, // 2:25.00 (5s slower than previous)
+        laps: mockLaps,
+      };
+
+      const result = compareRounds(slowerCurrentRound, mockPreviousRound);
+      expect(result).not.toBeNull();
+      expect(result!.totalTimeDiff).toBe(5000); // 5s slower
+      expect(result!.isFasterOverall).toBe(false);
+    });
+
+    it("should only compare activities that exist in both rounds", () => {
+      const incompleteCurrentRound = {
+        totalTime: 50000,
+        laps: mockLaps.slice(0, 5), // Only first 5 laps
+      };
+
+      const result = compareRounds(incompleteCurrentRound, mockPreviousRound);
+      expect(result).not.toBeNull();
+
+      const { activityComparisons } = result!;
+
+      // Should have comparisons for activities that exist in both rounds
+      expect(activityComparisons["Läufer 1"]).toBeDefined();
+      expect(activityComparisons["Läufer 2"]).toBeDefined();
+      expect(activityComparisons["Läufer 3"]).toBeDefined();
+      expect(activityComparisons["Schlauchrollen"]).toBeDefined();
+
+      // Should not have comparisons for activities that don't exist in current round
+      expect(activityComparisons["Läufer 4"]).toBeUndefined();
+      expect(activityComparisons["Läufer 9"]).toBeUndefined();
     });
   });
 });

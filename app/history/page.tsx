@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, formatTime } from "@/lib/lap-activities"
+import { calculateActivityTimes, formatTime, compareRounds } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
@@ -92,47 +92,9 @@ export default function HistoryPage() {
       )
       .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
 
-    const previousRound = previousRounds[0]
+    const previousRound = previousRounds[0] || null
 
-    if (!previousRound) {
-      return null
-    }
-
-    const currentActivities = calculateActivityTimes(currentRound.laps)
-    const previousActivities = calculateActivityTimes(previousRound.laps)
-
-    // Compare total time
-    const totalTimeDiff = currentRound.totalTime - previousRound.totalTime
-
-    // Compare each activity
-    const activityComparisons: {
-      [activityName: string]: {
-        current: number;
-        previous: number;
-        diff: number;
-        isFaster: boolean
-      }
-    } = {}
-
-    currentActivities.forEach(currentActivity => {
-      const previousActivity = previousActivities.find(p => p.name === currentActivity.name)
-      if (previousActivity) {
-        const diff = currentActivity.time - previousActivity.time
-        activityComparisons[currentActivity.name] = {
-          current: currentActivity.time,
-          previous: previousActivity.time,
-          diff,
-          isFaster: diff < 0
-        }
-      }
-    })
-
-    return {
-      previousRound,
-      totalTimeDiff,
-      isFasterOverall: totalTimeDiff < 0,
-      activityComparisons
-    }
+    return compareRounds(currentRound, previousRound)
   }
 
   // Filter rounds by selected team (only show current team's rounds)

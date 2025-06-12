@@ -96,3 +96,81 @@ export function formatTime(
       return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
   }
 }
+
+/**
+ * Interface for activity comparison data
+ */
+export interface ActivityComparison {
+  current: number;
+  previous: number;
+  diff: number;
+  isFaster: boolean;
+}
+
+/**
+ * Interface for round comparison result
+ */
+export interface RoundComparison {
+  previousRound: {
+    id: string;
+    totalTime: number;
+    laps: { lapNumber: number; time: number; timestamp: Date }[];
+  };
+  totalTimeDiff: number;
+  isFasterOverall: boolean;
+  activityComparisons: { [activityName: string]: ActivityComparison };
+}
+
+/**
+ * Compare two rounds and calculate differences for total time and individual activities
+ * @param currentRound The current round data
+ * @param previousRound The previous round to compare against
+ * @returns Comparison data or null if no valid comparison can be made
+ */
+export function compareRounds(
+  currentRound: {
+    totalTime: number;
+    laps: { lapNumber: number; time: number; timestamp: Date }[];
+  },
+  previousRound: {
+    id: string;
+    totalTime: number;
+    laps: { lapNumber: number; time: number; timestamp: Date }[];
+  } | null
+): RoundComparison | null {
+  if (!previousRound) {
+    return null;
+  }
+
+  const currentActivities = calculateActivityTimes(currentRound.laps);
+  const previousActivities = calculateActivityTimes(previousRound.laps);
+
+  // Compare total time
+  const totalTimeDiff = currentRound.totalTime - previousRound.totalTime;
+
+  // Compare each activity
+  const activityComparisons: { [activityName: string]: ActivityComparison } =
+    {};
+
+  currentActivities.forEach((currentActivity) => {
+    const previousActivity = previousActivities.find(
+      (p) => p.name === currentActivity.name
+    );
+    if (previousActivity) {
+      const diff = currentActivity.time - previousActivity.time;
+      activityComparisons[currentActivity.name] = {
+        current: currentActivity.time,
+        previous: previousActivity.time,
+        diff,
+        isFaster: diff < 0,
+      };
+    }
+  });
+
+  return {
+    previousRound,
+    totalTimeDiff,
+    isFasterOverall: totalTimeDiff < 0,
+    activityComparisons,
+  };
+}
