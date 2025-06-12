@@ -6,12 +6,14 @@ import { useState, useCallback } from "react"
 import { Settings, History, ChevronDown, Users, Plus, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@workspace/ui/components/dropdown-menu"
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
 import { useTeam } from "@/components/team-context"
 
 export function Navigation() {
   const pathname = usePathname()
-  const { teams, selectedTeamId, setSelectedTeamId, createTeam, updateTeam, deleteTeam, getCurrentTeam } = useTeam()
-  const [showTeamDropdown, setShowTeamDropdown] = useState(false)
+  const { teams, setSelectedTeamId, createTeam, updateTeam, deleteTeam, getCurrentTeam } = useTeam()
   const [showManageDialog, setShowManageDialog] = useState(false)
   const [newTeamName, setNewTeamName] = useState("")
   const [editingTeam, setEditingTeam] = useState<{ id: string; name: string; color: string } | null>(null)
@@ -36,8 +38,15 @@ export function Navigation() {
 
   const handleTeamSelect = useCallback((teamId: string) => {
     setSelectedTeamId(teamId)
-    setShowTeamDropdown(false)
   }, [setSelectedTeamId])
+
+  const handleManageDialogOpen = useCallback(() => {
+    setShowManageDialog(true)
+  }, [])
+
+  const handleManageDialogClose = useCallback(() => {
+    setShowManageDialog(false)
+  }, [])
 
   const currentTeam = getCurrentTeam()
 
@@ -55,16 +64,15 @@ export function Navigation() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Create New Team */}
-              <div>
-                <label htmlFor="newTeamName" className="text-sm font-medium">Create New Team</label>
-                <div className="flex gap-2 mt-1">
-                  <input
+              <div className="space-y-2">
+                <Label htmlFor="newTeamName">Create New Team</Label>
+                <div className="flex gap-2">
+                  <Input
                     id="newTeamName"
-                    type="text"
                     value={newTeamName}
                     onChange={(e) => setNewTeamName(e.target.value)}
                     placeholder="Enter team name"
-                    className="flex-1 px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="flex-1"
                     onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
                   />
                   <Button 
@@ -78,24 +86,23 @@ export function Navigation() {
               </div>
 
               {/* Teams List */}
-              <div>
-                <label className="text-sm font-medium">Existing Teams</label>
-                <div className="space-y-2 mt-2">
+              <div className="space-y-2">
+                <Label>Existing Teams</Label>
+                <div className="space-y-2">
                   {teams.map((team) => (
                     <div
                       key={team.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border"
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-card"
                     >
                       <div
-                        className="w-4 h-4 rounded-full"
+                        className="w-4 h-4 rounded-full flex-shrink-0"
                         style={{ backgroundColor: team.color }}
                       />
                       {editingTeam?.id === team.id ? (
-                        <input
-                          type="text"
+                        <Input
                           value={editTeamName}
                           onChange={(e) => setEditTeamName(e.target.value)}
-                          className="flex-1 px-2 py-1 border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                          className="flex-1"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') handleUpdateTeam(team.id, editTeamName)
                             if (e.key === 'Escape') {
@@ -108,7 +115,7 @@ export function Navigation() {
                       ) : (
                         <span className="flex-1 font-medium">{team.name}</span>
                       )}
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 flex-shrink-0">
                         {editingTeam?.id === team.id ? (
                           <>
                             <Button
@@ -159,13 +166,14 @@ export function Navigation() {
                 </div>
               </div>
 
-              <Button 
-                onClick={() => setShowManageDialog(false)}
-                className="w-full"
-                variant="outline"
-              >
-                Close
-              </Button>
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={handleManageDialogClose}
+                  variant="outline"
+                >
+                  Close
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -179,59 +187,47 @@ export function Navigation() {
           
           <div className="flex items-center gap-2">
             {/* Team Selector Dropdown */}
-            <div className="relative">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTeamDropdown(!showTeamDropdown)}
-                className="flex items-center gap-2"
-              >
-                {currentTeam && (
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: currentTeam.color }}
-                  />
-                )}
-                <span>{currentTeam?.name || "Select Team"}</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              
-              {showTeamDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-56 bg-background border border-border rounded-lg shadow-lg z-40">
-                  <div className="p-2 space-y-1">
-                    {teams.map((team) => (
-                      <button
-                        key={team.id}
-                        onClick={() => handleTeamSelect(team.id)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                          selectedTeamId === team.id
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-muted'
-                        }`}
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: team.color }}
-                        />
-                        {team.name}
-                      </button>
-                    ))}
-                    <div className="border-t pt-1 mt-1">
-                      <button
-                        onClick={() => {
-                          setShowTeamDropdown(false)
-                          setShowManageDialog(true)
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
-                      >
-                        <Users className="h-4 w-4" />
-                        Manage Teams
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  {currentTeam && (
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: currentTeam.color }}
+                    />
+                  )}
+                  <span>{currentTeam?.name || "Select Team"}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-white dark:bg-gray-800" sideOffset={5}>
+                {teams.map((team) => (
+                  <DropdownMenuItem
+                    key={team.id}
+                    onClick={() => handleTeamSelect(team.id)}
+                    className="flex items-center gap-3 cursor-pointer px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: team.color }}
+                    />
+                    <span className="flex-1">{team.name}</span>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleManageDialogOpen}
+                  className="flex items-center gap-3 cursor-pointer px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <Users className="h-4 w-4 flex-shrink-0" />
+                  <span>Manage Teams</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Link href="/history">
               <Button 

@@ -170,34 +170,29 @@ export default function HistoryPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     onClick={() => setSelectedTeamId("all")}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedTeamId === "all"
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted hover:bg-muted/80'
-                    }`}
+                    variant={selectedTeamId === "all" ? "default" : "secondary"}
+                    size="sm"
                   >
                     All Teams ({savedRounds.length})
-                  </button>
+                  </Button>
                   {teams.map((team) => {
                     const teamRounds = savedRounds.filter(round => round.teamId === team.id)
                     return (
-                      <button
+                      <Button
                         key={team.id}
                         onClick={() => setSelectedTeamId(team.id)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                          selectedTeamId === team.id
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted hover:bg-muted/80'
-                        }`}
+                        variant={selectedTeamId === team.id ? "default" : "secondary"}
+                        size="sm"
+                        className="flex items-center gap-2"
                       >
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: team.color }}
                         />
                         {team.name} ({teamRounds.length})
-                      </button>
+                      </Button>
                     )
                   })}
                 </div>
