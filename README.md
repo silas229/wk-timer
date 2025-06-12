@@ -80,15 +80,14 @@ A web-based timer application built with modern technologies for precise time tr
 
 - **Vitest** - Fast unit testing framework
 - **React Testing Library** - Component testing utilities
-- **Turbo** - Monorepo build system
 - **npm** - Fast, reliable package manager
 - **ESLint** - Code linting and formatting
 - **TypeScript** - Static type checking
 
 ### **Architecture**
 
-- **Monorepo Structure** - Organized workspace with shared packages
-- **Component Library** - Reusable UI components package
+- **Single Package Structure** - Simplified project organization
+- **Component Library** - Reusable UI components with shadcn/ui
 - **Path Aliases** - Clean import statements
 - **CI/CD Integration** - GitHub Actions for automated testing
 
@@ -181,20 +180,15 @@ npm run test:ui
 
 ```text
 wk-timer/
-├── apps/
-│   └── web/               # Main application
-│       ├── app/           # Next.js App Router pages
-│       ├── components/    # React components
-│       ├── lib/           # Utilities and IndexedDB manager
-│       ├── hooks/         # Custom React hooks
-│       ├── public/        # Static assets and PWA files
-│       └── __tests__/     # Test files
-├── packages/
-│   ├── ui/                # Shared UI component library
-│   ├── eslint-config/     # ESLint configurations
-│   └── typescript-config/ # TypeScript configurations
+├── app/                   # Next.js App Router pages
+├── components/            # React components
+│   └── ui/               # shadcn/ui component library
+├── hooks/                # Custom React hooks
+├── lib/                  # Utilities and IndexedDB manager
+├── public/               # Static assets and PWA files
+├── __tests__/            # Test files
 └── .github/
-    └── workflows/         # CI/CD pipelines
+    └── workflows/        # CI/CD pipelines
 ```
 
 ## 🏗️ Architecture Highlights
@@ -244,13 +238,13 @@ wk-timer/
 To add new shadcn/ui components:
 
 ```bash
-npx shadcn@latest add <component-name> -c apps/web
+npx shadcn@latest add <component-name>
 ```
 
-Components are automatically placed in `packages/ui/src/components` and can be imported:
+Components are automatically placed in `components/ui/` and can be imported:
 
 ```tsx
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@/components/ui/button"
 ```
 
 ## 📝 Contributing
