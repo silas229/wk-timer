@@ -116,8 +116,8 @@ export interface RoundComparison {
     totalTime: number;
     laps: { lapNumber: number; time: number; timestamp: Date }[];
   };
-  totalTimeDiff: number;
-  isFasterOverall: boolean;
+  totalTimeDiff: number | null;
+  isFasterOverall: boolean | null;
   activityComparisons: { [activityName: string]: ActivityComparison };
 }
 
