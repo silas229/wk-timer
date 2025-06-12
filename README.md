@@ -9,8 +9,8 @@ A web-based timer application built with modern technologies for precise time tr
 ### 🏃‍♂️ **Timer Functionality**
 
 - **Precision Timing**: High-accuracy stopwatch with millisecond precision
-- **Lap Recording**: Track up to 12 laps per session with individual timestamps
-- **Auto-completion**: Automatic round completion after 12 laps
+- **Lap Recording**: Track up to 13 laps per session with individual timestamps
+- **Auto-completion**: Automatic round completion after 13 laps
 - **State Management**: Start, stop, lap, and restart functionality
 
 ### 👥 **Team Management**

@@ -230,7 +230,7 @@ export default function HistoryPage() {
               </h3>
               <p className="text-muted-foreground">
                 {selectedTeamId === "all" 
-                  ? "Complete a 12-lap round on the timer page to see your history here."
+                  ? "Complete a 13-lap round on the timer page to see your history here."
                   : "Complete a round with this team selected to see it here."
                 }
               </p>

@@ -77,7 +77,7 @@ export default function Page() {
   }
 
   const handleLap = () => {
-    if (state === "running" && laps.length < 12) {
+    if (state === "running" && laps.length < 13) {
       const newLap: Lap = {
         lapNumber: laps.length + 1,
         time: time,
@@ -86,7 +86,7 @@ export default function Page() {
       setLaps([...laps, newLap])
       
       // If this is the 12th lap, finish the round and show save dialog
-      if (laps.length + 1 === 12) {
+      if (laps.length + 1 === 13) {
         setState("finished")
         setShowSaveDialog(true)
       }
@@ -117,7 +117,7 @@ export default function Page() {
     if (state === "stopped") return "Start"
     if (state === "running") {
       if (laps.length === 0) return "Lap"
-      if (laps.length < 12) return `Lap ${laps.length + 1}`
+      if (laps.length < 13) return `Lap ${laps.length + 1}`
       return "Stop"
     }
     if (state === "finished") return "Restart"
@@ -127,7 +127,7 @@ export default function Page() {
   const handleButtonClick = () => {
     if (state === "stopped") handleStart()
     else if (state === "running") {
-      if (laps.length < 12) handleLap()
+      if (laps.length < 13) handleLap()
       else handleStop()
     }
     else if (state === "finished") handleRestart()
@@ -153,7 +153,7 @@ export default function Page() {
             <CardContent className="space-y-4">
               <div className="text-sm text-muted-foreground">
                 <p>Round completed in {formatTime(time)}</p>
-                <p>12 laps recorded</p>
+                <p>13 laps recorded</p>
               </div>
               <div className="flex gap-2">
                 <Button 
@@ -187,7 +187,7 @@ export default function Page() {
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 {state === "stopped" && "Ready to start"}
-                {state === "running" && `Running - Lap ${laps.length + 1}/12`}
+                {state === "running" && `Running - Lap ${laps.length + 1}/13`}
                 {state === "finished" && "Round completed!"}
               </p>
             </CardHeader>
@@ -196,7 +196,7 @@ export default function Page() {
         {/* Laps Display */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Laps ({laps.length}/12)</CardTitle>
+            <CardTitle className="text-xl">Laps ({laps.length}/13)</CardTitle>
           </CardHeader>
           <CardContent>
             {laps.length === 0 ? (
