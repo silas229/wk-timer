@@ -171,7 +171,7 @@ export function Navigation() {
                   onClick={handleManageDialogClose}
                   variant="outline"
                 >
-                  Close
+                  Schließen
                 </Button>
               </div>
             </CardContent>
@@ -236,13 +236,13 @@ export function Navigation() {
                 className="flex items-center gap-2"
               >
                 <History className="h-4 w-4" />
-                <span className="sr-only">Verlauf</span>
+                <span className="hidden sm:inline">Verlauf</span>
               </Button>
             </Link>
 
             {/* <Button variant="ghost" size="icon">
               <Settings className="h-4 w-4" />
-              <span className="sr-only">Einstellungen</span>
+              <span className="hidden sm:inline">Einstellungen</span>
             </Button> */}
           </div>
         </div>
