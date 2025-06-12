@@ -11,7 +11,7 @@ type TimerState = "stopped" | "running" | "finished"
 
 // Button labels for each lap based on the German competition format
 const BUTTON_LABELS = [
-  "Start Läufer 2", 
+  "Start Läufer 2",
   "Start Läufer 3",
   "Start Schlauchrollen",
   "Ende Schlauchrollen",
@@ -47,7 +47,7 @@ export default function Page() {
       console.warn('Database not initialized, cannot save round')
       return
     }
-    
+
     try {
       await indexedDB.saveRound(round)
     } catch (error) {
@@ -58,15 +58,15 @@ export default function Page() {
   // Get current activity being performed
   const getCurrentActivity = useCallback(() => {
     if (state !== "running" || laps.length >= 13) return null
-    
+
     // Find the last completed lap time
     const lastLap = laps.length > 0 ? laps[laps.length - 1] : null
     const lastLapTime = lastLap ? lastLap.time : 0
-    
+
     // Find current activity based on the next lap to be recorded
     const nextLapIndex = laps.length + 1
     const currentActivity = LAP_ACTIVITIES.find(activity => activity.endIndex === nextLapIndex)
-    
+
     if (currentActivity) {
       return {
         name: currentActivity.name,
@@ -75,7 +75,7 @@ export default function Page() {
         totalTime: time
       }
     }
-    
+
     return null
   }, [state, laps, time])
 
@@ -111,18 +111,18 @@ export default function Page() {
       }
       const updatedLaps = [...laps, newLap]
       setLaps(updatedLaps)
-      
+
       // Scroll to bottom of activities
       setTimeout(() => {
         if (activitiesRef.current) {
           activitiesRef.current.scrollTop = activitiesRef.current.scrollHeight
         }
       }, 100)
-      
+
       // If this is the 13th lap, finish the round and automatically save it
       if (updatedLaps.length === 13) {
         setState("finished")
-        
+
         // Auto-save the round
         const round: SavedRound = {
           id: Date.now().toString(),
@@ -132,7 +132,7 @@ export default function Page() {
           teamId: selectedTeamId,
           teamName: getCurrentTeam()?.name || "Unbekannte Gruppe"
         }
-        
+
         setLastSavedRound(round)
         await saveRoundToStorage(round)
       }
@@ -214,7 +214,7 @@ export default function Page() {
             <CardTitle className="text-xl">Aktivitäten ({laps.length}/13 Runden)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div 
+            <div
               ref={activitiesRef}
               className="space-y-2 h-64 overflow-y-auto"
             >
@@ -240,7 +240,7 @@ export default function Page() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* Current Activity */}
                   {(() => {
                     const currentActivity = getCurrentActivity()
@@ -270,18 +270,17 @@ export default function Page() {
         <div className="text-center space-y-3">
           <Button
             onClick={handleButtonClick}
-            size="lg"
+            size="xl"
             className="w-full text-lg py-6"
           >
             {getButtonText()}
           </Button>
-          
+
           {state === "finished" && lastSavedRound && (
             <Button
               onClick={handleDiscardRound}
               variant="destructive"
               className="w-full"
-              size="sm"
             >
               Runde verwerfen
             </Button>
