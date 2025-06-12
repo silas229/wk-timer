@@ -23,7 +23,6 @@ const BUTTON_LABELS = [
   "Start Läufer 8",
   "Ende Kuppeln",
   "Start Läufer 9",
-  "Ende",
 ]
 
 export default function Page() {
@@ -165,10 +164,10 @@ export default function Page() {
     if (state === "stopped") return "Start"
     if (state === "running") {
       if (laps.length === 0) return BUTTON_LABELS[0] // "Start Läufer 1"
-      if (laps.length < 13) return BUTTON_LABELS[laps.length]
-      return "Stop"
+      if (laps.length < BUTTON_LABELS.length) return BUTTON_LABELS[laps.length]
+      return "Ende"
     }
-    if (state === "finished") return "Restart"
+    if (state === "finished") return "Neustart"
     return "Start"
   }
 
@@ -248,7 +247,7 @@ export default function Page() {
                     return currentActivity ? (
                       <div className="flex justify-between items-center p-3 rounded-lg bg-blue-100 border-2 border-blue-300 dark:bg-blue-900 dark:border-blue-700">
                         <span className="font-medium text-blue-800 dark:text-blue-200">
-                          {currentActivity.name} (current)
+                          {currentActivity.name} (aktuell)
                         </span>
                         <div className="text-right">
                           <div className="font-mono text-sm text-blue-800 dark:text-blue-200">

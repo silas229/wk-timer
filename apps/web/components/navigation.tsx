@@ -236,14 +236,14 @@ export function Navigation() {
                 className="flex items-center gap-2"
               >
                 <History className="h-4 w-4" />
-                Verlauf
+                <span className="sr-only">Verlauf</span>
               </Button>
             </Link>
             
-            <Button variant="ghost" size="icon">
+            {/* <Button variant="ghost" size="icon">
               <Settings className="h-4 w-4" />
               <span className="sr-only">Einstellungen</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </header>

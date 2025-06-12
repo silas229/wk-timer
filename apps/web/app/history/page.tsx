@@ -37,7 +37,7 @@ export default function HistoryPage() {
 
   const loadSavedRounds = useCallback(async () => {
     if (!isInitialized) return
-    
+
     try {
       setIsLoading(true)
       const rounds = await indexedDB.getAllRounds()
@@ -88,27 +88,29 @@ export default function HistoryPage() {
     const previousRounds = savedRounds
       .filter(round => round.completedAt.getTime() < currentRound.completedAt.getTime())
       .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
-    
+
     const previousRound = previousRounds[0]
-    
+
     if (!previousRound) {
       return null
     }
 
     const currentActivities = calculateActivityTimes(currentRound.laps)
     const previousActivities = calculateActivityTimes(previousRound.laps)
-    
+
     // Compare total time
     const totalTimeDiff = currentRound.totalTime - previousRound.totalTime
-    
+
     // Compare each activity
-    const activityComparisons: { [activityName: string]: { 
-      current: number; 
-      previous: number; 
-      diff: number; 
-      isFaster: boolean 
-    }} = {}
-    
+    const activityComparisons: {
+      [activityName: string]: {
+        current: number;
+        previous: number;
+        diff: number;
+        isFaster: boolean
+      }
+    } = {}
+
     currentActivities.forEach(currentActivity => {
       const previousActivity = previousActivities.find(p => p.name === currentActivity.name)
       if (previousActivity) {
@@ -121,7 +123,7 @@ export default function HistoryPage() {
         }
       }
     })
-    
+
     return {
       previousRound,
       totalTimeDiff,
@@ -136,7 +138,7 @@ export default function HistoryPage() {
   // Group rounds by day
   const groupedRounds = useCallback(() => {
     const groups: { [key: string]: SavedRound[] } = {}
-    
+
     filteredRounds.forEach(round => {
       const dateKey = round.completedAt.toDateString()
       if (!groups[dateKey]) {
@@ -144,17 +146,17 @@ export default function HistoryPage() {
       }
       groups[dateKey]!.push(round)
     })
-    
+
     // Sort each group by time (newest first)
     Object.keys(groups).forEach(dateKey => {
       groups[dateKey]!.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
     })
-    
+
     // Sort groups by date (newest first)
-    const sortedGroups = Object.entries(groups).sort(([a], [b]) => 
+    const sortedGroups = Object.entries(groups).sort(([a], [b]) =>
       new Date(b).getTime() - new Date(a).getTime()
     )
-    
+
     return sortedGroups
   }, [filteredRounds])
 
@@ -196,9 +198,22 @@ export default function HistoryPage() {
         {/* Main content - only show when initialized and not loading */}
         {isInitialized && !isLoading && (
           <>
-            <div className="flex flex-col gap-4">            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Rundenverlauf</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Rundenverlauf</h2>
+                  {savedRounds.length > 0 && (
+                    <Button
+                      onClick={clearAllRounds}
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Alle löschen
+                    </Button>
+                  )}
+                </div>
                 <p className="text-muted-foreground">
                   {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Runde' : 'Runden'}
                   {getCurrentTeam() && (
@@ -206,124 +221,112 @@ export default function HistoryPage() {
                   )}
                 </p>
               </div>
-              {savedRounds.length > 0 && (
-                <Button
-                  onClick={clearAllRounds}
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Alle löschen
-                </Button>
-              )}
             </div>
-          </div>
 
-        {/* Rounds List */}
-        {filteredRounds.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">
-                {getCurrentTeam() ? `Keine Runden für ${getCurrentTeam()?.name}` : "Keine Gruppe ausgewählt"}
-              </h3>
-              <p className="text-muted-foreground">
-                {getCurrentTeam() 
-                  ? "Schließe eine Runde mit diesem Team ab, um sie hier zu sehen."
-                  : "Wähle eine Gruppe aus der Navigation aus, um deren Runden zu sehen."
-                }
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-            <Accordion 
-            type="multiple" 
-            defaultValue={(() => {
-              const groups = groupedRounds()
-              return groups.length > 0 && groups[0]?.[0] ? [groups[0][0]] : []
-            })()}
-            className="space-y-4"
-            >
-            {groupedRounds().map(([dateKey, roundsForDay]) => (
-              <AccordionItem key={dateKey} value={dateKey} className="border rounded-lg">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <div className="text-left">
-                  <h3 className="text-lg font-semibold">
-                    {formatDayHeader(new Date(dateKey))}
+            {/* Rounds List */}
+            {filteredRounds.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">
+                    {getCurrentTeam() ? `Keine Runden für ${getCurrentTeam()?.name}` : "Keine Gruppe ausgewählt"}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {roundsForDay.length} {roundsForDay.length === 1 ? 'Runde' : 'Runden'}
+                  <p className="text-muted-foreground">
+                    {getCurrentTeam()
+                      ? "Schließe eine Runde mit diesem Team ab, um sie hier zu sehen."
+                      : "Wähle eine Gruppe aus der Navigation aus, um deren Runden zu sehen."
+                    }
                   </p>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <div className="space-y-3 pt-2">
-                {roundsForDay.map((round) => {
-                  const previousComparison = getPreviousTeamComparison(round)
-                  const activities = calculateActivityTimes(round.laps)
-                  return (
-                  <Card key={round.id}>
-                    <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="w-full">
-                      <div className="flex items-center gap-3 mb-1">
-                        <div
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: getTeamColor(round.teamId) }}
-                        />
-                        <CardTitle className="text-lg">
-                        <span className="font-mono">{formatDuration(round.totalTime)}</span>
-                        {previousComparison && (<span className={`ml-2 font-medium text-xs  p-1 align-middle border rounded ${previousComparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>{formatDurationChange(previousComparison.totalTimeDiff)}</span>)}
-                        <span> ({formatTimeOfDay(round.completedAt)} Uhr)</span>
-                        </CardTitle>
+                </CardContent>
+              </Card>
+            ) : (
+              <Accordion
+                type="multiple"
+                defaultValue={(() => {
+                  const groups = groupedRounds()
+                  return groups.length > 0 && groups[0]?.[0] ? [groups[0][0]] : []
+                })()}
+                className="space-y-4"
+              >
+                {groupedRounds().map(([dateKey, roundsForDay]) => (
+                  <AccordionItem key={dateKey} value={dateKey} className="border rounded-lg">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <div className="text-left">
+                        <h3 className="text-lg font-semibold">
+                          {formatDayHeader(new Date(dateKey))}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {roundsForDay.length} {roundsForDay.length === 1 ? 'Runde' : 'Runden'}
+                        </p>
                       </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div className="space-y-3 pt-2">
+                        {roundsForDay.map((round) => {
+                          const previousComparison = getPreviousTeamComparison(round)
+                          const activities = calculateActivityTimes(round.laps)
+                          return (
+                            <Card key={round.id}>
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div className="w-full">
+                                    <div className="flex items-center gap-3 mb-1">
+                                      <div
+                                        className="w-4 h-4 rounded-full"
+                                        style={{ backgroundColor: getTeamColor(round.teamId) }}
+                                      />
+                                      <CardTitle className="text-lg">
+                                        <span className="font-mono">{formatDuration(round.totalTime)}</span>
+                                        {previousComparison && (<span className={`ml-2 font-medium text-xs p-1 align-middle border rounded ${previousComparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>{formatDurationChange(previousComparison.totalTimeDiff)}</span>)}
+                                        <span> ({formatTimeOfDay(round.completedAt)} Uhr)</span>
+                                      </CardTitle>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    onClick={() => deleteRound(round.id)}
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-muted-foreground hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Runde löschen</span>
+                                  </Button>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                  {activities.map((activity, index) => {
+                                    const activityComparison = previousComparison?.activityComparisons[activity.name]
+                                    return (
+                                      <div
+                                        key={`${activity.name}-${index}`}
+                                        className={"flex justify-between items-center p-2 rounded text-sm bg-muted/50"}>
+                                        <span className="font-medium">{activity.name}</span>
+                                        <div className="text-right">
+                                          <span className="font-mono">
+                                            {formatTime(activity.time, 'seconds')}
+                                          </span>
+                                          {activityComparison && (
+                                            <div className={`text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
+                                              {formatDurationChange(activityComparison.diff)}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
                       </div>
-                      <Button
-                      onClick={() => deleteRound(round.id)}
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                      >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Runde löschen</span>
-                      </Button>
-                    </div>
-                    </CardHeader>
-                    <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {activities.map((activity, index) => {
-                      const activityComparison = previousComparison?.activityComparisons[activity.name]
-                      return (
-                        <div
-                        key={`${activity.name}-${index}`}
-                        className={"flex justify-between items-center p-2 rounded text-sm bg-muted/50"}>
-                        <span className="font-medium">{activity.name}</span>
-                        <div className="text-right">
-                          <span className="font-mono">
-                            {formatTime(activity.time, 'seconds')}
-                          </span>
-                          {activityComparison && (
-                            <div className={`text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
-                              {formatDurationChange(activityComparison.diff)}
-                            </div>
-                          )}
-                        </div>
-                        </div>
-                      )
-                      })}
-                    </div>
-                    </CardContent>
-                  </Card>
-                  )
-                })}
-                </div>
-              </AccordionContent>
-              </AccordionItem>
-            ))}
-            </Accordion>
-        )}
-        </>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
+          </>
         )}
       </div>
     </div>
