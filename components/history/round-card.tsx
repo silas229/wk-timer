@@ -50,7 +50,7 @@ export function RoundCard({
               />
               <CardTitle className="text-lg">
                 <span className="font-mono">{formatTime(round.totalTime, 'full')}</span>
-                {comparison && (
+                {comparison && comparison.totalTimeDiff !== null && comparison.isFasterOverall !== null && (
                   <span className={`ml-2 font-medium text-xs p-1 align-middle border rounded ${comparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>
                     {formatTime(comparison.totalTimeDiff, 'diff')}
                   </span>

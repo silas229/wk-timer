@@ -25,7 +25,7 @@ export function TimerDisplay({ time, state, laps, comparison }: TimerDisplayProp
       <CardHeader className="text-center">
         <CardTitle className="text-4xl font-mono font-bold">
           {formatTime(time, 'full')}
-          {comparison && state === "finished" && comparison.totalTimeDiff !== null && (
+          {comparison && state === "finished" && comparison.totalTimeDiff !== null && comparison.isFasterOverall !== null && (
             <div className={`mt-2 text-lg font-medium ${comparison.isFasterOverall ? 'text-green-600' : 'text-red-600'}`}>
               {formatTime(comparison.totalTimeDiff, 'diff')}
             </div>
