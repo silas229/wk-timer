@@ -63,14 +63,34 @@ export function calculateActivityTimes(
 }
 
 /**
- * Format time in milliseconds to MM:SS.MS format
- * @param milliseconds Time in milliseconds
- * @returns Formatted time string
+ * Format time in milliseconds with various format options
  */
-export function formatActivityTime(milliseconds: number): string {
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const seconds = totalSeconds % 60;
-  const ms = Math.floor((milliseconds % 1000) / 10);
+export type TimeFormat = "full" | "seconds" | "diff";
 
-  return `${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+export function formatTime(
+  milliseconds: number,
+  format: TimeFormat = "full"
+): string {
+  const isNegative = milliseconds < 0;
+  const absMilliseconds = Math.abs(milliseconds);
+
+  const totalSeconds = Math.floor(absMilliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const ms = Math.floor((absMilliseconds % 1000) / 10);
+
+  switch (format) {
+    case "full": // m:ss.ms format
+      return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+
+    case "seconds": // ss.ms format
+      return `${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+
+    case "diff": // +/-ss.ms format
+      const prefix = isNegative ? "-" : "+";
+      return `${prefix}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+
+    default:
+      return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+  }
 }

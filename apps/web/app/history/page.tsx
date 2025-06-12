@@ -7,33 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, formatActivityTime } from "@/lib/lap-activities"
+import { calculateActivityTimes, formatTime, formatActivityTime } from "@/lib/lap-activities"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Use unified time formatting functions
   const formatDurationChange = useCallback((milliseconds: number) => {
-    const isNegative = milliseconds < 0
-    milliseconds = Math.abs(milliseconds)
-    const totalSeconds = Math.floor(milliseconds / 1000)
-    const seconds = totalSeconds % 60
-    const ms = Math.floor((milliseconds % 1000) / 10)
-    return `${isNegative ? '-' : '+'}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`
+    return formatTime(milliseconds, 'diff')
   }, [])
 
-    const formatDuration = useCallback((milliseconds: number) => {
-    const totalSeconds = Math.floor(milliseconds / 1000)
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    const ms = Math.floor((milliseconds % 1000) / 10)
-    return `${minutes.toString()}:${seconds
-      .toString()
-      .padStart(2, "0")}.${ms.toString().padStart(2, "0")}`
+  const formatDuration = useCallback((milliseconds: number) => {
+    return formatTime(milliseconds, 'full')
   }, [])
 
-  const formatTime = useCallback((date: Date) => {
+  const formatTimeOfDay = useCallback((date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
       timeStyle: 'short'
     }).format(date)
@@ -284,8 +274,8 @@ export default function HistoryPage() {
                         />
                         <CardTitle className="text-lg">
                         <span className="font-mono">{formatDuration(round.totalTime)}</span>
-                        {previousComparison && (<span className={`ml-2 font-medium text-xs p-1 border rounded ${previousComparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>{formatDurationChange(previousComparison.totalTimeDiff)}</span>)}
-                        <span> ({formatTime(round.completedAt)} Uhr)</span>
+                        {previousComparison && (<span className={`ml-2 font-medium text-xs  p-1 align-middle border rounded ${previousComparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>{formatDurationChange(previousComparison.totalTimeDiff)}</span>)}
+                        <span> ({formatTimeOfDay(round.completedAt)} Uhr)</span>
                         </CardTitle>
                       </div>
                       </div>
@@ -311,7 +301,7 @@ export default function HistoryPage() {
                         <span className="font-medium">{activity.name}</span>
                         <div className="text-right">
                           <span className="font-mono">
-                            {formatActivityTime(activity.time)}
+                            {formatTime(activity.time, 'seconds')}
                           </span>
                           {activityComparison && (
                             <div className={`text-xs ${activityComparison.isFaster ? 'text-green-600' : 'text-red-600'}`}>
