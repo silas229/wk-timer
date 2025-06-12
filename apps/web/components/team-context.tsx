@@ -50,7 +50,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
         // Create default team
         const defaultTeam: Team = {
           id: "default",
-          name: "Default Team",
+          name: "Gruppe 1",
           color: teamColors[0]!,
           createdAt: new Date()
         }

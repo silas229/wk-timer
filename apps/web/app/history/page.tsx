@@ -25,12 +25,9 @@ export default function HistoryPage() {
   }, [])
 
   const formatDate = useCallback((date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat('de-DE', {
+      dateStyle: 'short',
+      timeStyle: 'short'
     }).format(date)
   }, [])
 
@@ -146,11 +143,11 @@ export default function HistoryPage() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Round History</h2>
+                  <h2 className="text-2xl font-bold">Rundenverlauf</h2>
                   <p className="text-muted-foreground">
-                    {filteredRounds.length} saved {filteredRounds.length === 1 ? 'round' : 'rounds'}
+                    {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Runde' : 'Runden'}
                 {selectedTeamId !== "all" && (
-                  <span> for {teams.find(t => t.id === selectedTeamId)?.name}</span>
+                  <span> für {teams.find(t => t.id === selectedTeamId)?.name}</span>
                 )}
               </p>
             </div>
@@ -162,7 +159,7 @@ export default function HistoryPage() {
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Clear All
+                Alle löschen
               </Button>
             )}
           </div>
@@ -173,7 +170,7 @@ export default function HistoryPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  Filter by Team
+                  Filter nach Gruppe
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -183,7 +180,7 @@ export default function HistoryPage() {
                     variant={selectedTeamId === "all" ? "default" : "secondary"}
                     size="sm"
                   >
-                    All Teams ({savedRounds.length})
+                    Alle Gruppen ({savedRounds.length})
                   </Button>
                   {teams.map((team) => {
                     const teamRounds = savedRounds.filter(round => round.teamId === team.id)
@@ -215,12 +212,12 @@ export default function HistoryPage() {
             <CardContent className="text-center py-12">
               <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">
-                {selectedTeamId === "all" ? "No rounds saved yet" : "No rounds for this team"}
+                {selectedTeamId === "all" ? "Bisher wurden keine Runden aufgezeichnet" : "Keine Runden für dieses Team"}
               </h3>
               <p className="text-muted-foreground">
                 {selectedTeamId === "all" 
-                  ? "Complete a 13-lap round on the timer page to see your history here."
-                  : "Complete a round with this team selected to see it here."
+                  ? "Schließe eine Runde mit dem Timer-Seite, um die Historie hier zu sehen."
+                  : "Schließe eine Runde mit diesem Team aus, um sie hier zu sehen."
                 }
               </p>
             </CardContent>
@@ -246,10 +243,10 @@ export default function HistoryPage() {
                           {formatDate(round.completedAt)}
                         </p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span>Total: {formatTime(round.totalTime)}</span>
+                          <span>Gesamzeit: {formatTime(round.totalTime)}</span>
                           {fastestActivity && fastestActivity.activity && (
                             <span>
-                              Fastest: {formatActivityTime(fastestActivity.time)} ({fastestActivity.activity.name})
+                              Schnellste Runde: {formatActivityTime(fastestActivity.time)} ({fastestActivity.activity.name})
                             </span>
                           )}
                         </div>
@@ -261,7 +258,7 @@ export default function HistoryPage() {
                         className="text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete round</span>
+                        <span className="sr-only">Runde löschen</span>
                       </Button>
                     </div>
                   </CardHeader>

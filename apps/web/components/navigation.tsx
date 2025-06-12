@@ -59,19 +59,19 @@ export function Navigation() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Manage Teams
+                Gruppen verwalten
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Create New Team */}
               <div className="space-y-2">
-                <Label htmlFor="newTeamName">Create New Team</Label>
+                <Label htmlFor="newTeamName">Neue Gruppe anlegen</Label>
                 <div className="flex gap-2">
                   <Input
                     id="newTeamName"
                     value={newTeamName}
                     onChange={(e) => setNewTeamName(e.target.value)}
-                    placeholder="Enter team name"
+                    placeholder="Gruppennamen eingeben"
                     className="flex-1"
                     onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
                   />
@@ -87,7 +87,7 @@ export function Navigation() {
 
               {/* Teams List */}
               <div className="space-y-2">
-                <Label>Existing Teams</Label>
+                <Label>Bestehende Gruppen</Label>
                 <div className="space-y-2">
                   {teams.map((team) => (
                     <div
@@ -224,7 +224,7 @@ export function Navigation() {
                   className="flex items-center gap-3 cursor-pointer px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Users className="h-4 w-4 flex-shrink-0" />
-                  <span>Manage Teams</span>
+                  <span>Gruppen verwalten</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -236,13 +236,13 @@ export function Navigation() {
                 className="flex items-center gap-2"
               >
                 <History className="h-4 w-4" />
-                History
+                Verlauf
               </Button>
             </Link>
             
             <Button variant="ghost" size="icon">
               <Settings className="h-4 w-4" />
-              <span className="sr-only">Settings</span>
+              <span className="sr-only">Einstellungen</span>
             </Button>
           </div>
         </div>

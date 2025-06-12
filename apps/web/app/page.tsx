@@ -65,7 +65,7 @@ export default function Page() {
       totalTime: time,
       laps: laps,
       teamId: selectedTeamId,
-      teamName: currentTeam?.name || "Unknown Team"
+      teamName: currentTeam?.name || "Unbekannte Gruppe"
     }
   }, [time, laps, selectedTeamId, getCurrentTeam])
 
@@ -248,9 +248,9 @@ export default function Page() {
                 {formatTime(time)}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {state === "stopped" && "Ready to start"}
-                {state === "running" && `Running - Lap ${laps.length + 1}/13`}
-                {state === "finished" && "Round completed!"}
+                {state === "stopped" && "Bereit zu starten"}
+                {state === "running" && `Läuft - Runde ${laps.length + 1}/13`}
+                {state === "finished" && "Durchgang abgeschlossen!"}
               </p>
             </CardHeader>
           </Card>
@@ -258,7 +258,7 @@ export default function Page() {
         {/* Activities Display */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Activities ({laps.length}/13 laps)</CardTitle>
+            <CardTitle className="text-xl">Aktivitäten ({laps.length}/13 Runden)</CardTitle>
           </CardHeader>
           <CardContent>
             <div 
@@ -267,7 +267,7 @@ export default function Page() {
             >
               {activities.length === 0 && state === "stopped" ? (
                 <p className="text-center text-muted-foreground py-8">
-                  No activities recorded yet
+                  Noch keine Runden aufgezeichnet
                 </p>
               ) : (
                 <>
@@ -301,7 +301,7 @@ export default function Page() {
                             {formatActivityTime(currentActivity.currentTime)}
                           </div>
                           <div className="text-xs text-blue-600 dark:text-blue-400">
-                            Started at {formatActivityTime(currentActivity.startTime)}
+                            Gestartet um {formatActivityTime(currentActivity.startTime)}
                           </div>
                         </div>
                       </div>
@@ -323,19 +323,9 @@ export default function Page() {
           >
             {getButtonText()}
           </Button>
-          
-          {state === "running" && (
-            <Button
-              onClick={handleStop}
-              variant="outline"
-              className="w-full mt-2"
-            >
-              Stop
-            </Button>
-          )}
-        </div>
         </div>
       </div>
+    </div>
     </>
   )
 }
