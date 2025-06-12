@@ -12,10 +12,12 @@ describe("Time Utilities", () => {
 
   function parseTimeToMs(timeString: string): number {
     const [minutes, rest] = timeString.split(":");
+    if (!rest) throw new Error("Invalid time format");
     const [seconds, milliseconds] = rest.split(".");
+    if (!seconds || !milliseconds) throw new Error("Invalid time format");
 
     return (
-      parseInt(minutes) * 60 * 1000 +
+      parseInt(minutes || "0") * 60 * 1000 +
       parseInt(seconds) * 1000 +
       parseInt(milliseconds) * 10
     );
@@ -54,7 +56,8 @@ describe("Color Utilities", () => {
   }
 
   function generateTeamColor(index: number, colors: string[]): string {
-    return colors[index % colors.length];
+    const color = colors[index % colors.length];
+    return color || "#000000"; // Fallback color
   }
 
   const teamColors = [

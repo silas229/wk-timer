@@ -51,12 +51,12 @@ describe("Timer Logic", () => {
     addLap(90000); // 1.5 minutes
 
     expect(laps).toHaveLength(3);
-    expect(laps[0].lapNumber).toBe(1);
-    expect(laps[0].time).toBe(30000);
-    expect(laps[1].lapNumber).toBe(2);
-    expect(laps[1].time).toBe(60000);
-    expect(laps[2].lapNumber).toBe(3);
-    expect(laps[2].time).toBe(90000);
+    expect(laps[0]?.lapNumber).toBe(1);
+    expect(laps[0]?.time).toBe(30000);
+    expect(laps[1]?.lapNumber).toBe(2);
+    expect(laps[1]?.time).toBe(60000);
+    expect(laps[2]?.lapNumber).toBe(3);
+    expect(laps[2]?.time).toBe(90000);
   });
 
   it("should not allow more than 12 laps", () => {
@@ -66,7 +66,7 @@ describe("Timer Logic", () => {
     }
 
     expect(laps).toHaveLength(12);
-    expect(laps[11].lapNumber).toBe(12);
+    expect(laps[11]?.lapNumber).toBe(12);
   });
 
   it("should calculate lap times correctly", () => {
@@ -183,7 +183,7 @@ describe("Round Data Structure", () => {
 
     // Verify times are increasing
     for (let i = 1; i < laps.length; i++) {
-      expect(laps[i].time).toBeGreaterThan(laps[i - 1].time);
+      expect(laps[i]?.time).toBeGreaterThan(laps[i - 1]?.time || 0);
     }
   });
 });
