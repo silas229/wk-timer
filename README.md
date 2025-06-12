@@ -39,6 +39,16 @@ A web-based timer application built with modern technologies for precise time tr
 - **Fixed Layout**: Stable button positioning prevents UI jumping
 - **Intuitive Navigation**: Clean, modern interface with clear visual hierarchy
 
+### 📱 **Progressive Web App (PWA)**
+
+- **Offline Functionality**: Timer works without internet connection
+- **App-like Experience**: Install as native app on any device
+- **Service Worker**: Background caching for instant loading
+- **Install Prompts**: Smart installation suggestions
+- **Network Status**: Visual indicator for online/offline state
+- **Manifest Configuration**: Proper app metadata and icons
+- **Cross-Platform**: Works on desktop, mobile, and tablet
+
 ## 🛠️ Technologies Used
 
 ### **Frontend Framework**
@@ -53,6 +63,12 @@ A web-based timer application built with modern technologies for precise time tr
 - **Tailwind CSS** - Utility-first CSS framework
 - **Lucide React** - Beautiful icon library
 - **next-themes** - Theme management
+
+### **Progressive Web App**
+
+- **next-pwa** - Service worker and PWA functionality
+- **Workbox** - Offline caching strategies
+- **Web App Manifest** - Native app-like installation
 
 ### **Data Management**
 
@@ -81,14 +97,16 @@ A web-based timer application built with modern technologies for precise time tr
 ### Prerequisites
 
 - **Node.js** >= 20
-- **pnpm** >= 10.4.1
+- **pnpm** >= 10.4.1 (recommended) or **npm** >= 10
 
 ### Installation
+
+#### Using pnpm (Recommended)
 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd wkt-next
+cd wk-timer
 
 # Install dependencies
 pnpm install
@@ -98,6 +116,17 @@ pnpm dev
 ```
 
 The application will be available at `http://localhost:3000`
+
+### PWA Installation
+
+Once the app is running, you can install it as a Progressive Web App:
+
+1. **Desktop (Chrome/Edge)**: Click the install icon in the address bar
+2. **Mobile (iOS Safari)**: Tap Share → Add to Home Screen
+3. **Mobile (Chrome/Firefox)**: Tap the menu → Install App
+4. **In-app prompt**: Use the floating install button when available
+
+The installed PWA will work offline and provide a native app experience.
 
 ### Development Commands
 
@@ -132,6 +161,8 @@ This project includes comprehensive testing with **35+ tests** across 6 test fil
 
 For detailed testing information, see **[TESTING.md](./TESTING.md)**
 
+For PWA implementation details and features, see **[PWA_README.md](./PWA_README.md)**
+
 ### Quick Testing Commands
 
 ```bash
@@ -151,12 +182,14 @@ pnpm test:ui
 ## 📁 Project Structure
 
 ```text
-wkt-next/
+wk-timer/
 ├── apps/
 │   └── web/               # Main application
 │       ├── app/           # Next.js App Router pages
 │       ├── components/    # React components
 │       ├── lib/           # Utilities and IndexedDB manager
+│       ├── hooks/         # Custom React hooks
+│       ├── public/        # Static assets and PWA files
 │       └── __tests__/     # Test files
 ├── packages/
 │   ├── ui/                # Shared UI component library
@@ -189,6 +222,15 @@ wkt-next/
 - Activity-aware UI components with German localization
 - Separation of concerns between UI and data
 - Type-safe prop interfaces
+
+### **Progressive Web App Features**
+
+- **Service Worker Integration**: Automatic caching with Workbox strategies
+- **Offline Functionality**: Full timer functionality without internet
+- **App Installation**: Native app-like installation across platforms
+- **Background Updates**: Automatic content updates when online
+- **Network Detection**: Smart online/offline status management
+- **Manifest Configuration**: Proper app metadata for installation prompts
 
 ### **Testing Strategy**
 
