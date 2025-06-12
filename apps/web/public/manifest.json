@@ -1,6 +1,6 @@
 {
   "name": "Wettkämpfe Timer",
-  "short_name": "WK Timer",
+  "short_name": "WK-Timer",
   "description": "Timer für den B-Teil beim Bundeswettbewerb der DJF mit Rundenverfolgung und Gruppen-Management",
   "start_url": "/",
   "display": "standalone",

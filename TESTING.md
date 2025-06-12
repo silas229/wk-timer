@@ -5,7 +5,7 @@ This project uses [Vitest](https://vitest.dev/) as the testing framework with Re
 ## Prerequisites
 
 - Node.js 20+
-- pnpm 10.4.1+
+- npm 10+
 
 ## Test Structure
 
@@ -23,35 +23,35 @@ __tests__/
 
 ```bash
 # Run all tests across the monorepo
-pnpm test
+npm run test
 
 # Run tests once (CI mode)
-pnpm test:run
+npm run test:run
 
 # Run tests with coverage
-pnpm test:coverage
+npm run test:coverage
 
 # Run type checking
-pnpm typecheck
+npm run typecheck
 
 # Run linting
-pnpm lint
+npm run lint
 ```
 
 ### App Level (apps/web)
 
 ```bash
 # Run tests in watch mode
-pnpm test
+npm run test
 
 # Run tests once
-pnpm test:run
+npm run test:run
 
 # Run tests with UI
-pnpm test:ui
+npm run test:ui
 
 # Run tests with coverage
-pnpm test:coverage
+npm run test:coverage
 ```
 
 ## Test Configuration
@@ -133,7 +133,7 @@ The project includes a GitHub Action (`.github/workflows/test.yml`) that:
 
 ### Workflow Steps
 
-1. **Setup**: Checkout code, setup Node.js and pnpm
+1. **Setup**: Checkout code, setup Node.js and npm
 2. **Dependencies**: Install with frozen lockfile
 3. **Quality Checks**: Linting and type checking
 4. **Testing**: Run test suite
@@ -146,13 +146,13 @@ The project includes a GitHub Action (`.github/workflows/test.yml`) that:
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Run all tests
-pnpm test:run
+npm run test:run
 
 # Run with coverage
-pnpm test:coverage
+npm run test:coverage
 ```
 
 ### Watch Mode Development
@@ -160,12 +160,12 @@ pnpm test:coverage
 ```bash
 # Start tests in watch mode
 cd apps/web
-pnpm test
+npm run test
 ```
 
 ### Coverage Reports
 
-After running `pnpm test:coverage`, coverage reports are available:
+After running `npm run test:coverage`, coverage reports are available:
 
 - Text output in terminal
 - HTML report in `coverage/index.html`

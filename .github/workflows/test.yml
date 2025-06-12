@@ -14,28 +14,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.4.1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run type checking
-        run: cd apps/web && pnpm typecheck
+        run: cd apps/web && npm run typecheck
 
       - name: Run tests
-        run: pnpm test:run
+        run: npm run test:run
 
       - name: Build project
-        run: cd apps/web && pnpm build
+        run: cd apps/web && npm run build
 
   test-coverage:
     runs-on: ubuntu-latest
@@ -45,22 +40,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.4.1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run tests with coverage
-        run: cd apps/web && pnpm test:coverage
+        run: cd apps/web && npm run test:coverage
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4

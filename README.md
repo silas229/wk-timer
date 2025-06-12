@@ -81,7 +81,7 @@ A web-based timer application built with modern technologies for precise time tr
 - **Vitest** - Fast unit testing framework
 - **React Testing Library** - Component testing utilities
 - **Turbo** - Monorepo build system
-- **pnpm** - Fast, disk space efficient package manager
+- **npm** - Fast, reliable package manager
 - **ESLint** - Code linting and formatting
 - **TypeScript** - Static type checking
 
@@ -97,11 +97,11 @@ A web-based timer application built with modern technologies for precise time tr
 ### Prerequisites
 
 - **Node.js** >= 20
-- **pnpm** >= 10.4.1 (recommended) or **npm** >= 10
+- **npm** >= 10 (included with Node.js)
 
 ### Installation
 
-#### Using pnpm (Recommended)
+#### Installation and Setup
 
 ```bash
 # Clone the repository
@@ -109,10 +109,10 @@ git clone <repository-url>
 cd wk-timer
 
 # Install dependencies
-pnpm install
+npm install
 
 # Start development server
-pnpm dev
+npm run dev
 ```
 
 The application will be available at `http://localhost:3000`
@@ -132,20 +132,20 @@ The installed PWA will work offline and provide a native app experience.
 
 ```bash
 # Development
-pnpm dev              # Start development server with hot reload
-pnpm build            # Build for production
-pnpm start            # Start production server
+npm run dev              # Start development server with hot reload
+npm run build            # Build for production
+npm run start            # Start production server
 
 # Code Quality
-pnpm lint             # Run ESLint
-pnpm typecheck        # TypeScript type checking
-pnpm format           # Format code with Prettier
+npm run lint             # Run ESLint
+npm run typecheck        # TypeScript type checking
+npm run format           # Format code with Prettier
 
 # Testing
-pnpm test             # Run tests in watch mode
-pnpm test:run         # Run tests once (CI mode)
-pnpm test:ui          # Interactive test interface
-pnpm test:coverage    # Generate coverage reports
+npm run test             # Run tests in watch mode
+npm run test:run         # Run tests once (CI mode)
+npm run test:ui          # Interactive test interface
+npm run test:coverage    # Generate coverage reports
 ```
 
 ## 🧪 Testing
@@ -161,22 +161,20 @@ This project includes comprehensive testing with **35+ tests** across 6 test fil
 
 For detailed testing information, see **[TESTING.md](./TESTING.md)**
 
-For PWA implementation details and features, see **[PWA_README.md](./PWA_README.md)**
-
 ### Quick Testing Commands
 
 ```bash
 # Run all tests
-pnpm test:run
+npm run test:run
 
 # Watch mode for development
-pnpm test
+npm run test
 
 # Coverage analysis
-pnpm test:coverage
+npm run test:coverage
 
 # Interactive test UI
-pnpm test:ui
+npm run test:ui
 ```
 
 ## 📁 Project Structure
@@ -246,7 +244,7 @@ wk-timer/
 To add new shadcn/ui components:
 
 ```bash
-pnpm dlx shadcn@latest add <component-name> -c apps/web
+npx shadcn@latest add <component-name> -c apps/web
 ```
 
 Components are automatically placed in `packages/ui/src/components` and can be imported:
@@ -260,7 +258,7 @@ import { Button } from "@workspace/ui/components/button"
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
-4. Run the test suite: `pnpm test:run`
+4. Run the test suite: `npm run test:run`
 5. Commit your changes: `git commit -m 'Add amazing feature'`
 6. Push to the branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
