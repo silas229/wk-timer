@@ -34,3 +34,9 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# PWA/Service Worker generated files
+/app/public/sw.js
+/app/public/workbox-*.js
+/app/public/sw.js.map
+/app/public/workbox-*.js.map
