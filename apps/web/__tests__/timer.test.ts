@@ -29,7 +29,7 @@ describe("Timer Logic", () => {
   }
 
   function addLap(time: number): void {
-    if (laps.length < 12) {
+    if (laps.length < 13) {
       laps.push({
         lapNumber: laps.length + 1,
         time,
@@ -59,14 +59,14 @@ describe("Timer Logic", () => {
     expect(laps[2]?.time).toBe(90000);
   });
 
-  it("should not allow more than 12 laps", () => {
+  it("should not allow more than 13 laps", () => {
     // Add 15 laps
     for (let i = 1; i <= 15; i++) {
       addLap(i * 10000);
     }
 
-    expect(laps).toHaveLength(12);
-    expect(laps[11]?.lapNumber).toBe(12);
+    expect(laps).toHaveLength(13);
+    expect(laps[12]?.lapNumber).toBe(13);
   });
 
   it("should calculate lap times correctly", () => {
@@ -97,17 +97,17 @@ describe("Timer Logic", () => {
     state = "running";
     expect(state).toBe("running");
 
-    // Finish after 12 laps
-    for (let i = 1; i <= 12; i++) {
+    // Finish after 13 laps
+    for (let i = 1; i <= 13; i++) {
       addLap(i * 10000);
     }
 
-    if (laps.length === 12) {
+    if (laps.length === 13) {
       state = "finished";
     }
 
     expect(state).toBe("finished");
-    expect(laps).toHaveLength(12);
+    expect(laps).toHaveLength(13);
   });
 
   it("should reset timer correctly", () => {
