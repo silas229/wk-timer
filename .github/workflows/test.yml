@@ -24,13 +24,13 @@ jobs:
         run: npm ci
 
       - name: Run type checking
-        run: cd apps/web && npm run typecheck
+        run: npm run typecheck
 
       - name: Run tests
         run: npm run test:run
 
       - name: Build project
-        run: cd apps/web && npm run build
+        run: npm run build
 
   test-coverage:
     runs-on: ubuntu-latest
