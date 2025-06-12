@@ -131,6 +131,11 @@ export default function HistoryPage() {
     loadSavedRounds()
   }, [loadSavedRounds])
 
+  // Reload rounds when teams change (e.g., when a team is deleted)
+  useEffect(() => {
+    loadSavedRounds()
+  }, [teams, loadSavedRounds])
+
   return (
     <div className="flex items-start justify-center p-4">
       <div className="w-full max-w-4xl space-y-6">

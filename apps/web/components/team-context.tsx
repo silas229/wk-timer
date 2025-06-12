@@ -127,6 +127,12 @@ export function TeamProvider({ children }: TeamProviderProps) {
       setTeams(updatedTeams)
       localStorage.setItem('timer-teams', JSON.stringify(updatedTeams))
       
+      // Delete all rounds associated with the deleted team
+      // This ensures data consistency and prevents orphaned records
+      const existingRounds = JSON.parse(localStorage.getItem('timer-rounds') || '[]')
+      const filteredRounds = existingRounds.filter((round: any) => round.teamId !== id)
+      localStorage.setItem('timer-rounds', JSON.stringify(filteredRounds))
+      
       // If the deleted team was selected, switch to first available team
       if (selectedTeamId === id) {
         const newSelectedId = updatedTeams[0]?.id || ""
