@@ -84,9 +84,12 @@ export default function HistoryPage() {
   }, [])
 
   const getPreviousTeamComparison = (currentRound: SavedRound) => {
-    // Find all rounds completed before this round (regardless of team)
+    // Find all rounds completed before this round for the same team
     const previousRounds = savedRounds
-      .filter(round => round.completedAt.getTime() < currentRound.completedAt.getTime())
+      .filter(round =>
+        round.teamId === currentRound.teamId &&
+        round.completedAt.getTime() < currentRound.completedAt.getTime()
+      )
       .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
 
     const previousRound = previousRounds[0]
