@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { Users, Plus, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useTeam } from "@/components/team-context"
@@ -43,18 +43,16 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
     setEditTeamName("")
   }, [onOpenChange])
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Gruppen verwalten
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
           {/* Create New Team */}
           <div className="space-y-2">
             <Label htmlFor="newTeamName">Neue Gruppe anlegen</Label>
@@ -69,7 +67,6 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
               />
               <Button
                 onClick={handleCreateTeam}
-                size="sm"
                 disabled={!newTeamName.trim()}
               >
                 <Plus className="h-4 w-4" />
@@ -166,8 +163,8 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
               Schließen
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
