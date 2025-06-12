@@ -13,6 +13,42 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/vitest.config.*",
+        "**/vitest.setup.*"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "test:run": {
+      "dependsOn": ["^test:run"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/vitest.config.*",
+        "**/vitest.setup.*"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^test:coverage"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/vitest.config.*",
+        "**/vitest.setup.*"
+      ],
+      "outputs": ["coverage/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

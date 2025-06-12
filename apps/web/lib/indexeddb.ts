@@ -20,7 +20,7 @@ export interface SavedRound {
   teamName: string;
 }
 
-const DB_NAME = "WktTimerDB";
+const DB_NAME = "WkTimerDB";
 const DB_VERSION = 1;
 const TEAMS_STORE = "teams";
 const ROUNDS_STORE = "rounds";
