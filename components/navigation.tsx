@@ -27,8 +27,8 @@ export function Navigation() {
   return (
     <>
       {/* Team Management Dialog */}
-      <TeamManageDialog 
-        open={showManageDialog} 
+      <TeamManageDialog
+        open={showManageDialog}
         onOpenChange={setShowManageDialog}
       />
 
