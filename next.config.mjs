@@ -6,10 +6,11 @@ const nextConfig = {
 };
 
 const pwaConfig = withPWA({
-  dest: "public",
+  dest: "app/public",
   register: true,
   skipWaiting: true,
-  disable: typeof process !== "undefined" && process.env.NODE_ENV === "development",
+  disable:
+    typeof process !== "undefined" && process.env.NODE_ENV === "development",
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
