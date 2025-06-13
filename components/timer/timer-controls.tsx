@@ -28,12 +28,12 @@ interface TimerControlsProps {
   onDiscardRound: () => void
 }
 
-export function TimerControls({ 
-  state, 
-  laps, 
-  lastSavedRound, 
-  onButtonClick, 
-  onDiscardRound 
+export function TimerControls({
+  state,
+  laps,
+  lastSavedRound,
+  onButtonClick,
+  onDiscardRound
 }: TimerControlsProps) {
   const getButtonText = () => {
     if (state === "stopped") return "Start"

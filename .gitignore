@@ -36,7 +36,7 @@ npm-debug.log*
 *.pem
 
 # PWA/Service Worker generated files
-/app/public/sw.js
-/app/public/workbox-*.js
-/app/public/sw.js.map
-/app/public/workbox-*.js.map
+/public/sw.js
+/public/workbox-*.js
+/public/sw.js.map
+/public/workbox-*.js.map

@@ -6,7 +6,7 @@ const nextConfig = {
 };
 
 const pwaConfig = withPWA({
-  dest: "app/public",
+  dest: "public",
   register: true,
   skipWaiting: true,
   disable:
