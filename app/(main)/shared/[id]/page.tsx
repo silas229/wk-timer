@@ -1,19 +1,8 @@
 import { Metadata } from 'next';
 import { calculateActivityTimes } from '@/lib/lap-activities';
 import { SharedRoundCard } from '@/components/shared-round-card';
-
-interface SharedRoundData {
-  id: string; // UUID that serves as both local and shareable ID
-  completedAt: string;
-  totalTime: number;
-  laps: Array<{
-    lapNumber: number;
-    time: number;
-    timestamp: string;
-  }>;
-  teamName: string;
-  description?: string;
-}
+import { SharedRoundData } from '@/lib/round-storage';
+import { getRoundStorage } from '@/lib/round-storage-factory';
 
 interface PageProps {
   params: Promise<{
@@ -22,18 +11,12 @@ interface PageProps {
 }
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-// Fetch shared round data on the server
+
+// Fetch shared round data directly from storage
 async function fetchSharedRound(id: string): Promise<SharedRoundData | null> {
   try {
-    const response = await fetch(`${baseUrl}/api/share-round?id=${id}`, {
-      cache: 'no-store' // Always fetch fresh data
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return await response.json();
+    const storage = getRoundStorage();
+    return await storage.retrieve(id);
   } catch (error) {
     console.error('Error fetching shared round:', error);
     return null;
