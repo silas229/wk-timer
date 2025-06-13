@@ -50,7 +50,7 @@ jobs:
 
       - name: Copy JS files to server
         run: |
-          rsync -avz --delete public/*.js ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }}:${{ vars.SERVER_PATH }}/public/*.js
+          rsync -avz public/*.js ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }}:${{ vars.SERVER_PATH }}/public/
 
       - name: Deploy on server
         run: |
