@@ -43,6 +43,12 @@ export default [
     },
   },
   {
-    ignores: ["dist/**", ".next/**", "coverage/**", "app/public/**"],
+    ignores: [
+      "dist/**",
+      ".next/**",
+      "coverage/**",
+      "public/**",
+      "next.config.mjs",
+    ],
   },
 ];
