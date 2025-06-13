@@ -16,9 +16,9 @@ interface SharedRoundData {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -41,7 +41,8 @@ async function fetchSharedRound(id: string): Promise<SharedRoundData | null> {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const roundData = await fetchSharedRound(params.id);
+  const { id } = await params;
+  const roundData = await fetchSharedRound(id);
 
   if (!roundData) {
     return {
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${roundData.teamName} - Geteilter Durchgang | Wettkämpfe Timer`;
   const description = roundData.description ?? `Geteilter Durchgang von ${roundData.teamName}`;
-  const url = `${baseUrl}/shared/${params.id}`;
+  const url = `${baseUrl}/shared/${id}`;
 
   return {
     title,
@@ -77,7 +78,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function SharedRoundPage({ params }: PageProps) {
-  const roundData = await fetchSharedRound(params.id);
+  const { id } = await params;
+  const roundData = await fetchSharedRound(id);
 
   if (!roundData) {
     return (
