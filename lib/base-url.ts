@@ -5,6 +5,7 @@
  */
 export function getBaseUrl(fallback?: string): string {
   const baseUrl = process.env.BASE_URL?.trim();
+  console.info("Base URL:", baseUrl);
 
   // If BASE_URL is set and not empty, and is a valid URL, use it
   if (baseUrl && baseUrl.length > 0 && baseUrl !== "" && baseUrl !== "/") {
