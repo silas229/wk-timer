@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET, POST } from "@/app/api/share-round/route";
 import { NextRequest } from "next/server";
 
-describe("Share Round API", () => {
+describe("Share Round API Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -216,7 +216,7 @@ describe("Share Round API", () => {
     });
   });
 
-  describe("Integration: POST then GET", () => {
+  describe("Basic Integration: POST then GET", () => {
     it("should allow sharing and retrieving a round end-to-end", async () => {
       const roundData = {
         id: "integration-test-uuid",

@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-describe("oEmbed API", () => {
+describe("oEmbed API Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
