@@ -1,0 +1,6 @@
+# Ignore actual round data files
+rounds/
+*.json
+
+# Keep the README
+!README.md

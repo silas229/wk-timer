@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { generateUUID } from "@/lib/uuid";
 
 // Mock timer functionality
 describe("Timer Logic", () => {
@@ -142,7 +143,7 @@ describe("Round Data Structure", () => {
 
   it("should create valid round object", () => {
     const mockRound: SavedRound = {
-      id: "round-123",
+      id: generateUUID(),
       completedAt: new Date("2024-01-01T12:00:00Z"),
       totalTime: 120000,
       laps: [
@@ -162,6 +163,9 @@ describe("Round Data Structure", () => {
     };
 
     expect(mockRound.id).toBeTruthy();
+    expect(mockRound.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
     expect(mockRound.completedAt).toBeInstanceOf(Date);
     expect(mockRound.totalTime).toBeGreaterThan(0);
     expect(mockRound.laps).toHaveLength(2);

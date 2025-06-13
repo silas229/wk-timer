@@ -100,7 +100,7 @@ export function PWAInstallPrompt() {
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground mb-4">
-          Installiere Wettkämpfe Timer auf Ihrem Gerät für schnellen Zugriff und Offline-Nutzung.
+          Installiere Wettkämpfe Timer auf deinem Gerät für schnellen Zugriff und Offline-Nutzung.
         </p>
         <div className="flex gap-2">
           <Button onClick={handleInstallClick} className="flex-1">

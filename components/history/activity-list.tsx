@@ -4,11 +4,16 @@ import type { ActivityTime, RoundComparison } from "@/lib/lap-activities"
 interface ActivityListProps {
   activities: ActivityTime[]
   comparison: RoundComparison | null
+  layout?: 'grid' | 'single-column'
 }
 
-export function ActivityList({ activities, comparison }: ActivityListProps) {
+export function ActivityList({ activities, comparison, layout = 'grid' }: ActivityListProps) {
+  const containerClass = layout === 'single-column'
+    ? "space-y-2"
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+    <div className={containerClass}>
       {activities.map((activity, index) => {
         const activityComparison = comparison?.activityComparisons[activity.name]
         return (

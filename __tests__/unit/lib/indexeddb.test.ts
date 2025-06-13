@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { Team, SavedRound } from "../lib/indexeddb";
+import type { Team, SavedRound } from "@/lib/indexeddb";
+import { generateUUID } from "@/lib/uuid";
 
 describe("IndexedDB Manager", () => {
   beforeEach(() => {
@@ -34,7 +35,7 @@ describe("IndexedDB Manager", () => {
 
   describe("Round Operations", () => {
     const mockRound: SavedRound = {
-      id: "round-1",
+      id: generateUUID(),
       completedAt: new Date("2024-01-01T00:00:00Z"),
       totalTime: 120000, // 2 minutes in milliseconds
       laps: [
@@ -54,7 +55,10 @@ describe("IndexedDB Manager", () => {
     };
 
     it("should create a round with valid data", () => {
-      expect(mockRound.id).toBe("round-1");
+      expect(mockRound.id).toBeTruthy();
+      expect(mockRound.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
       expect(mockRound.teamId).toBe("team-1");
       expect(mockRound.totalTime).toBe(120000);
       expect(mockRound.laps).toHaveLength(2);
