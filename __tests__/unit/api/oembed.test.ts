@@ -44,7 +44,7 @@ describe("oEmbed API Unit Tests", () => {
         type: "rich",
         width: 430,
         height: 720,
-        title: "Test description",
+        title: "Test Team - Geteilter Durchgang",
         author_name: "Wettkämpfe Timer",
         provider_name: "Wettkämpfe Timer",
         html: expect.stringContaining(
