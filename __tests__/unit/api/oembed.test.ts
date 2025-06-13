@@ -43,7 +43,7 @@ describe("oEmbed API Unit Tests", () => {
         version: "1.0",
         type: "rich",
         width: 430,
-        height: 676,
+        height: 720,
         title: "Test description",
         author_name: "Wettkämpfe Timer",
         provider_name: "Wettkämpfe Timer",
