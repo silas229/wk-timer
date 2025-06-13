@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities"
+import { generateUUID } from "@/lib/uuid"
 import { PWAInstallPrompt } from "@/components/pwa-install"
 import { TimerDisplay } from "@/components/timer/timer-display"
 import { ActivitiesDisplay } from "@/components/timer/activities-display"
 import { TimerControls } from "@/components/timer/timer-controls"
+import { ShareDialog } from "@/components/share-dialog"
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -21,6 +23,7 @@ export default function Page() {
   const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null)
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const activitiesRef = useRef<HTMLDivElement>(null)
 
   // Calculate activities whenever laps change
@@ -153,7 +156,7 @@ export default function Page() {
 
         // Auto-save the round
         const round: SavedRound = {
-          id: Date.now().toString(),
+          id: generateUUID(),
           completedAt: new Date(),
           totalTime: time,
           laps: updatedLaps,
@@ -188,6 +191,51 @@ export default function Page() {
       } catch (error) {
         console.error('Failed to discard round:', error)
       }
+    }
+  }
+
+  const handleShareRound = () => {
+    if (lastSavedRound) {
+      setShareDialogOpen(true)
+    }
+  }
+
+  const handleShareSubmit = async (description: string): Promise<string | null> => {
+    if (!lastSavedRound) return null
+
+    try {
+      const response = await fetch('/api/share-round', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roundData: lastSavedRound,
+          description,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share round')
+      }
+
+      const result = await response.json()
+      
+      // Update the round with share information
+      const updatedRound: SavedRound = {
+        ...lastSavedRound,
+        sharedUrl: result.sharedUrl,
+        description,
+      }
+
+      // Save the updated round to local storage
+      await saveRoundToStorage(updatedRound)
+      setLastSavedRound(updatedRound)
+
+      return result.sharedUrl
+    } catch (error) {
+      console.error('Error sharing round:', error)
+      return null
     }
   }
 
@@ -242,7 +290,18 @@ export default function Page() {
           lastSavedRound={lastSavedRound}
           onButtonClick={handleButtonClick}
           onDiscardRound={handleDiscardRound}
+          onShareRound={handleShareRound}
         />
+
+        {/* Share Dialog */}
+        {lastSavedRound && (
+          <ShareDialog
+            isOpen={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
+            round={lastSavedRound}
+            onShare={handleShareSubmit}
+          />
+        )}
       </div>
     </div>
   )

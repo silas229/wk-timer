@@ -12,12 +12,14 @@ export interface Lap {
 }
 
 export interface SavedRound {
-  id: string;
+  id: string; // UUID for both local storage and sharing
   completedAt: Date;
   totalTime: number;
   laps: Lap[];
   teamId: string;
   teamName: string;
+  sharedUrl?: string; // URL for shared round
+  description?: string; // User description for shared round
 }
 
 const DB_NAME = "WkTimerDB";
