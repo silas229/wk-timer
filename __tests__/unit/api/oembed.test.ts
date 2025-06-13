@@ -264,22 +264,5 @@ describe("oEmbed API Unit Tests", () => {
       expect(response.status).toBe(200);
       expect(data.html).toContain("http://localhost:3000/embed/test-uuid");
     });
-
-    it("should handle URLs with port numbers", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockRoundData),
-      });
-
-      const request = new NextRequest(
-        "http://localhost:3001/api/oembed?url=http://localhost:3001/shared/test-uuid&format=json"
-      );
-
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.html).toContain("http://localhost:3001/embed/test-uuid");
-    });
   });
 });

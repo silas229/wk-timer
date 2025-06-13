@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRoundStorage } from "@/lib/round-storage-factory";
 import type { SharedRoundData } from "@/lib/round-storage";
+import { getBaseUrl } from "@/lib/base-url";
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     await storage.store(shareableId, sharedRound);
 
     // Generate the shareable URL
-    const baseUrl = request.nextUrl.origin;
+    const baseUrl = getBaseUrl();
     const sharedUrl = `${baseUrl}/shared/${shareableId}`;
 
     return NextResponse.json(

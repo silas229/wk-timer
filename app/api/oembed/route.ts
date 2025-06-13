@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getBaseUrl } from "@/lib/base-url";
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch the round data to get title and description
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl = getBaseUrl(request.nextUrl.origin);
     const response = await fetch(`${baseUrl}/api/share-round?id=${roundId}`);
 
     if (!response.ok) {

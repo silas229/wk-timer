@@ -3,14 +3,13 @@ import { calculateActivityTimes } from '@/lib/lap-activities';
 import { SharedRoundCard } from '@/components/shared-round-card';
 import { SharedRoundData } from '@/lib/round-storage';
 import { getRoundStorage } from '@/lib/round-storage-factory';
+import { getBaseUrl } from '@/lib/base-url';
 
 interface PageProps {
   params: Promise<{
     id: string;
   }>;
 }
-
-const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
 // Fetch shared round data directly from storage
 async function fetchSharedRound(id: string): Promise<SharedRoundData | null> {
@@ -36,6 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${roundData.teamName} - Geteilter Durchgang | Wettkämpfe Timer`;
   const description = roundData.description ?? `Geteilter Durchgang von ${roundData.teamName}`;
+  const baseUrl = getBaseUrl();
   const url = `${baseUrl}/shared/${id}`;
 
   return {
