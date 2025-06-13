@@ -1,10 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GET, POST } from "@/app/api/share-round/route";
 import { NextRequest } from "next/server";
+import {
+  setRoundStorage,
+  resetRoundStorage,
+} from "@/lib/round-storage-factory";
+import { MemoryRoundStorage } from "@/lib/memory-round-storage";
 
 describe("Share Round API Unit Tests", () => {
+  let testStorage: MemoryRoundStorage;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    testStorage = new MemoryRoundStorage();
+    setRoundStorage(testStorage);
+  });
+
+  afterEach(() => {
+    resetRoundStorage();
   });
 
   describe("POST /api/share-round", () => {

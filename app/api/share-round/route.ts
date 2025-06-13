@@ -1,21 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Interface for shared round data
-interface SharedRoundData {
-  id: string; // UUID that serves as both local and shareable ID
-  completedAt: string;
-  totalTime: number;
-  laps: Array<{
-    lapNumber: number;
-    time: number;
-    timestamp: string;
-  }>;
-  teamName: string;
-  description?: string;
-}
-
-// TODO: Replace with a proper database or persistent storage
-const sharedRounds: Map<string, SharedRoundData> = new Map();
+import { getRoundStorage } from "@/lib/round-storage-factory";
+import type { SharedRoundData } from "@/lib/round-storage";
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -50,8 +35,9 @@ export async function POST(request: NextRequest) {
       description: description || undefined,
     };
 
-    // Store the shared round
-    sharedRounds.set(shareableId, sharedRound);
+    // Store the shared round using the storage abstraction
+    const storage = getRoundStorage();
+    await storage.store(shareableId, sharedRound);
 
     // Generate the shareable URL
     const baseUrl = request.nextUrl.origin;
@@ -75,26 +61,36 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const roundId = searchParams.get("id");
+  try {
+    const { searchParams } = new URL(request.url);
+    const roundId = searchParams.get("id");
 
-  if (!roundId) {
+    if (!roundId) {
+      return NextResponse.json(
+        { error: "Round ID is required" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Retrieve the shared round using the storage abstraction
+    const storage = getRoundStorage();
+    const sharedRound = await storage.retrieve(roundId);
+
+    if (!sharedRound) {
+      return NextResponse.json(
+        { error: "Shared round not found" },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+
+    return NextResponse.json(sharedRound, { headers: corsHeaders });
+  } catch (error) {
+    console.error("Error retrieving round:", error);
     return NextResponse.json(
-      { error: "Round ID is required" },
-      { status: 400, headers: corsHeaders }
+      { error: "Failed to retrieve round" },
+      { status: 500, headers: corsHeaders }
     );
   }
-
-  const sharedRound = sharedRounds.get(roundId);
-
-  if (!sharedRound) {
-    return NextResponse.json(
-      { error: "Shared round not found" },
-      { status: 404, headers: corsHeaders }
-    );
-  }
-
-  return NextResponse.json(sharedRound, { headers: corsHeaders });
 }
 
 // Handle OPTIONS requests for CORS preflight

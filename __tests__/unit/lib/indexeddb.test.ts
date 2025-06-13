@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { Team, SavedRound } from "../lib/indexeddb";
-import { generateUUID } from "../lib/uuid";
+import type { Team, SavedRound } from "@/lib/indexeddb";
+import { generateUUID } from "@/lib/uuid";
 
 describe("IndexedDB Manager", () => {
   beforeEach(() => {
