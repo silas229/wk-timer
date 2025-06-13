@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { SavedRound } from '@/lib/indexeddb';
+import { formatTime } from '@/lib/lap-activities';
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -112,7 +113,7 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
         {!sharedUrl && !round.sharedUrl ? (
           <>
             <div className="space-y-3">
-              <div>
+              <div className="grid w-full max-w-sm items-center gap-3">
                 <Label htmlFor="description">Beschreibung (optional)</Label>
                 <Input
                   id="description"
@@ -120,6 +121,7 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={200}
+                  autoComplete="off"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   {description.length}/200 Zeichen
@@ -129,7 +131,7 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm font-medium">{round.teamName}</p>
                 <p className="text-xs text-muted-foreground">
-                  Zeit: {Math.floor(round.totalTime / 60000)}:{String(Math.floor((round.totalTime % 60000) / 1000)).padStart(2, '0')}.{String(Math.floor((round.totalTime % 1000) / 10)).padStart(2, '0')}
+                  Zeit: {formatTime(round.totalTime)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {round.completedAt.toLocaleDateString('de-DE')} um {round.completedAt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
