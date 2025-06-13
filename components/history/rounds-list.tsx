@@ -16,13 +16,15 @@ interface RoundsListProps {
   savedRounds: SavedRound[]
   teams: Team[]
   onDeleteRound: (roundId: string) => void
+  onShareRound?: (round: SavedRound) => void
 }
 
 export function RoundsList({
   filteredRounds,
   savedRounds,
   teams,
-  onDeleteRound
+  onDeleteRound,
+  onShareRound
 }: RoundsListProps) {
   const formatDayHeader = (date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
@@ -85,7 +87,7 @@ export function RoundsList({
                 {formatDayHeader(new Date(dateKey))}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {roundsForDay.length} {roundsForDay.length === 1 ? 'Runde' : 'Runden'}
+                {roundsForDay.length} {roundsForDay.length === 1 ? 'Durchgang' : 'Durchgänge'}
               </p>
             </div>
           </AccordionTrigger>
@@ -100,6 +102,7 @@ export function RoundsList({
                     comparison={previousComparison}
                     teams={teams}
                     onDeleteRound={onDeleteRound}
+                    onShareRound={onShareRound}
                   />
                 )
               })}

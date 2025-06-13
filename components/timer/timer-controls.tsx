@@ -68,7 +68,7 @@ export function TimerControls({
             <Share2 />
             Runde teilen
           </Button>
-          
+
           <Button
             onClick={onDiscardRound}
             variant="destructive"

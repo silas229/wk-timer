@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +23,26 @@ interface ShareDialogProps {
 export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialogProps) {
   const [description, setDescription] = useState('');
   const [isSharing, setIsSharing] = useState(false);
-  const [sharedUrl, setSharedUrl] = useState<string | null>(null);
+  const [sharedUrl, setSharedUrl] = useState<string | null>(round.sharedUrl || null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [canUseNativeShare, setCanUseNativeShare] = useState(false);
+
+  // Check if native sharing is supported
+  useEffect(() => {
+    setCanUseNativeShare(
+      typeof navigator !== 'undefined' &&
+      'share' in navigator &&
+      typeof navigator.share === 'function'
+    );
+  }, []);
+
+  // Initialize dialog state when round changes or dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setSharedUrl(round.sharedUrl || null);
+      setDescription(round.description || '');
+    }
+  }, [isOpen, round.sharedUrl, round.description]);
 
   const handleShare = async () => {
     setIsSharing(true);
@@ -41,14 +59,30 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
   };
 
   const handleCopyUrl = async () => {
-    if (sharedUrl) {
+    const urlToCopy = sharedUrl || round.sharedUrl;
+    if (urlToCopy) {
       try {
-        await navigator.clipboard.writeText(sharedUrl);
+        await navigator.clipboard.writeText(urlToCopy);
         setCopiedToClipboard(true);
         setTimeout(() => setCopiedToClipboard(false), 2000);
       } catch (error) {
         console.error('Error copying to clipboard:', error);
       }
+    }
+  };
+
+  const handleNativeShare = async () => {
+    const urlToShare = sharedUrl || round.sharedUrl;
+    if (!urlToShare || !canUseNativeShare) return;
+
+    try {
+      await navigator.share({
+        title: `Durchgang von ${round.teamName}`,
+        url: urlToShare,
+      });
+    } catch (error) {
+      // User cancelled or error occurred
+      console.log('Native share cancelled or failed:', error);
     }
   };
 
@@ -65,21 +99,24 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Runde teilen
+            {round.sharedUrl ? 'Geteilter Durchgang' : 'Durchgang teilen'}
           </DialogTitle>
           <DialogDescription>
-            Teilen Sie diese Runde mit anderen. Der Link wird öffentlich zugänglich sein.
+            {round.sharedUrl
+              ? 'Dieser Durchgang wurde bereits geteilt. Kopiere den Link und teile ihn mit anderen.'
+              : 'Teile diesen Durchgang mit anderen. Der Link wird öffentlich zugänglich sein.'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        {!sharedUrl ? (
+        {!sharedUrl && !round.sharedUrl ? (
           <>
             <div className="space-y-3">
               <div>
                 <Label htmlFor="description">Beschreibung (optional)</Label>
                 <Input
                   id="description"
-                  placeholder="Beschreiben Sie diese Runde..."
+                  placeholder="Beschreibe diesen Durchgang..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={200}
@@ -88,7 +125,7 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
                   {description.length}/200 Zeichen
                 </p>
               </div>
-              
+
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm font-medium">{round.teamName}</p>
                 <p className="text-xs text-muted-foreground">
@@ -112,16 +149,17 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
         ) : (
           <>
             <div className="space-y-3">
-              <div>
-                <Label>Geteilte Runde</Label>
-                <p className="text-sm text-muted-foreground">
-                  Ihre Runde wurde erfolgreich geteilt! Kopieren Sie den Link und teilen Sie ihn mit anderen.
-                </p>
-              </div>
+
+              {(round.description || description) && (
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-sm font-medium">Beschreibung:</p>
+                  <p className="text-sm">{round.description || description}</p>
+                </div>
+              )}
 
               <div className="flex items-center space-x-2">
                 <Input
-                  value={sharedUrl}
+                  value={sharedUrl || round.sharedUrl || ''}
                   readOnly
                   className="font-mono text-xs"
                 />
@@ -130,6 +168,7 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
                   variant="outline"
                   onClick={handleCopyUrl}
                   className="shrink-0"
+                  title="Link kopieren"
                 >
                   {copiedToClipboard ? (
                     <Check className="h-4 w-4 text-green-600" />
@@ -137,6 +176,19 @@ export function ShareDialog({ isOpen, onOpenChange, round, onShare }: ShareDialo
                     <Copy className="h-4 w-4" />
                   )}
                 </Button>
+
+                {/* Native Share Button - only show if supported */}
+                {canUseNativeShare && (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={handleNativeShare}
+                    className="shrink-0"
+                    title="Mit anderen Apps teilen"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
 
               {copiedToClipboard && (

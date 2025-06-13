@@ -40,7 +40,7 @@ export function RoundStatsHeader({
           )}
         </div>
         <p className="text-muted-foreground">
-          {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Runde' : 'Runden'}
+          {filteredRounds.length} gespeicherte {filteredRounds.length === 1 ? 'Durchgang' : 'Durchgänge'}
           {currentTeam && (
             <span> für {currentTeam.name}</span>
           )}

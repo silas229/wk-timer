@@ -56,7 +56,9 @@ describe("IndexedDB Manager", () => {
 
     it("should create a round with valid data", () => {
       expect(mockRound.id).toBeTruthy();
-      expect(mockRound.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      expect(mockRound.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
       expect(mockRound.teamId).toBe("team-1");
       expect(mockRound.totalTime).toBe(120000);
       expect(mockRound.laps).toHaveLength(2);

@@ -8,8 +8,8 @@ interface ActivityListProps {
 }
 
 export function ActivityList({ activities, comparison, layout = 'grid' }: ActivityListProps) {
-  const containerClass = layout === 'single-column' 
-    ? "space-y-2" 
+  const containerClass = layout === 'single-column'
+    ? "space-y-2"
     : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
 
   return (

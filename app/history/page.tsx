@@ -7,11 +7,14 @@ import { LoadingState } from "@/components/history/loading-state"
 import { RoundStatsHeader } from "@/components/history/round-stats-header"
 import { EmptyState } from "@/components/history/empty-state"
 import { RoundsList } from "@/components/history/rounds-list"
+import { ShareDialog } from "@/components/share-dialog"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [roundToShare, setRoundToShare] = useState<SavedRound | null>(null)
 
   const loadSavedRounds = useCallback(async () => {
     if (!isInitialized) return
@@ -61,10 +64,56 @@ export default function HistoryPage() {
     }
   }, [])
 
+  const handleShareRound = (round: SavedRound) => {
+    setRoundToShare(round)
+    setShareDialogOpen(true)
+  }
+
+  const handleShareSubmit = async (description: string): Promise<string | null> => {
+    if (!roundToShare) return null
+
+    try {
+      const response = await fetch('/api/share-round', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roundData: roundToShare,
+          description,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share round')
+      }
+
+      const result = await response.json()
+
+      // Update the round with share information
+      const updatedRound: SavedRound = {
+        ...roundToShare,
+        sharedUrl: result.sharedUrl,
+        description,
+      }
+
+      // Save the updated round to local storage
+      await indexedDB.saveRound(updatedRound)
+
+      // Update the local state
+      setSavedRounds(prevRounds =>
+        prevRounds.map(r => r.id === updatedRound.id ? updatedRound : r)
+      )
+
+      return result.sharedUrl
+    } catch (error) {
+      console.error('Error sharing round:', error)
+      return null
+    }
+  }
+
   // Filter rounds by selected team (only show current team's rounds)
   const filteredRounds = savedRounds.filter(round => round.teamId === selectedTeamId)
-
-
 
   return (
     <div className="flex items-start justify-center p-4">
@@ -93,9 +142,20 @@ export default function HistoryPage() {
                 savedRounds={savedRounds}
                 teams={teams}
                 onDeleteRound={deleteRound}
+                onShareRound={handleShareRound}
               />
             )}
           </>
+        )}
+
+        {/* Share Dialog */}
+        {roundToShare && (
+          <ShareDialog
+            isOpen={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
+            round={roundToShare}
+            onShare={handleShareSubmit}
+          />
         )}
       </div>
     </div>

@@ -163,7 +163,9 @@ describe("Round Data Structure", () => {
     };
 
     expect(mockRound.id).toBeTruthy();
-    expect(mockRound.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(mockRound.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
     expect(mockRound.completedAt).toBeInstanceOf(Date);
     expect(mockRound.totalTime).toBeGreaterThan(0);
     expect(mockRound.laps).toHaveLength(2);

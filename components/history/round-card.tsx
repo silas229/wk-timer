@@ -17,15 +17,23 @@ interface RoundCardProps {
   comparison: RoundComparison | null
   teams: Team[]
   onDeleteRound: (roundId: string) => void
+  onShareRound?: (round: SavedRound) => void
 }
 
 export function RoundCard({
   round,
   comparison,
   teams,
-  onDeleteRound
+  onDeleteRound,
+  onShareRound
 }: RoundCardProps) {
   const activities = calculateActivityTimes(round.laps)
+
+  const handleShareRound = () => {
+    if (onShareRound) {
+      onShareRound(round)
+    }
+  }
 
   const getTeamColor = (teamId: string) => {
     const team = teams.find(t => t.id === teamId)
@@ -64,16 +72,31 @@ export function RoundCard({
                 <span>Geteilt</span>
               </div>
             )}
+          </div>          <div className="flex gap-2">
+            <Button
+              onClick={() => onDeleteRound(round.id)}
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Runde löschen</span>
+            </Button>
+
+            {/* Share Button - always show if onShareRound is provided */}
+            {onShareRound && (
+              <Button
+                onClick={handleShareRound}
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-primary"
+                title={round.sharedUrl ? "Geteilten Link anzeigen" : "Runde teilen"}
+              >
+                <Share2 className="h-4 w-4" />
+                <span className="sr-only">{round.sharedUrl ? "Geteilten Link anzeigen" : "Runde teilen"}</span>
+              </Button>
+            )}
           </div>
-          <Button
-            onClick={() => onDeleteRound(round.id)}
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Runde löschen</span>
-          </Button>
         </div>
       </CardHeader>
       <CardContent>

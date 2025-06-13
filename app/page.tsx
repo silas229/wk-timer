@@ -220,7 +220,7 @@ export default function Page() {
       }
 
       const result = await response.json()
-      
+
       // Update the round with share information
       const updatedRound: SavedRound = {
         ...lastSavedRound,
