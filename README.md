@@ -29,6 +29,15 @@ A web-based timer application built with modern technologies for precise time tr
 - **Round History**: Complete history of all timed sessions
 - **Data Integrity**: Transaction-safe operations with error handling
 
+### 🔗 **Sharing & Embedding**
+
+- **Round Sharing**: Share completed rounds with unique URLs
+- **Custom Descriptions**: Add descriptions to shared rounds for context
+- **Copy & Native Share**: Copy links or use native OS share dialog
+- **oEmbed Support**: Rich embeds in social media and platforms
+- **Embed Pages**: Dedicated embed URLs for iframe integration
+- **Social Metadata**: Open Graph and Twitter Card support for rich previews
+
 ### 🎨 **User Experience**
 
 - **Dark/Light Mode**: System-aware theme switching

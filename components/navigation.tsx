@@ -53,7 +53,7 @@ export function Navigation() {
                       style={{ backgroundColor: currentTeam.color }}
                     />
                   )}
-                  <span>{currentTeam?.name || "Select Team"}</span>
+                  <span>{currentTeam?.name || "Gruppe auswählen"}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

@@ -108,7 +108,7 @@ describe('Team Context Functionality', () => {
             onClick={() => setSelectedTeamId('team-1')}
             data-testid="select-team"
           >
-            Select Team
+            Gruppe auswählen
           </button>
           <div data-testid="selected-team">{selectedTeamId}</div>
           <div data-testid="current-team-name">{getCurrentTeam()?.name || 'none'}</div>
