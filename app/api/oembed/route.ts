@@ -69,11 +69,6 @@ export async function GET(request: NextRequest) {
       thumbnail_height: 512,
     };
 
-    // Add description if available
-    if (roundData.description) {
-      oembedResponse.title = roundData.description;
-    }
-
     return NextResponse.json(oembedResponse, {
       headers: {
         ...corsHeaders,
