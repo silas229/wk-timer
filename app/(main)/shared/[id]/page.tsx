@@ -21,11 +21,11 @@ interface PageProps {
   };
 }
 
-const base_url = process.env.BASE_URL || 'http://localhost:3000';
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 // Fetch shared round data on the server
 async function fetchSharedRound(id: string): Promise<SharedRoundData | null> {
   try {
-    const response = await fetch(`${base_url}/api/share-round?id=${id}`, {
+    const response = await fetch(`${baseUrl}/api/share-round?id=${id}`, {
       cache: 'no-store' // Always fetch fresh data
     });
 
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${roundData.teamName} - Geteilter Durchgang | Wettkämpfe Timer`;
   const description = roundData.description ?? `Geteilter Durchgang von ${roundData.teamName}`;
-  const url = `${base_url}/shared/${params.id}`;
+  const url = `${baseUrl}/shared/${params.id}`;
 
   return {
     title,
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       types: {
-        'application/json+oembed': `${base_url}/api/oembed?url=${encodeURIComponent(url)}&format=json`,
+        'application/json+oembed': `${baseUrl}/api/oembed?url=${encodeURIComponent(url)}&format=json`,
       },
     },
   };
