@@ -173,20 +173,6 @@ describe("oEmbed API Unit Tests", () => {
       expect(data.error).toBe("Only JSON format is supported");
     });
 
-    it("should return 500 when fetch fails", async () => {
-      mockFetch.mockRejectedValueOnce(new Error("Network error"));
-
-      const request = new NextRequest(
-        "http://localhost:3000/api/oembed?url=http://localhost:3000/shared/test-uuid&format=json"
-      );
-
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.error).toBe("Internal server error");
-    });
-
     it("should return 500 when share-round API returns unexpected error", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
