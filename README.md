@@ -126,6 +126,35 @@ npm run dev
 
 The application will be available at `http://localhost:3000`
 
+### Environment Variables
+
+The application uses environment variables for configuration. Copy the example file and customize as needed:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+```
+
+Available environment variables:
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `BASE_URL` | Base URL for sharing and embed features | `http://localhost:3000` | No |
+| `PORT` | Port for the development server | `3000` | No |
+| `ROUNDS_STORAGE_DIR` | Directory for storing shared rounds | `./data/rounds` | No |
+
+#### Production Configuration
+
+For production deployment, ensure to set:
+
+```bash
+# Production example
+BASE_URL=https://your-domain.com
+ROUNDS_STORAGE_DIR=./data/rounds
+```
+
+**Note**: The `.env` file is already included in `.gitignore` to prevent committing sensitive data.
+
 ### PWA Installation
 
 Once the app is running, you can install it as a Progressive Web App:
