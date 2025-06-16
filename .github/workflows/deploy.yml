@@ -55,3 +55,27 @@ jobs:
       - name: Deploy on server
         run: |
           ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "cd ${{ vars.SERVER_PATH }} && git pull && npm install --save && supervisorctl restart wk-timer"
+
+      - name: Wait for application to start
+        run: sleep 10
+
+      - name: Verify supervisor status
+        run: |
+          status_output=$(ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "supervisorctl status wk-timer")
+          echo "$status_output"
+          if echo "$status_output" | grep -q "RUNNING"; then
+            echo "✅ wk-timer is running"
+          else
+            echo "❌ wk-timer is not running"
+            exit 1
+          fi
+
+      - name: Test application accessibility
+        run: |
+          response_code=$(curl -s -o /dev/null -w "%{http_code}" https://wk-timer.us.silas229.name)
+          if [ "$response_code" -eq 200 ]; then
+            echo "✅ Application is accessible and returned HTTP 200"
+          else
+            echo "❌ Application returned HTTP $response_code"
+            exit 1
+          fi
