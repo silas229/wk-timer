@@ -10,7 +10,7 @@ export interface SharedRoundData {
   }>;
   teamName: string;
   description?: string;
-  // A-Teil (Knoten)
+  // A-Teil (Löschangriff)
   aPartErrorPoints?: number; // Fehlerpunkte A-Teil
   knotTime?: number; // Knotenzeit in Sekunden
   aPartPenaltySeconds?: number; // Strafsekunden bei Zeitüberschreitung A-Teil

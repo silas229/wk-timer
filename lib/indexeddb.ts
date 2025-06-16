@@ -21,7 +21,7 @@ export interface SavedRound {
   teamName: string;
   sharedUrl?: string; // URL for shared round
   description?: string; // User description for shared round
-  // A-Teil (Knoten)
+  // A-Teil (Löschangriff)
   aPartErrorPoints?: number; // Fehlerpunkte A-Teil
   knotTime?: number; // Knotenzeit in Sekunden
   aPartPenaltySeconds?: number; // Strafsekunden bei Zeitüberschreitung A-Teil

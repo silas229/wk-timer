@@ -6,7 +6,7 @@ export interface ScoringParameters {
   // Team-Daten
   teamAverageAge?: number;
 
-  // A-Teil (Knoten)
+  // A-Teil (Löschangriff)
   aPartErrorPoints?: number;
   knotTime?: number; // in Sekunden
   aPartPenaltySeconds?: number; // Strafsekunden bei Zeitüberschreitung
@@ -45,7 +45,7 @@ export interface ScoringResult {
 }
 
 /**
- * Berechnet die Punkte für den A-Teil (Knoten)
+ * Berechnet die Punkte für den A-Teil (Löschangriff)
  *
  * Regeln:
  * - Start bei 1000 Punkten
@@ -130,7 +130,7 @@ export function calculateBPartPoints(params: {
   }
 
   const basePoints = 400;
-  const targetTime = calculateTargetTimeMs(teamAverageAge)!;
+  const targetTime = calculateTargetTimeMs(teamAverageAge)! / 1000; // Umwandlung in Sekunden
   const timeDifference = bPartTime - targetTime;
   const timePoints = -timeDifference; // Negative Differenz = Bonus, positive = Abzug
   const errorPointsDeduction = bPartErrorPoints;

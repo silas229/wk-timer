@@ -122,14 +122,25 @@ export function RoundDetailsDialog({
 
     setIsSharing(true)
     try {
-      await onShareRound(round, description)
+      // Create updated round data with current dialog values
+      const updatedRound: SavedRound = {
+        ...round,
+        description: description.trim() || undefined,
+        aPartErrorPoints: aPartErrorPoints ? parseFloat(aPartErrorPoints) : undefined,
+        knotTime: knotTime ? parseFloat(knotTime) : undefined,
+        aPartPenaltySeconds: aPartPenaltySeconds ? parseFloat(aPartPenaltySeconds) : undefined,
+        bPartErrorPoints: bPartErrorPoints ? parseFloat(bPartErrorPoints) : undefined,
+        overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
+      }
+
+      await onShareRound(updatedRound, description)
       // Link wird automatisch über round.sharedUrl angezeigt
     } catch (error) {
       console.error('Error sharing round:', error)
     } finally {
       setIsSharing(false)
     }
-  }, [round, hasUnsavedChanges, handleSave, onShareRound, description])
+  }, [round, hasUnsavedChanges, handleSave, onShareRound, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression])
 
   const handleCopyUrl = useCallback(async () => {
     const urlToCopy = round?.sharedUrl
@@ -179,6 +190,7 @@ export function RoundDetailsDialog({
   const isShared = !!round.sharedUrl
   const canEdit = !isShared
 
+  const targetTime = calculateTargetTimeMs(teamAverageAge)!
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -220,9 +232,9 @@ export function RoundDetailsDialog({
             />
           </div>
 
-          {/* A-Teil (Knoten) */}
+          {/* A-Teil (Löschangriff) */}
           <div className="space-y-4">
-            <h3 className="font-semibold">A-Teil (Knoten)</h3>
+            <h3 className="font-semibold">A-Teil (Löschangriff)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ErrorPointsInput
                 id="aPartErrorPoints"
@@ -270,12 +282,12 @@ export function RoundDetailsDialog({
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Sollzeit:</span> {formatTime(calculateTargetTimeMs(teamAverageAge)!)}
+                    <span className="font-medium">Sollzeit:</span> {formatTime(targetTime)}
                   </div>
                   <div>
                     <span className="font-medium">Ist-Zeit:</span> {formatTime(round.totalTime)}
-                    <span className={`ml-2 ${round.totalTime <= calculateTargetTimeMs(teamAverageAge)! ? 'text-green-600' : 'text-red-600'}`}>
-                      ({round.totalTime <= calculateTargetTimeMs(teamAverageAge)! ? '-' : '+'}{Math.abs(Math.round((round.totalTime - calculateTargetTimeMs(teamAverageAge)!) / 1000))}s)
+                    <span className={`ml-2 ${round.totalTime <= targetTime ? 'text-green-600' : 'text-red-600'}`}>
+                      ({formatTime(round.totalTime - targetTime, "diff-seconds")}s)
                     </span>
                   </div>
                 </div>

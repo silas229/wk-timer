@@ -14,7 +14,7 @@ interface SharedRoundData {
   }>;
   teamName: string;
   description?: string;
-  // A-Teil (Knoten)
+  // A-Teil (Löschangriff)
   aPartErrorPoints?: number;
   knotTime?: number;
   aPartPenaltySeconds?: number;
@@ -67,7 +67,6 @@ export function SharedRoundCard({ roundData, activities }: SharedRoundCardProps)
                 {roundData.teamName} • {completedAt.toLocaleDateString('de-DE')}
               </CardTitle>
             </div>
-            <span className="font-mono text-xl font-bold">{formatTime(roundData.totalTime, 'full')}</span>
             {roundData.description && (
               <p className="text-sm mt-2 p-2 bg-muted rounded">
                 {roundData.description}
@@ -77,98 +76,99 @@ export function SharedRoundCard({ roundData, activities }: SharedRoundCardProps)
         </div>
       </CardHeader>
       <CardContent>
-        {/* Scoring Results */}
+        {/* Gesamtpunktzahl ganz oben groß */}
         {scoringResult && scoringResult.canCalculate && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">Punkteberechnung</h3>
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <div className="font-medium">A-Teil (Knoten)</div>
-                <div className="text-lg font-mono">{formatPoints(scoringResult.aPartPoints)} Punkte</div>
-              </div>
-              <div>
-                <div className="font-medium">B-Teil (Staffellauf)</div>
-                <div className="text-lg font-mono">{formatPoints(scoringResult.bPartPoints)} Punkte</div>
-              </div>
-              <div>
-                <div className="font-medium">Gesamt</div>
-                <div className="text-xl font-mono font-bold text-green-700">
-                  {formatPoints(scoringResult.totalPoints)} Punkte
+          <div className="mb-6 text-center">
+            <div className="text-4xl font-bold text-green-700 mb-2">
+              {formatPoints(scoringResult.totalPoints)} Punkte
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Gesamtpunktzahl
+            </div>
+          </div>
+        )}
+
+        {/* A-Teil (Löschangriff) */}
+        {canCalculateScore && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">A-Teil (Löschangriff)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {roundData.knotTime !== undefined && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Knotenzeit</div>
+                  <div className="text-lg font-mono">{roundData.knotTime}s</div>
                 </div>
+              )}
+              {roundData.aPartErrorPoints !== undefined && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Fehlerpunkte</div>
+                  <div className="text-lg font-mono">{roundData.aPartErrorPoints}</div>
+                </div>
+              )}
+              {roundData.aPartPenaltySeconds !== undefined && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Strafsekunden</div>
+                  <div className="text-lg font-mono">{roundData.aPartPenaltySeconds}s</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* B-Teil (Staffellauf) */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-3">B-Teil (Staffellauf)</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div className="col-span-2">
+              <div className="text-sm font-medium text-muted-foreground">Laufzeit</div>
+              <div>
+                <span className="text-lg font-mono font-bold">
+                  {formatTime(roundData.totalTime, 'full')}
+                </span>
+                {roundData.teamAverageAge && targetTime && (
+                  <span className={`ml-1 ${roundData.totalTime <= targetTime ? 'text-green-600' : 'text-red-600'}`}>
+                    ({Math.floor(Math.abs(roundData.totalTime - targetTime) / 1000)}s {roundData.totalTime <= targetTime ? 'unter' : 'über'} Sollzeit)
+                  </span>
+                )}
               </div>
             </div>
-
-            {/* Additional scoring details */}
-            {roundData.teamAverageAge && (
-              <div className="mt-3 pt-3 border-t border-green-200">
-                <div className="grid grid-cols-2 gap-4 text-xs text-green-700">
-                  <div>
-                    <span className="font-medium">Durchschnittsalter:</span> {roundData.teamAverageAge} Jahre
-                  </div>
-                  {scoringResult.breakdown.bPart && (
-                    <div>
-                      <span className="font-medium">Sollzeit B-Teil:</span> {formatTime(scoringResult.breakdown.bPart.targetTime)}
-                      <span className={`ml-2 ${roundData.totalTime <= scoringResult.breakdown.bPart.targetTime ? 'text-green-600' : 'text-red-600'}`}>
-                        ({roundData.totalTime <= scoringResult.breakdown.bPart.targetTime ? '-' : '+'}{Math.abs(roundData.totalTime - scoringResult.breakdown.bPart.targetTime)}s)
-                      </span>
-                    </div>
-                  )}
-                </div>
+            {roundData.bPartErrorPoints !== undefined && (
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">Fehlerpunkte</div>
+                <div className="text-lg font-mono">{roundData.bPartErrorPoints}</div>
               </div>
             )}
           </div>
-        )}
 
-        {/* Target time display even without full scoring */}
-        {!scoringResult?.canCalculate && roundData.teamAverageAge && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <h4 className="font-medium text-blue-800 mb-2">Zeitvergleich</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm text-blue-700">
-              <div>
-                <span className="font-medium">Sollzeit B-Teil:</span> {formatTime(targetTime!)}
-              </div>
-              <div>
-                <span className="font-medium">Ist-Zeit:</span> {formatTime(roundData.totalTime)}
-                <span className={`ml-2 ${roundData.totalTime <= targetTime! ? 'text-green-600' : 'text-red-600'}`}>
-                  ({roundData.totalTime <= targetTime! ? '-' : '+'}{Math.abs(roundData.totalTime - targetTime!)}s)
-                </span>
-              </div>
-            </div>
+          {/* Activity List als Teil des B-Teils */}
+          <div className="mt-4">
+            <h4 className="text-md font-medium mb-2">Rundenzeiten</h4>
+            <ActivityList
+              activities={activities}
+              comparison={null}
+              layout="single-column"
+            />
           </div>
-        )}
+        </div>
 
-        {/* Scoring parameters if available but incomplete */}
-        {!canCalculateScore && (roundData.aPartErrorPoints !== undefined || roundData.bPartErrorPoints !== undefined) && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <h4 className="font-medium text-yellow-800 mb-2">Verfügbare Parameter</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm text-yellow-700">
-              {roundData.aPartErrorPoints !== undefined && (
-                <div>Fehlerpunkte A-Teil: {roundData.aPartErrorPoints}</div>
-              )}
-              {roundData.knotTime !== undefined && (
-                <div>Knotenzeit: {formatTime(roundData.knotTime)}</div>
-              )}
-              {roundData.aPartPenaltySeconds !== undefined && (
-                <div>Strafsekunden A-Teil: {roundData.aPartPenaltySeconds}s</div>
-              )}
-              {roundData.bPartErrorPoints !== undefined && (
-                <div>Fehlerpunkte B-Teil: {roundData.bPartErrorPoints}</div>
-              )}
+        {/* Gesamteindruck und weitere Details */}
+        {(roundData.overallImpression !== undefined || roundData.teamAverageAge !== undefined) && (
+          <div className="mb-4">
+            <h4 className="font-medium mb-2">Zusätzliche Informationen</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               {roundData.overallImpression !== undefined && (
-                <div>Gesamteindruck: {roundData.overallImpression}</div>
+                <div>
+                  <span className="font-medium">Gesamteindruck:</span> {roundData.overallImpression}
+                </div>
               )}
               {roundData.teamAverageAge !== undefined && (
-                <div>Durchschnittsalter: {roundData.teamAverageAge} Jahre</div>
+                <div>
+                  <span className="font-medium">Durchschnittsalter:</span> {roundData.teamAverageAge} Jahre
+                </div>
               )}
             </div>
           </div>
         )}
-
-        <ActivityList
-          activities={activities}
-          comparison={null}
-          layout="single-column"
-        />
       </CardContent>
     </Card>
   );

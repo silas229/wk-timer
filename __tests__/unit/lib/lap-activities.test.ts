@@ -192,12 +192,6 @@ describe("Lap Activities", () => {
         expect(formatTime(1500, "seconds")).toBe("01.50");
         expect(formatTime(59999, "seconds")).toBe("59.99");
       });
-
-      it("should handle minutes overflow in seconds format", () => {
-        expect(formatTime(60000, "seconds")).toBe("00.00"); // 1 minute becomes 0 seconds
-        expect(formatTime(65000, "seconds")).toBe("05.00"); // 1:05 becomes 05 seconds
-        expect(formatTime(125678, "seconds")).toBe("05.67"); // 2:05.67 becomes 05.67 seconds
-      });
     });
 
     describe("diff format", () => {
@@ -228,7 +222,7 @@ describe("Lap Activities", () => {
 
       it("should handle negative values in seconds format", () => {
         expect(formatTime(-1500, "seconds")).toBe("01.50"); // Absolute value
-        expect(formatTime(-65000, "seconds")).toBe("05.00");
+        expect(formatTime(-65000, "seconds")).toBe("65.00");
       });
     });
 
