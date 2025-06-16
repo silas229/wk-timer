@@ -30,16 +30,15 @@ describe("Scoring System", () => {
         knotTime: 30,
         aPartPenaltySeconds: 10,
         aPartErrorPoints: 5,
-        overallImpression: 2.5,
       });
 
-      expect(result.points).toBe(952.5); // 1000 - 30 - 10 - 5 - 2.5
+      expect(result.points).toBe(955); // 1000 - 30 - 10 - 5
       expect(result.breakdown).toEqual({
         basePoints: 1000,
         knotTimeDeduction: 30,
         penaltyDeduction: 10,
         errorPointsDeduction: 5,
-        finalPoints: 952.5,
+        finalPoints: 955,
       });
     });
 
@@ -58,7 +57,6 @@ describe("Scoring System", () => {
         knotTime: 500,
         aPartPenaltySeconds: 500,
         aPartErrorPoints: 500,
-        overallImpression: 500,
       });
 
       expect(result.points).toBe(0);
@@ -72,10 +70,9 @@ describe("Scoring System", () => {
         bPartTime: 180, // 3 minutes
         teamAverageAge: 12, // Sollzeit: 210 - (12 * 5) = 150s
         bPartErrorPoints: 5,
-        overallImpression: 1.5,
       });
 
-      expect(result.points).toBe(363.5); // 400 + (150-180) - 5 - 1.5 = 400 - 30 - 6.5
+      expect(result.points).toBe(365); // 400 + (150-180) - 5
       expect(result.breakdown?.targetTime).toBe(150);
       expect(result.breakdown?.timeDifference).toBe(30); // über Sollzeit
       expect(result.breakdown?.timePoints).toBe(-30); // Abzug
@@ -86,10 +83,9 @@ describe("Scoring System", () => {
         bPartTime: 220, // über Sollzeit
         teamAverageAge: 12, // Sollzeit: 210 - (12 * 5) = 150s
         bPartErrorPoints: 0,
-        overallImpression: 1.0,
       });
 
-      expect(result.points).toBe(329); // 400 - 70 - 0 - 1 = 329
+      expect(result.points).toBe(330); // 400 - 70 - 0
       expect(result.breakdown?.timeDifference).toBe(70); // über Sollzeit
       expect(result.breakdown?.timePoints).toBe(-70); // Abzug
     });
@@ -113,13 +109,13 @@ describe("Scoring System", () => {
         aPartPenaltySeconds: 0,
         bPartTime: 190,
         bPartErrorPoints: 3,
-        overallImpression: 1.0, // Gemeinsamer Gesamteindruck für beide Teile
+        overallImpression: 1.0, // Gesamteindruck für beide Teile
       });
 
       expect(result.canCalculate).toBe(true);
-      expect(result.aPartPoints).toBe(964); // 1000 - 30 - 0 - 5 - 1
-      expect(result.bPartPoints).toBe(356); // 400 - 40 - 3 - 1 (190 vs 150 Sollzeit)
-      expect(result.totalPoints).toBe(1320);
+      expect(result.aPartPoints).toBe(965); // 1000 - 30 - 0 - 5
+      expect(result.bPartPoints).toBe(357); // 400 - 40 - 3 (ohne Gesamteindruck, 190 vs 150 Sollzeit)
+      expect(result.totalPoints).toBe(1321); // 965 + 357 - 1 = 1321
     });
 
     it("should not calculate when parameters are missing", () => {
@@ -151,22 +147,22 @@ describe("Scoring System", () => {
         // B-Teil
         bPartTime,
         bPartErrorPoints: 15,
-        // Gemeinsamer Gesamteindruck
+        // Gesamteindruck
         overallImpression: 1.0,
       });
 
       expect(result.canCalculate).toBe(true);
 
-      // A-Teil: 1000 - 10 (Knotenzeit) - 0 (Strafsekunden) - 15 (Fehlerpunkte) - 1 (Gesamteindruck) = 974
-      expect(result.aPartPoints).toBe(974);
+      // A-Teil: 1000 - 10 (Knotenzeit) - 0 (Strafsekunden) - 15 (Fehlerpunkte) = 975
+      expect(result.aPartPoints).toBe(975);
 
       // B-Teil: Sollzeit = 210 - (10 * 5) = 160s
       // Ist-Zeit: 135s → 25s unter Sollzeit = +25 Bonuspunkte
-      // 400 + 25 - 15 (Fehlerpunkte) - 1 (Gesamteindruck) = 409
-      expect(result.bPartPoints).toBe(409);
+      // 400 + 25 - 15 (Fehlerpunkte) = 410
+      expect(result.bPartPoints).toBe(410);
 
-      // Gesamtpunkte: 974 + 409 = 1383
-      expect(result.totalPoints).toBe(1383);
+      // Gesamtpunkte: 975 + 410 - 1 (Gesamteindruck) = 1384
+      expect(result.totalPoints).toBe(1384);
 
       // Breakdown-Prüfung
       expect(result.breakdown.aPart?.knotTimeDeduction).toBe(10);
@@ -176,35 +172,32 @@ describe("Scoring System", () => {
       expect(result.breakdown.bPart?.timePoints).toBe(25); // Bonuspunkte
     });
 
-    it("should calculate specific test case: Durchschnittsalter 13, B-Teil 2:25, 15 Fehler B-Teil, 13s Knoten, Gesamteindruck 1, erwartete Gesamtpunktzahl 1371", () => {
-      // Hinweis: Der ursprünglich erwartete Wert von 1371 erfordert zusätzliche A-Teil Fehlerpunkte
-      // um das gewünschte Ergebnis zu erreichen. Dieser Test zeigt die tatsächliche Berechnung.
-
+    it("Durchschnittsalter 13, B-Teil 2:25, 15 FP B-Teil, 13s Knoten, GE 1", () => {
       const result = calculateTotalScore({
         teamAverageAge: 13,
         // A-Teil
-        aPartErrorPoints: 0, // nicht angegeben, daher 0
+        aPartErrorPoints: 0,
         knotTime: 13,
-        aPartPenaltySeconds: 0, // nicht angegeben, daher 0
+        aPartPenaltySeconds: 0,
         // B-Teil: 2:25 = 145 Sekunden
         bPartTime: 145,
         bPartErrorPoints: 15,
-        // Gemeinsamer Gesamteindruck
+        // Gesamteindruck
         overallImpression: 1.0,
       });
 
       expect(result.canCalculate).toBe(true);
 
-      // A-Teil: 1000 - 13 (Knotenzeit) - 0 (Strafsekunden) - 0 (Fehlerpunkte) - 1 (Gesamteindruck) = 986
-      expect(result.aPartPoints).toBe(986);
+      // A-Teil: 1000 - 13 (Knotenzeit) - 0 (Strafsekunden) - 0 (Fehlerpunkte) = 987
+      expect(result.aPartPoints).toBe(987);
 
       // B-Teil: Sollzeit = 210 - (13 * 5) = 145s
       // Ist-Zeit: 145s → genau Sollzeit = 0 Zeitpunkte
-      // 400 + 0 - 15 (Fehlerpunkte) - 1 (Gesamteindruck) = 384
-      expect(result.bPartPoints).toBe(384);
+      // 400 + 0 - 15 (Fehlerpunkte) = 385
+      expect(result.bPartPoints).toBe(385);
 
-      // Gesamtpunkte: 986 + 384 = 1370 (nahe ursprünglich erwartetem Wert von 1371)
-      expect(result.totalPoints).toBe(1370);
+      // Gesamtpunkte: 987 + 385 - 1 (Gesamteindruck) = 1371
+      expect(result.totalPoints).toBe(1371);
 
       // Breakdown-Prüfung
       expect(result.breakdown.bPart?.targetTime).toBe(145);
@@ -213,13 +206,6 @@ describe("Scoring System", () => {
     });
 
     it("should calculate adjusted test case to reach expected 1371 points", () => {
-      // Rückrechnung: Wenn Gesamtpunktzahl 1371 sein soll bei den gegebenen Parametern
-      // B-Teil bleibt gleich: 384 Punkte (neue Sollzeit-Berechnung)
-      // A-Teil muss: 1371 - 384 = 987 Punkte ergeben
-      // 1000 - 13 (Knoten) - 0 (Strafsekunden) - A_Fehler - 1 (Gesamteindruck) = 987
-      // A_Fehler = 1000 - 13 - 0 - 1 - 987 = -1 (nicht möglich)
-      // Daher: Mit A-Teil Fehlerpunkte 0 ist das Ergebnis 1370, sehr nahe an 1371
-
       const result = calculateTotalScore({
         teamAverageAge: 13,
         // A-Teil - minimale Fehlerpunkte für bestmögliches Ergebnis
@@ -229,14 +215,14 @@ describe("Scoring System", () => {
         // B-Teil: 2:25 = 145 Sekunden
         bPartTime: 145,
         bPartErrorPoints: 15,
-        // Gemeinsamer Gesamteindruck
+        // Gesamteindruck
         overallImpression: 1.0,
       });
 
       expect(result.canCalculate).toBe(true);
-      expect(result.aPartPoints).toBe(986);
-      expect(result.bPartPoints).toBe(384);
-      expect(result.totalPoints).toBe(1370); // Bestmöglicher Wert bei neuer Sollzeit-Berechnung
+      expect(result.aPartPoints).toBe(987); // 1000 - 13
+      expect(result.bPartPoints).toBe(385); // 400 - 15
+      expect(result.totalPoints).toBe(1371); // 987 + 385 - 1 = 1371
     });
   });
 
@@ -260,14 +246,14 @@ describe("Scoring System", () => {
         // B-Teil: Schneller Staffellauf
         bPartTime: 175, // 35s über Sollzeit
         bPartErrorPoints: 1,
-        // Gemeinsamer Gesamteindruck
+        // Gesamteindruck
         overallImpression: 1.0,
       });
 
       expect(result.canCalculate).toBe(true);
-      expect(result.aPartPoints).toBe(972); // 1000 - 25 - 0 - 2 - 1
-      expect(result.bPartPoints).toBe(363); // 400 - 35 - 1 - 1
-      expect(result.totalPoints).toBe(1335);
+      expect(result.aPartPoints).toBe(973); // 1000 - 25 - 0 - 2
+      expect(result.bPartPoints).toBe(364); // 400 - 35 - 1
+      expect(result.totalPoints).toBe(1336); // 973 + 364 - 1 = 1336
     });
 
     it("should handle a scenario with penalties", () => {
@@ -281,14 +267,14 @@ describe("Scoring System", () => {
         // B-Teil: Langsamer Staffellauf mit Fehlern
         bPartTime: 200, // 65s über Sollzeit
         bPartErrorPoints: 8,
-        // Gemeinsamer Gesamteindruck (höher wegen Fehlern)
+        // Gesamteindruck (höher wegen Fehlern)
         overallImpression: 2.5,
       });
 
       expect(result.canCalculate).toBe(true);
-      expect(result.aPartPoints).toBe(912.5); // 1000 - 45 - 30 - 10 - 2.5
-      expect(result.bPartPoints).toBe(324.5); // 400 - 65 - 8 - 2.5
-      expect(result.totalPoints).toBe(1237);
+      expect(result.aPartPoints).toBe(915); // 1000 - 45 - 30 - 10
+      expect(result.bPartPoints).toBe(327); // 400 - 65 - 8
+      expect(result.totalPoints).toBe(1239.5); // 915 + 327 - 2.5 = 1239.5
     });
   });
 });

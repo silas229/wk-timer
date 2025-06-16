@@ -59,17 +59,14 @@ export function calculateAPartPoints(params: {
   knotTime?: number;
   aPartPenaltySeconds?: number;
   aPartErrorPoints?: number;
-  overallImpression?: number;
 }): { points: number | null; breakdown: ScoringResult["breakdown"]["aPart"] } {
-  const { knotTime, aPartPenaltySeconds, aPartErrorPoints, overallImpression } =
-    params;
+  const { knotTime, aPartPenaltySeconds, aPartErrorPoints } = params;
 
   // Alle Parameter müssen gesetzt sein für eine Berechnung
   if (
     knotTime === undefined ||
     aPartPenaltySeconds === undefined ||
-    aPartErrorPoints === undefined ||
-    overallImpression === undefined
+    aPartErrorPoints === undefined
   ) {
     return { points: null, breakdown: undefined };
   }
@@ -78,14 +75,9 @@ export function calculateAPartPoints(params: {
   const knotTimeDeduction = knotTime;
   const penaltyDeduction = aPartPenaltySeconds;
   const errorPointsDeduction = aPartErrorPoints;
-  const overallImpressionDeduction = overallImpression;
 
   const finalPoints =
-    basePoints -
-    knotTimeDeduction -
-    penaltyDeduction -
-    errorPointsDeduction -
-    overallImpressionDeduction;
+    basePoints - knotTimeDeduction - penaltyDeduction - errorPointsDeduction;
 
   return {
     points: Math.max(0, finalPoints), // Mindestens 0 Punkte
@@ -115,17 +107,11 @@ export function calculateBPartPoints(params: {
   bPartTime: number;
   teamAverageAge?: number;
   bPartErrorPoints?: number;
-  overallImpression?: number;
 }): { points: number | null; breakdown: ScoringResult["breakdown"]["bPart"] } {
-  const { bPartTime, teamAverageAge, bPartErrorPoints, overallImpression } =
-    params;
+  const { bPartTime, teamAverageAge, bPartErrorPoints } = params;
 
   // Alle Parameter müssen gesetzt sein für eine Berechnung
-  if (
-    teamAverageAge === undefined ||
-    bPartErrorPoints === undefined ||
-    overallImpression === undefined
-  ) {
+  if (teamAverageAge === undefined || bPartErrorPoints === undefined) {
     return { points: null, breakdown: undefined };
   }
 
@@ -134,10 +120,8 @@ export function calculateBPartPoints(params: {
   const timeDifference = bPartTime - targetTime;
   const timePoints = -timeDifference; // Negative Differenz = Bonus, positive = Abzug
   const errorPointsDeduction = bPartErrorPoints;
-  const overallImpressionDeduction = overallImpression;
 
-  const finalPoints =
-    basePoints + timePoints - errorPointsDeduction - overallImpressionDeduction;
+  const finalPoints = basePoints + timePoints - errorPointsDeduction;
 
   return {
     points: Math.max(0, finalPoints), // Mindestens 0 Punkte
@@ -160,20 +144,20 @@ export function calculateTotalScore(params: ScoringParameters): ScoringResult {
     knotTime: params.knotTime,
     aPartPenaltySeconds: params.aPartPenaltySeconds,
     aPartErrorPoints: params.aPartErrorPoints,
-    overallImpression: params.overallImpression,
   });
 
   const bPartResult = calculateBPartPoints({
     bPartTime: params.bPartTime,
     teamAverageAge: params.teamAverageAge,
     bPartErrorPoints: params.bPartErrorPoints,
-    overallImpression: params.overallImpression,
   });
 
   const canCalculate =
     aPartResult.points !== null && bPartResult.points !== null;
   const totalPoints = canCalculate
-    ? aPartResult.points! + bPartResult.points!
+    ? aPartResult.points! +
+      bPartResult.points! -
+      (params.overallImpression || 0)
     : null;
 
   return {
