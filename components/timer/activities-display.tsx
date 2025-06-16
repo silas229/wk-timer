@@ -49,7 +49,11 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
         <CardContent>
           <div
             ref={ref}
-            className="space-y-2 h-64 overflow-y-auto"
+            className={`space-y-2 transition-all duration-700 ease-in-out ${
+              state === "finished" 
+                ? "max-h-[2000px] overflow-y-visible" // Large height, no scroll when finished
+                : "h-64 max-h-64 overflow-y-auto" // Fixed height with scroll during round
+            }`}
           >
             {activities.length === 0 && state === "stopped" ? (
               <p className="text-center text-muted-foreground py-8">
