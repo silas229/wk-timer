@@ -10,6 +10,16 @@ export interface SharedRoundData {
   }>;
   teamName: string;
   description?: string;
+  // A-Teil (Knoten)
+  aPartErrorPoints?: number; // Fehlerpunkte A-Teil
+  knotTime?: number; // Knotenzeit in Sekunden
+  aPartPenaltySeconds?: number; // Strafsekunden bei Zeitüberschreitung A-Teil
+  // B-Teil (Staffellauf)
+  bPartErrorPoints?: number; // Fehlerpunkte B-Teil
+  // Gemeinsamer Gesamteindruck für beide Teile
+  overallImpression?: number; // Gesamteindruck (Durchschnitt mit einer Nachkommastelle)
+  // Team-Info für Berechnung
+  teamAverageAge?: number; // Durchschnittsalter des Teams
 }
 
 // Abstract storage interface

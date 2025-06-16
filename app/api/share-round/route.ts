@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
       laps: roundData.laps,
       teamName: roundData.teamName,
       description: description || undefined,
+      // Include scoring data if available
+      aPartErrorPoints: roundData.aPartErrorPoints,
+      knotTime: roundData.knotTime,
+      aPartPenaltySeconds: roundData.aPartPenaltySeconds,
+      bPartErrorPoints: roundData.bPartErrorPoints,
+      overallImpression: roundData.overallImpression,
+      teamAverageAge: roundData.teamAverageAge,
     };
 
     // Store the shared round using the storage abstraction

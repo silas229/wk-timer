@@ -7,14 +7,14 @@ import { LoadingState } from "@/components/history/loading-state"
 import { RoundStatsHeader } from "@/components/history/round-stats-header"
 import { EmptyState } from "@/components/history/empty-state"
 import { RoundsList } from "@/components/history/rounds-list"
-import { ShareDialog } from "@/components/share-dialog"
+import { RoundDetailsDialog } from "@/components/round-details-dialog"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [roundToShare, setRoundToShare] = useState<SavedRound | null>(null)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null)
 
   const loadSavedRounds = useCallback(async () => {
     if (!isInitialized) return
@@ -64,14 +64,34 @@ export default function HistoryPage() {
     }
   }, [])
 
-  const handleShareRound = (round: SavedRound) => {
-    setRoundToShare(round)
-    setShareDialogOpen(true)
+  const handleOpenDetails = (round: SavedRound) => {
+    setRoundToDetail(round)
+    setDetailsDialogOpen(true)
   }
 
-  const handleShareSubmit = async (description: string): Promise<string | null> => {
-    if (!roundToShare) return null
+  const handleUpdateRound = async (roundId: string, updatedData: Partial<SavedRound>): Promise<void> => {
+    try {
+      const existingRound = savedRounds.find(r => r.id === roundId)
+      if (!existingRound) return
 
+      const updatedRound = { ...existingRound, ...updatedData }
+      await indexedDB.saveRound(updatedRound)
+
+      setSavedRounds(prevRounds =>
+        prevRounds.map(r => r.id === roundId ? updatedRound : r)
+      )
+
+      // Update the detail dialog round if it's the same
+      if (roundToDetail?.id === roundId) {
+        setRoundToDetail(updatedRound)
+      }
+    } catch (error) {
+      console.error('Error updating round:', error)
+      throw error
+    }
+  }
+
+  const handleDetailsShare = async (round: SavedRound, description: string): Promise<string | null> => {
     try {
       const response = await fetch('/api/share-round', {
         method: 'POST',
@@ -79,8 +99,25 @@ export default function HistoryPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          roundData: roundToShare,
-          description,
+          roundData: {
+            id: round.id,
+            completedAt: round.completedAt.toISOString(),
+            totalTime: round.totalTime,
+            laps: round.laps.map(lap => ({
+              lapNumber: lap.lapNumber,
+              time: lap.time,
+              timestamp: lap.timestamp.toISOString(),
+            })),
+            teamName: round.teamName,
+            description: description.trim() || undefined,
+            // Include scoring data
+            aPartErrorPoints: round.aPartErrorPoints,
+            knotTime: round.knotTime,
+            aPartPenaltySeconds: round.aPartPenaltySeconds,
+            bPartErrorPoints: round.bPartErrorPoints,
+            overallImpression: round.overallImpression,
+            teamAverageAge: getCurrentTeam()?.averageAge,
+          },
         }),
       })
 
@@ -90,11 +127,11 @@ export default function HistoryPage() {
 
       const result = await response.json()
 
-      // Update the round with share information
+      // Update the round with shared URL and description
       const updatedRound: SavedRound = {
-        ...roundToShare,
+        ...round,
         sharedUrl: result.sharedUrl,
-        description,
+        description: description.trim() || undefined,
       }
 
       // Save the updated round to local storage
@@ -104,6 +141,11 @@ export default function HistoryPage() {
       setSavedRounds(prevRounds =>
         prevRounds.map(r => r.id === updatedRound.id ? updatedRound : r)
       )
+
+      // Update detail dialog
+      if (roundToDetail?.id === round.id) {
+        setRoundToDetail(updatedRound)
+      }
 
       return result.sharedUrl
     } catch (error) {
@@ -142,19 +184,20 @@ export default function HistoryPage() {
                 savedRounds={savedRounds}
                 teams={teams}
                 onDeleteRound={deleteRound}
-                onShareRound={handleShareRound}
+                onOpenDetails={handleOpenDetails}
               />
             )}
           </>
         )}
 
-        {/* Share Dialog */}
-        {roundToShare && (
-          <ShareDialog
-            isOpen={shareDialogOpen}
-            onOpenChange={setShareDialogOpen}
-            round={roundToShare}
-            onShare={handleShareSubmit}
+        {/* Round Details Dialog */}
+        {roundToDetail && (
+          <RoundDetailsDialog
+            open={detailsDialogOpen}
+            onOpenChange={setDetailsDialogOpen}
+            round={roundToDetail}
+            onUpdateRound={handleUpdateRound}
+            onShareRound={handleDetailsShare}
           />
         )}
       </div>
