@@ -35,7 +35,10 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
   }, [updateTeam])
 
   const handleDeleteTeam = useCallback((teamId: string) => {
-    deleteTeam(teamId)
+    const confirmDelete = window.confirm("Bist du sicher, dass du diese Gruppe löschen möchtest? Es werden auch alle erfassten Durchgänge der Gruppe gelöscht.")
+    if (confirmDelete) {
+      deleteTeam(teamId)
+    }
   }, [deleteTeam])
 
   const handleClose = useCallback(() => {
@@ -65,6 +68,7 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
                 value={newTeamName}
                 onChange={(e) => setNewTeamName(e.target.value)}
                 placeholder="Gruppennamen eingeben"
+                autoComplete="off"
                 className="flex-1"
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateTeam()}
               />
