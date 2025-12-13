@@ -41,6 +41,21 @@ const SETTINGS_STORE = "settings";
 class IndexedDBManager {
   private db: IDBDatabase | null = null;
 
+  private normalizeAndSortRounds(rawRounds: any[]): SavedRound[] {
+    const rounds = rawRounds.map((round: any) => ({
+      ...round,
+      completedAt: new Date(round.completedAt),
+      laps: round.laps.map((lap: any) => ({
+        ...lap,
+        timestamp: new Date(lap.timestamp),
+      })),
+    }));
+
+    // Sort by completion date (newest first)
+    rounds.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+    return rounds;
+  }
+
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = window.indexedDB.open(DB_NAME, DB_VERSION);
@@ -180,19 +195,7 @@ class IndexedDBManager {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const rounds = request.result.map((round: any) => ({
-          ...round,
-          completedAt: new Date(round.completedAt),
-          laps: round.laps.map((lap: any) => ({
-            ...lap,
-            timestamp: new Date(lap.timestamp),
-          })),
-        }));
-        // Sort by completion date (newest first)
-        rounds.sort(
-          (a, b) => b.completedAt.getTime() - a.completedAt.getTime()
-        );
-        resolve(rounds);
+        resolve(this.normalizeAndSortRounds(request.result));
       };
 
       request.onerror = () => {
@@ -210,19 +213,7 @@ class IndexedDBManager {
       const request = index.getAll(teamId);
 
       request.onsuccess = () => {
-        const rounds = request.result.map((round: any) => ({
-          ...round,
-          completedAt: new Date(round.completedAt),
-          laps: round.laps.map((lap: any) => ({
-            ...lap,
-            timestamp: new Date(lap.timestamp),
-          })),
-        }));
-        // Sort by completion date (newest first)
-        rounds.sort(
-          (a, b) => b.completedAt.getTime() - a.completedAt.getTime()
-        );
-        resolve(rounds);
+        resolve(this.normalizeAndSortRounds(request.result));
       };
 
       request.onerror = () => {
