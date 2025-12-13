@@ -88,7 +88,7 @@ export default async function SharedRoundPage({ params }: PageProps) {
     <div className="flex items-start justify-center min-h-screen p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Geteilter Durchgang</h1>
+          <h1 className="text-2xl font-bold mb-2">Geteilter Durchgang{roundData.teamName ? ` von ${roundData.teamName}` : ''}</h1>
           <p className="text-muted-foreground">
             Dieser Durchgang wurde von einem anderen Nutzer geteilt
           </p>

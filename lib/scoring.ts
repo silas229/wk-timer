@@ -119,9 +119,8 @@ export function calculateBPartPoints(params: {
   const targetTime = calculateTargetTimeMs(teamAverageAge)! / 1000; // Umwandlung in Sekunden
   const timeDifference = bPartTime - targetTime;
   const timePoints = -timeDifference; // Negative Differenz = Bonus, positive = Abzug
-  const errorPointsDeduction = bPartErrorPoints;
 
-  const finalPoints = basePoints + timePoints - errorPointsDeduction;
+  const finalPoints = basePoints - timeDifference - bPartErrorPoints;
 
   return {
     points: Math.max(0, finalPoints), // Mindestens 0 Punkte
@@ -130,7 +129,7 @@ export function calculateBPartPoints(params: {
       targetTime,
       timeDifference,
       timePoints,
-      errorPointsDeduction,
+      errorPointsDeduction: bPartErrorPoints,
       finalPoints: Math.max(0, finalPoints),
     },
   };

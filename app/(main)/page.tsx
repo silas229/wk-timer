@@ -9,6 +9,7 @@ import { PWAInstallPrompt } from "@/components/pwa-install"
 import { TimerDisplay } from "@/components/timer/timer-display"
 import { ActivitiesDisplay } from "@/components/timer/activities-display"
 import { TimerControls } from "@/components/timer/timer-controls"
+import { RoundDetailsDialog } from "@/components/round-details-dialog"
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -22,6 +23,8 @@ export default function Page() {
   const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null)
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null)
   const activitiesRef = useRef<HTMLDivElement>(null)
 
   // Calculate activities whenever laps change
@@ -192,6 +195,105 @@ export default function Page() {
     }
   }
 
+  const handleOpenDetails = (round: SavedRound) => {
+    setRoundToDetail(round)
+    setDetailsDialogOpen(true)
+  }
+
+  const handleUpdateRound = async (roundId: string, updatedData: Partial<SavedRound>): Promise<void> => {
+    try {
+      const existingRound = savedRounds.find(r => r.id === roundId)
+      if (!existingRound) return
+
+      const updatedRound = { ...existingRound, ...updatedData }
+      await indexedDB.saveRound(updatedRound)
+
+      setSavedRounds(prevRounds =>
+        prevRounds.map(r => r.id === roundId ? updatedRound : r)
+      )
+
+      // Update last saved round if it's the same
+      if (lastSavedRound?.id === roundId) {
+        setLastSavedRound(updatedRound)
+      }
+
+      // Update detail dialog round if it's the same
+      if (roundToDetail?.id === roundId) {
+        setRoundToDetail(updatedRound)
+      }
+    } catch (error) {
+      console.error('Error updating round:', error)
+      throw error
+    }
+  }
+
+  const handleDetailsShare = async (round: SavedRound): Promise<string | null> => {
+    try {
+      const response = await fetch('/api/share-round', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roundData: {
+            id: round.id,
+            completedAt: round.completedAt.toISOString(),
+            totalTime: round.totalTime,
+            laps: round.laps.map(lap => ({
+              lapNumber: lap.lapNumber,
+              time: lap.time,
+              timestamp: lap.timestamp.toISOString(),
+            })),
+            teamName: round.teamName,
+            description: round.description?.trim() || undefined,
+            // Include scoring data
+            aPartErrorPoints: round.aPartErrorPoints,
+            knotTime: round.knotTime,
+            aPartPenaltySeconds: round.aPartPenaltySeconds,
+            bPartErrorPoints: round.bPartErrorPoints,
+            overallImpression: round.overallImpression,
+            teamAverageAge: getCurrentTeam()?.averageAge,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share round')
+      }
+
+      const result = await response.json()
+
+      // Update the round with shared URL and description
+      const updatedRound: SavedRound = {
+        ...round,
+        sharedUrl: result.sharedUrl,
+      }
+
+      // Save the updated round to local storage
+      await indexedDB.saveRound(updatedRound)
+
+      // Update the local state
+      setSavedRounds(prevRounds =>
+        prevRounds.map(r => r.id === updatedRound.id ? updatedRound : r)
+      )
+
+      // Update last saved round if it's the same
+      if (lastSavedRound?.id === round.id) {
+        setLastSavedRound(updatedRound)
+      }
+
+      // Update detail dialog
+      if (roundToDetail?.id === round.id) {
+        setRoundToDetail(updatedRound)
+      }
+
+      return result.sharedUrl
+    } catch (error) {
+      console.error('Error sharing round:', error)
+      return null
+    }
+  }
+
   const handleButtonClick = () => {
     if (state === "stopped") {
       handleStart()
@@ -244,7 +346,19 @@ export default function Page() {
           lastSavedRound={lastSavedRound}
           onButtonClick={handleButtonClick}
           onDiscardRound={handleDiscardRound}
+          onOpenDetails={handleOpenDetails}
         />
+
+        {/* Round Details Dialog */}
+        {roundToDetail && (
+          <RoundDetailsDialog
+            open={detailsDialogOpen}
+            onOpenChange={setDetailsDialogOpen}
+            round={roundToDetail}
+            onUpdateRound={handleUpdateRound}
+            onShareRound={handleDetailsShare}
+          />
+        )}
       </div>
     </div>
   )

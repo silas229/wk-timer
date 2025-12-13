@@ -17,7 +17,7 @@ interface RoundDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   round: SavedRound | null
   onUpdateRound: (roundId: string, updatedRound: Partial<SavedRound>) => Promise<void>
-  onShareRound: (round: SavedRound, description: string) => Promise<string | null>
+  onShareRound: (round: SavedRound) => Promise<string | null>
 }
 
 export function RoundDetailsDialog({
@@ -133,7 +133,7 @@ export function RoundDetailsDialog({
         overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
       }
 
-      await onShareRound(updatedRound, description)
+      await onShareRound(updatedRound)
       // Link wird automatisch über round.sharedUrl angezeigt
     } catch (error) {
       console.error('Error sharing round:', error)
@@ -181,7 +181,7 @@ export function RoundDetailsDialog({
     aPartErrorPoints: aPartErrorPoints ? parseFloat(aPartErrorPoints) : undefined,
     knotTime: knotTime ? parseFloat(knotTime) : undefined,
     aPartPenaltySeconds: aPartPenaltySeconds ? parseFloat(aPartPenaltySeconds) : undefined,
-    bPartTime: round.totalTime,
+    bPartTime: Math.round(round.totalTime / 1000), // § 5.6
     bPartErrorPoints: bPartErrorPoints ? parseFloat(bPartErrorPoints) : undefined,
     overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
   }
@@ -193,7 +193,7 @@ export function RoundDetailsDialog({
   const targetTime = calculateTargetTimeMs(teamAverageAge)!
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" title={`Durchgangsdetails - ${round.teamName}`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BadgeInfo className="h-5 w-5" />

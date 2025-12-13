@@ -91,7 +91,7 @@ export default function HistoryPage() {
     }
   }
 
-  const handleDetailsShare = async (round: SavedRound, description: string): Promise<string | null> => {
+  const handleDetailsShare = async (round: SavedRound): Promise<string | null> => {
     try {
       const response = await fetch('/api/share-round', {
         method: 'POST',
@@ -109,7 +109,7 @@ export default function HistoryPage() {
               timestamp: lap.timestamp.toISOString(),
             })),
             teamName: round.teamName,
-            description: description.trim() || undefined,
+            description: round.description?.trim() || undefined,
             // Include scoring data
             aPartErrorPoints: round.aPartErrorPoints,
             knotTime: round.knotTime,
@@ -131,7 +131,6 @@ export default function HistoryPage() {
       const updatedRound: SavedRound = {
         ...round,
         sharedUrl: result.sharedUrl,
-        description: description.trim() || undefined,
       }
 
       // Save the updated round to local storage
