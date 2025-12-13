@@ -1,7 +1,8 @@
 # Wettkämpfe Timer
 
+[![Deployment](https://github.com/silas229/wk-timer/actions/workflows/deploy.yml/badge.svg)](https://wk-timer.us.silas229.name/)
 [![Tests](https://github.com/silas229/wk-timer/actions/workflows/test.yml/badge.svg)](https://github.com/silas229/wk-timer/actions/workflows/test.yml)
-![Codecov](https://img.shields.io/codecov/c/github/silas229/wk-timer)
+[![Codecov](https://img.shields.io/codecov/c/github/silas229/wk-timer)](https://app.codecov.io/gh/silas229/wk-timer/)
 
 A web-based timer application built with modern technologies for precise time tracking and team management made for **B-Teil of Bundeswettbewerb der Deutschen Jugendfeuerwehr**. This is a **Vibe Code Project** focusing on clean architecture, excellent developer experience, and robust testing practices.
 
