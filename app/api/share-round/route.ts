@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Store the shared round using the storage abstraction
     const storage = getRoundStorage();
-    await storage.store(shareableId, sharedRound);
+    await storage.store(sharedRound);
 
     // Generate the shareable URL
     const baseUrl = getBaseUrl();

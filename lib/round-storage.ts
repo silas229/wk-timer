@@ -24,6 +24,6 @@ export interface SharedRoundData {
 
 // Abstract storage interface
 export interface RoundStorage {
-  store(id: string, roundData: SharedRoundData): Promise<void>;
+  store(roundData: SharedRoundData): Promise<void>;
   retrieve(id: string): Promise<SharedRoundData | null>;
 }

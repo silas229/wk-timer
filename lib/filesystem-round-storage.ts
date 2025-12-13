@@ -7,7 +7,9 @@ import { RoundStorage, SharedRoundData } from "./round-storage";
  */
 function isSafeId(id: string): boolean {
   // UUID v4 regex (simplified)
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    id
+  );
 }
 
 export class FileSystemRoundStorage implements RoundStorage {
@@ -17,8 +19,8 @@ export class FileSystemRoundStorage implements RoundStorage {
     this.storageDir = storageDir;
   }
 
-  async store(id: string, roundData: SharedRoundData): Promise<void> {
-    if (!isSafeId(id)) {
+  async store(roundData: SharedRoundData): Promise<void> {
+    if (!isSafeId(roundData?.id)) {
       throw new Error("Invalid round ID (potential path traversal detected)");
     }
     try {
@@ -26,10 +28,10 @@ export class FileSystemRoundStorage implements RoundStorage {
       await fs.mkdir(this.storageDir, { recursive: true });
 
       // Write the round data to a JSON file
-      const filePath = path.join(this.storageDir, `${id}.json`);
+      const filePath = path.join(this.storageDir, `${roundData.id}.json`);
       await fs.writeFile(filePath, JSON.stringify(roundData, null, 2), "utf-8");
     } catch (error) {
-      console.error(`Failed to store round ${id}:`, error);
+      console.error(`Failed to store round ${roundData.id}:`, error);
       throw new Error(
         `Failed to store round: ${error instanceof Error ? error.message : "Unknown error"}`
       );
