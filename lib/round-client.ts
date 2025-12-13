@@ -25,25 +25,23 @@ export async function shareRoundAndPersist(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      roundData: {
-        id: round.id,
-        completedAt: round.completedAt.toISOString(),
-        totalTime: round.totalTime,
-        laps: round.laps.map((lap) => ({
-          lapNumber: lap.lapNumber,
-          time: lap.time,
-          timestamp: lap.timestamp.toISOString(),
-        })),
-        teamName: round.teamName,
-        description: round.description?.trim() || undefined,
-        // Include scoring data
-        aPartErrorPoints: round.aPartErrorPoints,
-        knotTime: round.knotTime,
-        aPartPenaltySeconds: round.aPartPenaltySeconds,
-        bPartErrorPoints: round.bPartErrorPoints,
-        overallImpression: round.overallImpression,
-        teamAverageAge,
-      },
+      id: round.id,
+      completedAt: round.completedAt.toISOString(),
+      totalTime: round.totalTime,
+      laps: round.laps.map((lap) => ({
+        lapNumber: lap.lapNumber,
+        time: lap.time,
+        timestamp: lap.timestamp.toISOString(),
+      })),
+      teamName: round.teamName,
+      description: round.description?.trim() || undefined,
+      // Include scoring data
+      aPartErrorPoints: round.aPartErrorPoints,
+      knotTime: round.knotTime,
+      aPartPenaltySeconds: round.aPartPenaltySeconds,
+      bPartErrorPoints: round.bPartErrorPoints,
+      overallImpression: round.overallImpression,
+      teamAverageAge,
     }),
   });
 
@@ -132,35 +130,52 @@ export function createRoundHandlers(params: {
       const existingRound = getRoundById(roundId);
       if (!existingRound) return;
 
-      const updatedRound = await updateRoundInStorage(existingRound, updatedData);
+      const updatedRound = await updateRoundInStorage(
+        existingRound,
+        updatedData
+      );
 
-      setSavedRounds((prevRounds) => replaceRoundInList(prevRounds, updatedRound));
+      setSavedRounds((prevRounds) =>
+        replaceRoundInList(prevRounds, updatedRound)
+      );
 
       if (setLastSavedRound) {
-        setLastSavedRound((prev) => updateLastSavedRoundIfMatching(prev, updatedRound));
+        setLastSavedRound((prev) =>
+          updateLastSavedRoundIfMatching(prev, updatedRound)
+        );
       }
 
-      setRoundToDetail((prev) => updateDetailRoundIfMatching(prev, updatedRound));
+      setRoundToDetail((prev) =>
+        updateDetailRoundIfMatching(prev, updatedRound)
+      );
     } catch (error) {
       console.error("Error updating round:", error);
       throw error;
     }
   };
 
-  const handleDetailsShare = async (round: SavedRound): Promise<string | null> => {
+  const handleDetailsShare = async (
+    round: SavedRound
+  ): Promise<string | null> => {
     try {
       const { sharedUrl, updatedRound } = await shareRoundAndPersist(
         round,
         getAverageAge()
       );
 
-      setSavedRounds((prevRounds) => replaceRoundInList(prevRounds, updatedRound));
+      setSavedRounds((prevRounds) =>
+        replaceRoundInList(prevRounds, updatedRound)
+      );
 
       if (setLastSavedRound) {
-        setLastSavedRound((prev) => updateLastSavedRoundIfMatching(prev, updatedRound));
+        setLastSavedRound((prev) =>
+          updateLastSavedRoundIfMatching(prev, updatedRound)
+        );
       }
 
-      setRoundToDetail((prev) => updateDetailRoundIfMatching(prev, updatedRound));
+      setRoundToDetail((prev) =>
+        updateDetailRoundIfMatching(prev, updatedRound)
+      );
 
       return sharedUrl;
     } catch (error) {
