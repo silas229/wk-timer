@@ -2,12 +2,12 @@ import { promises as fs } from "fs";
 import path from "path";
 import { RoundStorage, SharedRoundData } from "./round-storage";
 
-// Validate round ID: accept only UUIDs (or adjust regex as needed)
+/**
+ * Validate round ID: accept only UUIDs
+ */
 function isSafeId(id: string): boolean {
-  // UUID v4 regex (simplified): /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  // For more general case: /^[a-zA-Z0-9\-]+$/
-  // Adjust as needed for your IDs' format.
-  return /^[a-zA-Z0-9\-]+$/.test(id);
+  // UUID v4 regex (simplified)
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
 }
 
 export class FileSystemRoundStorage implements RoundStorage {
