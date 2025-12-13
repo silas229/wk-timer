@@ -20,7 +20,7 @@ export function ErrorPointsInput({
   onChange,
   disabled = false,
   className = ""
-}: ErrorPointsInputProps) {
+}: Readonly<ErrorPointsInputProps>) {
   const handleDecrement = () => {
     const current = Number.parseFloat(value) || 0
     const newValue = Math.max(0, current - 5)
