@@ -31,7 +31,7 @@ interface SharedRoundCardProps {
   activities: ActivityTime[];
 }
 
-export function SharedRoundCard({ roundData, activities }: SharedRoundCardProps) {
+export function SharedRoundCard({ roundData, activities }: Readonly<SharedRoundCardProps>) {
   const completedAt = new Date(roundData.completedAt);
 
   // Calculate scoring if all data is available

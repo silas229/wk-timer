@@ -26,7 +26,7 @@ export function RoundDetailsDialog({
   round,
   onUpdateRound,
   onShareRound
-}: RoundDetailsDialogProps) {
+}: Readonly<RoundDetailsDialogProps>) {
   const { getCurrentTeam } = useTeam()
 
   // Form state
@@ -88,11 +88,11 @@ export function RoundDetailsDialog({
     try {
       const updatedData: Partial<SavedRound> = {
         description: description.trim() || undefined,
-        aPartErrorPoints: aPartErrorPoints ? parseFloat(aPartErrorPoints) : undefined,
-        knotTime: knotTime ? parseFloat(knotTime) : undefined,
-        aPartPenaltySeconds: aPartPenaltySeconds ? parseFloat(aPartPenaltySeconds) : undefined,
-        bPartErrorPoints: bPartErrorPoints ? parseFloat(bPartErrorPoints) : undefined,
-        overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
+        aPartErrorPoints: aPartErrorPoints ? Number.parseFloat(aPartErrorPoints) : undefined,
+        knotTime: knotTime ? Number.parseFloat(knotTime) : undefined,
+        aPartPenaltySeconds: aPartPenaltySeconds ? Number.parseFloat(aPartPenaltySeconds) : undefined,
+        bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
+        overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
       }
 
       await onUpdateRound(round.id, updatedData)
@@ -109,7 +109,7 @@ export function RoundDetailsDialog({
 
     // Confirmation for first-time sharing
     if (!round.sharedUrl) {
-      const confirmShare = window.confirm(
+      const confirmShare = globalThis.confirm(
         "Nach dem Teilen können die Daten nicht mehr geändert werden.\n\nBist du sicher, dass alle Werte korrekt sind und du den Durchgang teilen möchtest?"
       )
       if (!confirmShare) return
@@ -126,11 +126,11 @@ export function RoundDetailsDialog({
       const updatedRound: SavedRound = {
         ...round,
         description: description.trim() || undefined,
-        aPartErrorPoints: aPartErrorPoints ? parseFloat(aPartErrorPoints) : undefined,
-        knotTime: knotTime ? parseFloat(knotTime) : undefined,
-        aPartPenaltySeconds: aPartPenaltySeconds ? parseFloat(aPartPenaltySeconds) : undefined,
-        bPartErrorPoints: bPartErrorPoints ? parseFloat(bPartErrorPoints) : undefined,
-        overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
+        aPartErrorPoints: aPartErrorPoints ? Number.parseFloat(aPartErrorPoints) : undefined,
+        knotTime: knotTime ? Number.parseFloat(knotTime) : undefined,
+        aPartPenaltySeconds: aPartPenaltySeconds ? Number.parseFloat(aPartPenaltySeconds) : undefined,
+        bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
+        overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
       }
 
       await onShareRound(updatedRound)
@@ -178,12 +178,12 @@ export function RoundDetailsDialog({
   // Calculate scoring
   const scoringParams: ScoringParameters = {
     teamAverageAge,
-    aPartErrorPoints: aPartErrorPoints ? parseFloat(aPartErrorPoints) : undefined,
-    knotTime: knotTime ? parseFloat(knotTime) : undefined,
-    aPartPenaltySeconds: aPartPenaltySeconds ? parseFloat(aPartPenaltySeconds) : undefined,
+    aPartErrorPoints: aPartErrorPoints ? Number.parseFloat(aPartErrorPoints) : undefined,
+    knotTime: knotTime ? Number.parseFloat(knotTime) : undefined,
+    aPartPenaltySeconds: aPartPenaltySeconds ? Number.parseFloat(aPartPenaltySeconds) : undefined,
     bPartTime: Math.round(round.totalTime / 1000), // § 5.6
-    bPartErrorPoints: bPartErrorPoints ? parseFloat(bPartErrorPoints) : undefined,
-    overallImpression: overallImpression ? parseFloat(overallImpression) : undefined,
+    bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
+    overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
   }
 
   const scoringResult = calculateTotalScore(scoringParams)

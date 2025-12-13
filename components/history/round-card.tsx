@@ -28,7 +28,7 @@ export function RoundCard({
   teams,
   onDeleteRound,
   onOpenDetails
-}: RoundCardProps) {
+}: Readonly<RoundCardProps>) {
   const activities = calculateActivityTimes(round.laps)
 
   const handleOpenDetails = () => {
@@ -67,7 +67,7 @@ export function RoundCard({
   let scoringResult = null
   if (canCalculateScore) {
     const scoringParams = {
-      teamAverageAge: team!.averageAge!,
+      teamAverageAge: team.averageAge!,
       aPartErrorPoints: round.aPartErrorPoints!,
       knotTime: round.knotTime!,
       aPartPenaltySeconds: round.aPartPenaltySeconds!,
@@ -141,7 +141,7 @@ export function RoundCard({
                 <span className="font-mono">
                   {formatTime(targetTime)}
                 </span>
-                {round.totalTime && (
+                {!!(round.totalTime) && (
                   <span className={`font-mono ${round.totalTime <= targetTime ? 'text-green-600' : 'text-red-600'}`}>
                     ({formatTime((round.totalTime - targetTime), 'diff-seconds')}s)
                   </span>

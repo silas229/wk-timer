@@ -13,7 +13,7 @@ interface TeamManageDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) {
+export function TeamManageDialog({ open, onOpenChange }: Readonly<TeamManageDialogProps>) {
   const { teams, createTeam, updateTeam, deleteTeam } = useTeam()
   const [newTeamName, setNewTeamName] = useState("")
   const [editingTeam, setEditingTeam] = useState<{ id: string; name: string; color: string; averageAge?: number } | null>(null)
@@ -35,7 +35,7 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
   }, [updateTeam])
 
   const handleDeleteTeam = useCallback((teamId: string) => {
-    const confirmDelete = window.confirm("Bist du sicher, dass du diese Gruppe löschen möchtest? Es werden auch alle erfassten Durchgänge der Gruppe gelöscht.")
+    const confirmDelete = globalThis.confirm("Bist du sicher, dass du diese Gruppe löschen möchtest? Es werden auch alle erfassten Durchgänge der Gruppe gelöscht.")
     if (confirmDelete) {
       deleteTeam(teamId)
     }
@@ -102,7 +102,7 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
                         placeholder="Gruppenname"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            const avgAge = editTeamAverageAge ? parseFloat(editTeamAverageAge) : undefined
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
                             handleUpdateTeam(team.id, editTeamName, avgAge)
                           }
                           if (e.key === 'Escape') {
@@ -123,7 +123,7 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
                         placeholder="Durchschnittsalter (für Punkteberechnung)"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            const avgAge = editTeamAverageAge ? parseFloat(editTeamAverageAge) : undefined
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
                             handleUpdateTeam(team.id, editTeamName, avgAge)
                           }
                           if (e.key === 'Escape') {
@@ -149,7 +149,7 @@ export function TeamManageDialog({ open, onOpenChange }: TeamManageDialogProps) 
                       <>
                         <Button
                           onClick={() => {
-                            const avgAge = editTeamAverageAge ? parseFloat(editTeamAverageAge) : undefined
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
                             handleUpdateTeam(team.id, editTeamName, avgAge)
                           }}
                           size="sm"

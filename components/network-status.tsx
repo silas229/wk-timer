@@ -22,12 +22,12 @@ export function NetworkStatus() {
     // Initial check
     setIsOnline(navigator.onLine)
 
-    window.addEventListener('online', updateOnlineStatus)
-    window.addEventListener('offline', updateOnlineStatus)
+    globalThis.addEventListener('online', updateOnlineStatus)
+    globalThis.addEventListener('offline', updateOnlineStatus)
 
     return () => {
-      window.removeEventListener('online', updateOnlineStatus)
-      window.removeEventListener('offline', updateOnlineStatus)
+      globalThis.removeEventListener('online', updateOnlineStatus)
+      globalThis.removeEventListener('offline', updateOnlineStatus)
     }
   }, [])
 

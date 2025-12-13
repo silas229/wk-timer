@@ -22,13 +22,13 @@ export function ErrorPointsInput({
   className = ""
 }: ErrorPointsInputProps) {
   const handleDecrement = () => {
-    const current = parseFloat(value) || 0
+    const current = Number.parseFloat(value) || 0
     const newValue = Math.max(0, current - 5)
     onChange(newValue.toString())
   }
 
   const handleIncrement = () => {
-    const current = parseFloat(value) || 0
+    const current = Number.parseFloat(value) || 0
     const newValue = current + 5
     onChange(newValue.toString())
   }

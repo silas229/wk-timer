@@ -6,8 +6,6 @@ import {
   resetRoundStorage,
 } from "@/lib/round-storage-factory";
 import { MemoryRoundStorage } from "@/lib/memory-round-storage";
-import { Description } from "@radix-ui/react-dialog";
-
 describe("Share Round API Unit Tests", () => {
   let testStorage: MemoryRoundStorage;
 
