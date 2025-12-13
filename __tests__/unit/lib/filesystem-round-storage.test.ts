@@ -103,7 +103,7 @@ describe("FileSystemRoundStorage", () => {
       it("should reject non-UUID strings", async () => {
         const invalidIds = [
           "not-a-uuid",
-          "12345678-1234-1234-1234-123456789012", // Too many digits
+          "12345678-1234-1234-1234-1234567890123", // Too many digits
           "550e8400-e29b-41d4-a716", // Incomplete UUID
           "550e8400e29b41d4a716446655440000", // Missing hyphens
           "", // Empty string
@@ -119,7 +119,7 @@ describe("FileSystemRoundStorage", () => {
       });
 
       it("should accept valid UUID v1", async () => {
-        const validId = "550e8400-e29b-11d4-a716-446655440000";
+        const validId = "550e8400-e29b-11d4-8716-446655440000";
         const roundData = createMockRoundData(validId);
 
         await expect(storage.store(validId, roundData)).resolves.not.toThrow();
@@ -133,7 +133,7 @@ describe("FileSystemRoundStorage", () => {
       });
 
       it("should accept valid UUID v5", async () => {
-        const validId = "550e8400-e29b-51d4-a716-446655440000";
+        const validId = "550e8400-e29b-51d4-9716-446655440000";
         const roundData = createMockRoundData(validId);
 
         await expect(storage.store(validId, roundData)).resolves.not.toThrow();
@@ -208,7 +208,7 @@ describe("FileSystemRoundStorage", () => {
       it("should reject non-UUID strings", async () => {
         const invalidIds = [
           "not-a-uuid",
-          "12345678-1234-1234-1234-123456789012",
+          "12345678-1234-1234-1234-1234567890123",
           "550e8400-e29b-41d4-a716",
           "550e8400e29b41d4a716446655440000",
           "",
