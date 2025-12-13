@@ -69,9 +69,8 @@ describe("API Integration Tests", () => {
           { lapNumber: 2, time: 120000, timestamp: "2024-01-01T12:02:00Z" },
         ],
         teamName: "Cross API Test Team",
+        description: "Cross-API integration test",
       };
-
-      const description = "Cross-API integration test";
 
       // Step 1: Share the round
       const shareRequest = new NextRequest(
@@ -79,7 +78,7 @@ describe("API Integration Tests", () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roundData, description }),
+          body: JSON.stringify(roundData),
         }
       );
 
@@ -93,11 +92,7 @@ describe("API Integration Tests", () => {
       // Step 2: Mock the fetch for oEmbed (since it would call back to our API)
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            ...roundData,
-            description,
-          }),
+        json: () => Promise.resolve(roundData),
       });
 
       // Step 3: Generate oEmbed for the shared URL
@@ -147,7 +142,7 @@ describe("API Integration Tests", () => {
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roundData: roundDataWithLargeTimes }),
+        body: JSON.stringify(roundDataWithLargeTimes),
       });
 
       const response = await shareRoundPOST(request);
@@ -169,7 +164,7 @@ describe("API Integration Tests", () => {
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roundData: roundDataWithEmptyLaps }),
+        body: JSON.stringify(roundDataWithEmptyLaps),
       });
 
       const response = await shareRoundPOST(request);
@@ -188,18 +183,14 @@ describe("API Integration Tests", () => {
           { lapNumber: 1, time: 120000, timestamp: "2024-01-01T12:02:00Z" },
         ],
         teamName: "Team with 🏃‍♂️ emoji & special chars",
+        description:
+          'Description with <script>alert("test")</script> and "quotes"',
       };
-
-      const description =
-        'Description with <script>alert("test")</script> and "quotes"';
 
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roundData: roundDataWithSpecialChars,
-          description,
-        }),
+        body: JSON.stringify(roundDataWithSpecialChars),
       });
 
       const response = await shareRoundPOST(request);
@@ -238,10 +229,7 @@ describe("API Integration Tests", () => {
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roundData: roundDataWithLongStrings,
-          description: longString,
-        }),
+        body: JSON.stringify(roundDataWithLongStrings),
       });
 
       const response = await shareRoundPOST(request);
@@ -362,11 +350,9 @@ describe("API Integration Tests", () => {
         method: "POST",
         // No Content-Type header
         body: JSON.stringify({
-          roundData: {
-            id: "test-uuid",
-            teamName: "Test Team",
-            laps: [],
-          },
+          id: "test-uuid",
+          teamName: "Test Team",
+          laps: [],
         }),
       });
 

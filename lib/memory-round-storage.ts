@@ -3,8 +3,8 @@ import { RoundStorage, SharedRoundData } from "./round-storage";
 export class MemoryRoundStorage implements RoundStorage {
   private rounds: Map<string, SharedRoundData> = new Map();
 
-  async store(id: string, roundData: SharedRoundData): Promise<void> {
-    this.rounds.set(id, { ...roundData }); // Store a copy to avoid mutations
+  async store(roundData: SharedRoundData): Promise<void> {
+    this.rounds.set(roundData.id, { ...roundData }); // Store a copy to avoid mutations
   }
 
   async retrieve(id: string): Promise<SharedRoundData | null> {

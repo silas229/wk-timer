@@ -35,16 +35,16 @@ export function PWAInstallPrompt() {
     }
 
     // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (globalThis.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
     }
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
-    window.addEventListener('appinstalled', handleAppInstalled)
+    globalThis.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+    globalThis.addEventListener('appinstalled', handleAppInstalled)
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
-      window.removeEventListener('appinstalled', handleAppInstalled)
+      globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+      globalThis.removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [])
 

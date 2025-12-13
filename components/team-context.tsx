@@ -10,7 +10,7 @@ interface TeamContextValue {
   loadTeams: () => void
   getCurrentTeam: () => Team | undefined
   createTeam: (name: string) => void
-  updateTeam: (id: string, name: string) => void
+  updateTeam: (id: string, name: string, averageAge?: number) => void
   deleteTeam: (id: string) => void
   isInitialized: boolean
 }
@@ -119,14 +119,18 @@ export function TeamProvider({ children }: TeamProviderProps) {
     }
   }, [teams, teamColors, isInitialized])
 
-  const updateTeam = useCallback(async (id: string, name: string) => {
+  const updateTeam = useCallback(async (id: string, name: string, averageAge?: number) => {
     if (!name.trim() || !isInitialized) return
 
     try {
       const updatedTeam = teams.find(team => team.id === id)
       if (!updatedTeam) return
 
-      const newTeam = { ...updatedTeam, name: name.trim() }
+      const newTeam = {
+        ...updatedTeam,
+        name: name.trim(),
+        ...(averageAge !== undefined && { averageAge })
+      }
       await indexedDB.saveTeam(newTeam)
 
       const updatedTeams = teams.map(team =>

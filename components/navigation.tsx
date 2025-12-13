@@ -32,7 +32,7 @@ export function Navigation() {
         onOpenChange={setShowManageDialog}
       />
 
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-14 items-center justify-between px-4">
           <Link href="/" className="text-lg font-semibold hover:text-primary transition-colors">
             Wettkämpfe Timer

@@ -12,8 +12,7 @@ const corsHeaders = {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { roundData, description } = body;
+    const roundData = await request.json();
 
     // Validate required fields
     if (!roundData || !roundData.id || !roundData.laps || !roundData.teamName) {
@@ -33,12 +32,20 @@ export async function POST(request: NextRequest) {
       totalTime: roundData.totalTime,
       laps: roundData.laps,
       teamName: roundData.teamName,
-      description: description || undefined,
+      // Prefer explicit top-level description, but also support description inside roundData
+      description: roundData.description || undefined,
+      // Include scoring data if available
+      aPartErrorPoints: roundData.aPartErrorPoints,
+      knotTime: roundData.knotTime,
+      aPartPenaltySeconds: roundData.aPartPenaltySeconds,
+      bPartErrorPoints: roundData.bPartErrorPoints,
+      overallImpression: roundData.overallImpression,
+      teamAverageAge: roundData.teamAverageAge,
     };
 
     // Store the shared round using the storage abstraction
     const storage = getRoundStorage();
-    await storage.store(shareableId, sharedRound);
+    await storage.store(sharedRound);
 
     // Generate the shareable URL
     const baseUrl = getBaseUrl();

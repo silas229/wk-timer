@@ -16,7 +16,7 @@ interface RoundsListProps {
   savedRounds: SavedRound[]
   teams: Team[]
   onDeleteRound: (roundId: string) => void
-  onShareRound?: (round: SavedRound) => void
+  onOpenDetails?: (round: SavedRound) => void
 }
 
 export function RoundsList({
@@ -24,7 +24,7 @@ export function RoundsList({
   savedRounds,
   teams,
   onDeleteRound,
-  onShareRound
+  onOpenDetails
 }: RoundsListProps) {
   const formatDayHeader = (date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
@@ -102,7 +102,7 @@ export function RoundsList({
                     comparison={previousComparison}
                     teams={teams}
                     onDeleteRound={onDeleteRound}
-                    onShareRound={onShareRound}
+                    onOpenDetails={onOpenDetails}
                   />
                 )
               })}

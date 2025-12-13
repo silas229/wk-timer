@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Trash2, Share2 } from "lucide-react"
+import { Trash2, Calculator } from "lucide-react"
 import type { SavedRound, Lap } from "@/lib/indexeddb"
 
 type TimerState = "stopped" | "running" | "finished"
@@ -26,7 +26,7 @@ interface TimerControlsProps {
   lastSavedRound: SavedRound | null
   onButtonClick: () => void
   onDiscardRound: () => void
-  onShareRound: () => void
+  onOpenDetails?: (round: SavedRound) => void
 }
 
 export function TimerControls({
@@ -35,7 +35,7 @@ export function TimerControls({
   lastSavedRound,
   onButtonClick,
   onDiscardRound,
-  onShareRound
+  onOpenDetails
 }: TimerControlsProps) {
   const getButtonText = () => {
     if (state === "stopped") return "Start"
@@ -60,14 +60,16 @@ export function TimerControls({
 
       {state === "finished" && lastSavedRound && (
         <div className="space-y-2">
-          <Button
-            onClick={onShareRound}
-            variant="outline"
-            className="w-full"
-          >
-            <Share2 />
-            Runde teilen
-          </Button>
+          {onOpenDetails && (
+            <Button
+              onClick={() => onOpenDetails(lastSavedRound)}
+              variant="outline"
+              className="w-full"
+            >
+              <Calculator />
+              Punkteberechnung und Teilen
+            </Button>
+          )}
 
           <Button
             onClick={onDiscardRound}
