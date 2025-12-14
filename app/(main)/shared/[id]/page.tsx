@@ -4,6 +4,7 @@ import { SharedRoundCard } from '@/components/shared-round-card';
 import { SharedRoundData } from '@/lib/round-storage';
 import { getRoundStorage } from '@/lib/round-storage-factory';
 import { getBaseUrl } from '@/lib/base-url';
+import { logger, logError } from '@/lib/logger';
 
 interface PageProps {
   params: Promise<{
@@ -13,20 +14,29 @@ interface PageProps {
 
 // Fetch shared round data directly from storage
 async function fetchSharedRound(id: string): Promise<SharedRoundData | null> {
+  const log = logger.child({ event: 'shared_round.fetch', roundId: id });
   try {
     const storage = getRoundStorage();
-    return await storage.retrieve(id);
+    const round = await storage.retrieve(id);
+    if (round) {
+      log.debug('Shared round fetched');
+    } else {
+      log.warn('Shared round not found');
+    }
+    return round;
   } catch (error) {
-    console.error('Error fetching shared round:', error);
+    logError(log, error, 'Error fetching shared round');
     return null;
   }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  const log = logger.child({ event: 'shared_round.metadata', roundId: id });
   const roundData = await fetchSharedRound(id);
 
   if (!roundData) {
+    log.warn('Shared round not found for metadata');
     return {
       title: 'Durchgang nicht gefunden | Wettkämpfe Timer',
       description: 'Der angeforderte geteilte Durchgang konnte nicht gefunden werden.',
@@ -62,9 +72,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SharedRoundPage({ params }: PageProps) {
   const { id } = await params;
+  const log = logger.child({ event: 'shared_round.page', roundId: id });
   const roundData = await fetchSharedRound(id);
 
   if (!roundData) {
+    log.warn('Shared round not found for page render');
     return (
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="text-center">
