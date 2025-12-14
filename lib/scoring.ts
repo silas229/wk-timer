@@ -120,7 +120,7 @@ export function calculateBPartPoints(params: {
   const timeDifference = bPartTime - targetTime;
   const timePoints = -timeDifference; // Negative Differenz = Bonus, positive = Abzug
 
-  const finalPoints = basePoints - timeDifference - bPartErrorPoints;
+  const finalPoints = basePoints + timePoints - bPartErrorPoints;
 
   return {
     points: Math.max(0, finalPoints), // Mindestens 0 Punkte
@@ -178,12 +178,6 @@ export function calculateTotalScore(params: ScoringParameters): ScoringResult {
 export function formatPoints(points: number | null): string {
   if (points === null) return "-";
   return points.toString();
-}
-
-export function formatTime(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.round(seconds % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
 /**

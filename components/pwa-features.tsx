@@ -21,21 +21,25 @@ export function PWAFeatures() {
 
   const features = [
     {
+      id: "app-experience",
       icon: <Smartphone className="h-5 w-5" />,
       title: "App-ähnliche Erfahrung",
       description: "Funktioniert wie eine native App auf Ihrem Gerät"
     },
     {
+      id: "offline",
       icon: <Wifi className="h-5 w-5" />,
       title: "Offline-Funktionalität",
       description: "Timer funktioniert auch ohne Internetverbindung"
     },
     {
+      id: "quick-start",
       icon: <Clock className="h-5 w-5" />,
       title: "Schneller Start",
       description: "Direkter Zugriff vom Homescreen"
     },
     {
+      id: "no-app-store",
       icon: <Download className="h-5 w-5" />,
       title: "Kein App Store nötig",
       description: "Installation direkt über den Browser"
@@ -77,8 +81,8 @@ export function PWAFeatures() {
               </p>
 
               <div className="space-y-3">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
+                {features.map((feature) => (
+                  <div key={feature.id} className="flex items-start gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       {feature.icon}
                     </div>
