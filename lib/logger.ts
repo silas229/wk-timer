@@ -6,12 +6,20 @@ const level =
   (process.env.NODE_ENV === "production" ? "info" : "debug");
 
 function buildTransport(): TransportSingleOptions | undefined {
-  if (process.env.NODE_ENV === "production") {
+  // Always JSON in production
+  if (process.env.NODE_ENV === "production") return undefined;
+
+  // Turbopack/Edge/serverless: avoid pretty transport (worker not available)
+  if (process.env.TURBOPACK === "1" || process.env.NEXT_RUNTIME === "edge") {
     return undefined;
   }
 
+  // Opt-in pretty logs locally: ENABLE_PINO_PRETTY=1
+  if (process.env.ENABLE_PINO_PRETTY !== "1") return undefined;
+
   try {
-    return pino.transport({
+    require.resolve("pino-pretty");
+    return {
       target: "pino-pretty",
       options: {
         colorize: true,
@@ -19,9 +27,8 @@ function buildTransport(): TransportSingleOptions | undefined {
         singleLine: true,
         ignore: "pid,hostname",
       },
-    });
+    };
   } catch {
-    // pino-pretty is optional; fall back to JSON when unavailable
     return undefined;
   }
 }
