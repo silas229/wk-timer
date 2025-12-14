@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  MockInstance,
+} from "vitest";
 import type { SavedRound } from "@/lib/indexeddb";
 import { indexedDB as indexedDBManager } from "@/lib/indexeddb";
 import * as roundClient from "@/lib/round-client";
@@ -46,8 +54,8 @@ function createGetRoundById(getRounds: () => SavedRound[]) {
 }
 
 describe("round-client", () => {
-  let saveRoundSpy: ReturnType<typeof vi.spyOn<typeof indexedDBManager, "saveRound">>;
-  let getAllRoundsSpy: ReturnType<typeof vi.spyOn<typeof indexedDBManager, "getAllRounds">>;
+  let saveRoundSpy: MockInstance<(round: SavedRound) => Promise<void>>,
+    getAllRoundsSpy: MockInstance<() => Promise<SavedRound[]>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
