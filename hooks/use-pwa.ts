@@ -10,10 +10,11 @@ export function usePWA() {
   useEffect(() => {
     // Check if running in standalone mode (installed PWA)
     const checkStandalone = () => {
-      if (typeof window !== "undefined") {
+      if (typeof globalThis !== "undefined") {
         const standalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          (window.navigator as Navigator & { standalone?: boolean }).standalone ||
+          globalThis.matchMedia("(display-mode: standalone)").matches ||
+          (globalThis.navigator as Navigator & { standalone?: boolean })
+            .standalone ||
           document.referrer.includes("android-app://");
         setIsStandalone(standalone);
         setIsInstalled(standalone);
@@ -33,15 +34,18 @@ export function usePWA() {
 
     checkStandalone();
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
+    globalThis.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt
+    );
+    globalThis.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener(
+      globalThis.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt
       );
-      window.removeEventListener("appinstalled", handleAppInstalled);
+      globalThis.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
