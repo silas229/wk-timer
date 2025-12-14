@@ -1,35 +1,62 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { Team, SavedRound } from "@/lib/indexeddb";
+import { indexedDB as indexedDBManager } from "@/lib/indexeddb";
 import { generateUUID } from "@/lib/uuid";
 
 describe("IndexedDB Manager", () => {
-  beforeEach(() => {
-    // Reset all mocks before each test
+  const DB_NAME = "WkTimerDB";
+
+  const mockTeam: Team = {
+    id: "team-1",
+    name: "Test Team",
+    color: "#ff0000",
+    createdAt: new Date("2024-01-01T00:00:00Z"),
+  };
+
+  const resetDatabase = async () =>
+    new Promise<void>((resolve, reject) => {
+      const request = globalThis.indexedDB.deleteDatabase(DB_NAME);
+      request.onsuccess = () => resolve();
+      request.onblocked = () => resolve();
+      request.onerror = () =>
+        reject(
+          new Error(request.error?.message ?? "Failed to delete database")
+        );
+    });
+
+  const closeManagerDb = () => {
+    const manager = indexedDBManager as unknown as { db: IDBDatabase | null };
+    try {
+      manager.db?.close();
+    } catch {
+      // ignore
+    }
+    manager.db = null;
+  };
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    closeManagerDb();
+    await resetDatabase();
+    closeManagerDb();
+    await indexedDBManager.init();
+  });
+
+  afterEach(async () => {
+    closeManagerDb();
+    await resetDatabase();
+    closeManagerDb();
   });
 
   describe("Team Operations", () => {
-    const mockTeam: Team = {
-      id: "team-1",
-      name: "Test Team",
-      color: "#ff0000",
-      createdAt: new Date("2024-01-01T00:00:00Z"),
-    };
+    it("saves and retrieves a team with hydrated dates", async () => {
+      await indexedDBManager.saveTeam(mockTeam);
+      const teams = await indexedDBManager.getAllTeams();
 
-    it("should create a team with valid data", async () => {
-      // Note: Since we're mocking IndexedDB, we'll test the interface
-      // In a real scenario, you'd test against a real IndexedDB instance
-      expect(mockTeam.id).toBe("team-1");
-      expect(mockTeam.name).toBe("Test Team");
-      expect(mockTeam.color).toBe("#ff0000");
-      expect(mockTeam.createdAt).toBeInstanceOf(Date);
-    });
-
-    it("should validate team properties", () => {
-      expect(mockTeam).toHaveProperty("id");
-      expect(mockTeam).toHaveProperty("name");
-      expect(mockTeam).toHaveProperty("color");
-      expect(mockTeam).toHaveProperty("createdAt");
+      expect(teams).toHaveLength(1);
+      expect(teams[0]?.id).toBe("team-1");
+      expect(teams[0]?.createdAt).toBeInstanceOf(Date);
     });
   });
 
@@ -54,92 +81,86 @@ describe("IndexedDB Manager", () => {
       teamName: "Test Team",
     };
 
-    it("should create a round with valid data", () => {
-      expect(mockRound.id).toBeTruthy();
-      expect(mockRound.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-      );
-      expect(mockRound.teamId).toBe("team-1");
-      expect(mockRound.totalTime).toBe(120000);
-      expect(mockRound.laps).toHaveLength(2);
+    it("saves and retrieves rounds sorted by completion date", async () => {
+      const olderRound: SavedRound = {
+        ...mockRound,
+        id: generateUUID(),
+        completedAt: new Date("2024-01-01T00:00:00Z"),
+      };
+      const newerRound: SavedRound = {
+        ...mockRound,
+        id: generateUUID(),
+        completedAt: new Date("2024-01-02T00:00:00Z"),
+      };
+
+      await indexedDBManager.saveRound(olderRound);
+      await indexedDBManager.saveRound(newerRound);
+
+      const rounds = await indexedDBManager.getAllRounds();
+      expect(rounds.map((r) => r.id)).toEqual([newerRound.id, olderRound.id]);
+      expect(rounds[0]?.completedAt).toBeInstanceOf(Date);
+      expect(rounds[0]?.laps[0]?.timestamp).toBeInstanceOf(Date);
     });
 
-    it("should have proper lap structure", () => {
-      mockRound.laps.forEach((lap, index) => {
-        expect(lap).toHaveProperty("lapNumber");
-        expect(lap).toHaveProperty("time");
-        expect(lap).toHaveProperty("timestamp");
-        expect(lap.lapNumber).toBe(index + 1);
-        expect(lap.time).toBeGreaterThan(0);
-        expect(lap.timestamp).toBeInstanceOf(Date);
-      });
+    it("filters rounds by team", async () => {
+      const otherTeamRound: SavedRound = {
+        ...mockRound,
+        id: generateUUID(),
+        teamId: "team-2",
+        teamName: "Other Team",
+      };
+
+      await indexedDBManager.saveRound(mockRound);
+      await indexedDBManager.saveRound(otherTeamRound);
+
+      const team1Rounds = await indexedDBManager.getRoundsByTeam("team-1");
+      expect(team1Rounds).toHaveLength(1);
+      expect(team1Rounds[0]?.teamId).toBe("team-1");
     });
 
-    it("should calculate total time correctly", () => {
-      const calculatedTotal = mockRound.laps.reduce(
-        (sum, lap) => sum + lap.time,
-        0
-      );
-      expect(mockRound.totalTime).toBe(calculatedTotal);
+    it("deletes team and its rounds", async () => {
+      const roundForTeam1: SavedRound = {
+        ...mockRound,
+        id: generateUUID(),
+      };
+      const roundForTeam2: SavedRound = {
+        ...mockRound,
+        id: generateUUID(),
+        teamId: "team-2",
+        teamName: "Team 2",
+      };
+
+      await indexedDBManager.saveTeam(mockTeam);
+      await indexedDBManager.saveTeam({ ...mockTeam, id: "team-2" });
+      await indexedDBManager.saveRound(roundForTeam1);
+      await indexedDBManager.saveRound(roundForTeam2);
+
+      await indexedDBManager.deleteTeam("team-1");
+
+      const remainingRounds = await indexedDBManager.getAllRounds();
+      expect(remainingRounds).toHaveLength(1);
+      expect(remainingRounds[0]?.teamId).toBe("team-2");
+    });
+
+    it("clears all rounds", async () => {
+      await indexedDBManager.saveRound(mockRound);
+      await indexedDBManager.clearAllRounds();
+
+      const rounds = await indexedDBManager.getAllRounds();
+      expect(rounds).toHaveLength(0);
     });
   });
 
-  describe("Data Validation", () => {
-    it("should validate team ID format", () => {
-      const validIds = ["team-1", "team-abc-123", "unique-team-id"];
-      const invalidIds = ["", " ", "team 1", "team@1"];
+  describe("Settings Operations", () => {
+    it(
+      "sets and gets settings values",
+      async () => {
+        await indexedDBManager.setSetting("theme", "dark");
+        const value = await indexedDBManager.getSetting("theme");
 
-      validIds.forEach((id) => {
-        expect(typeof id).toBe("string");
-        expect(id.length).toBeGreaterThan(0);
-        expect(id.trim()).toBe(id);
-      });
-
-      invalidIds.forEach((id) => {
-        if (id.includes(" ") || id.includes("@")) {
-          expect(id).toMatch(/[\s@]/); // Should contain spaces or special chars
-        }
-      });
-    });
-
-    it("should validate color format", () => {
-      const validColors = ["#ff0000", "#00ff00", "#0000ff", "#ffffff"];
-      const invalidColors = ["red", "rgb(255,0,0)", "#gg0000", ""];
-
-      validColors.forEach((color) => {
-        expect(color).toMatch(/^#[0-9a-fA-F]{6}$/);
-      });
-
-      invalidColors.forEach((color) => {
-        if (color !== "") {
-          expect(color).not.toMatch(/^#[0-9a-fA-F]{6}$/);
-        }
-      });
-    });
-  });
-
-  describe("Time Calculations", () => {
-    it("should handle time formatting correctly", () => {
-      const timeInMs = 125000; // 2 minutes 5 seconds
-      const minutes = Math.floor(timeInMs / 60000);
-      const seconds = Math.floor((timeInMs % 60000) / 1000);
-      const milliseconds = timeInMs % 1000;
-
-      expect(minutes).toBe(2);
-      expect(seconds).toBe(5);
-      expect(milliseconds).toBe(0);
-    });
-
-    it("should calculate lap times accurately", () => {
-      const startTime = new Date("2024-01-01T00:00:00Z").getTime();
-      const lap1End = new Date("2024-01-01T00:01:00Z").getTime();
-      const lap2End = new Date("2024-01-01T00:02:00Z").getTime();
-
-      const lap1Time = lap1End - startTime;
-      const lap2Time = lap2End - lap1End;
-
-      expect(lap1Time).toBe(60000); // 1 minute
-      expect(lap2Time).toBe(60000); // 1 minute
-    });
+        expect(value).toBe("dark");
+      },
+      { timeout: 30000 }
+    );
   });
 });
