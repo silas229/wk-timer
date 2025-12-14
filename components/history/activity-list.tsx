@@ -1,5 +1,5 @@
-import { formatTime } from "@/lib/lap-activities"
-import type { ActivityTime, RoundComparison } from "@/lib/lap-activities"
+import { formatTime } from "@/lib/lap-activities";
+import type { ActivityTime, RoundComparison } from "@/lib/lap-activities";
 
 interface ActivityListProps {
   activities: ActivityTime[]
@@ -10,12 +10,12 @@ interface ActivityListProps {
 export function ActivityList({ activities, comparison, layout = 'grid' }: ActivityListProps) {
   const containerClass = layout === 'single-column'
     ? "space-y-2"
-    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2";
 
   return (
     <div className={containerClass}>
       {activities.map((activity, index) => {
-        const activityComparison = comparison?.activityComparisons[activity.name]
+        const activityComparison = comparison?.activityComparisons[activity.name];
         return (
           <div
             key={`${activity.name}-${index}`}
@@ -33,8 +33,8 @@ export function ActivityList({ activities, comparison, layout = 'grid' }: Activi
               )}
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

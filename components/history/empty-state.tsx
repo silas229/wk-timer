@@ -1,5 +1,5 @@
-import { Clock } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Clock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Team {
   id: string
@@ -28,5 +28,5 @@ export function EmptyState({ currentTeam }: EmptyStateProps) {
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }

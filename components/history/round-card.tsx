@@ -1,10 +1,10 @@
-import { Trash2, Share2, BadgeInfo } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { calculateActivityTimes, formatTime, type RoundComparison } from "@/lib/lap-activities"
-import { ActivityList } from "./activity-list"
-import { calculateTotalScore, formatPoints, calculateTargetTimeMs } from "@/lib/scoring"
-import type { SavedRound } from "@/lib/indexeddb"
+import { Trash2, Share2, BadgeInfo } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { calculateActivityTimes, formatTime, type RoundComparison } from "@/lib/lap-activities";
+import { ActivityList } from "./activity-list";
+import { calculateTotalScore, formatPoints, calculateTargetTimeMs } from "@/lib/scoring";
+import type { SavedRound } from "@/lib/indexeddb";
 
 interface Team {
   id: string
@@ -29,32 +29,32 @@ export function RoundCard({
   onDeleteRound,
   onOpenDetails
 }: Readonly<RoundCardProps>) {
-  const activities = calculateActivityTimes(round.laps)
+  const activities = calculateActivityTimes(round.laps);
 
   const handleOpenDetails = () => {
     if (onOpenDetails) {
-      onOpenDetails(round)
+      onOpenDetails(round);
     }
-  }
+  };
 
   const getTeamColor = (teamId: string) => {
-    const team = teams.find(t => t.id === teamId)
-    return team?.color || "#6b7280"
-  }
+    const team = teams.find(t => t.id === teamId);
+    return team?.color || "#6b7280";
+  };
 
   const getTeam = (teamId: string) => {
-    return teams.find(t => t.id === teamId)
-  }
+    return teams.find(t => t.id === teamId);
+  };
 
   const formatTimeOfDay = (date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
       timeStyle: 'short'
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   // Calculate target time for B-Teil if team average age is available
-  const team = getTeam(round.teamId)
-  const targetTime = calculateTargetTimeMs(team?.averageAge)
+  const team = getTeam(round.teamId);
+  const targetTime = calculateTargetTimeMs(team?.averageAge);
 
   // Calculate scoring if possible
   const canCalculateScore = team?.averageAge !== undefined &&
@@ -62,9 +62,9 @@ export function RoundCard({
     round.knotTime !== undefined &&
     round.aPartPenaltySeconds !== undefined &&
     round.overallImpression !== undefined &&
-    round.bPartErrorPoints !== undefined
+    round.bPartErrorPoints !== undefined;
 
-  let scoringResult = null
+  let scoringResult = null;
   if (canCalculateScore) {
     const scoringParams = {
       teamAverageAge: team.averageAge!,
@@ -74,8 +74,8 @@ export function RoundCard({
       overallImpression: round.overallImpression!,
       bPartTime: round.totalTime,
       bPartErrorPoints: round.bPartErrorPoints!,
-    }
-    scoringResult = calculateTotalScore(scoringParams)
+    };
+    scoringResult = calculateTotalScore(scoringParams);
   }
 
   return (
@@ -171,5 +171,5 @@ export function RoundCard({
         />
       </CardContent>
     </Card>
-  )
+  );
 }

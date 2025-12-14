@@ -1,8 +1,8 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { RoundCard } from "./round-card"
-import { compareRounds } from "@/lib/lap-activities"
-import type { SavedRound } from "@/lib/indexeddb"
-import type { RoundComparison } from "@/lib/lap-activities"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { RoundCard } from "./round-card";
+import { compareRounds } from "@/lib/lap-activities";
+import type { SavedRound } from "@/lib/indexeddb";
+import type { RoundComparison } from "@/lib/lap-activities";
 
 interface Team {
   id: string
@@ -29,8 +29,8 @@ export function RoundsList({
   const formatDayHeader = (date: Date) => {
     return new Intl.DateTimeFormat('de-DE', {
       dateStyle: 'full'
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   const getPreviousTeamComparison = (currentRound: SavedRound): RoundComparison | null => {
     // Find all rounds completed before this round for the same team
@@ -39,43 +39,43 @@ export function RoundsList({
         round.teamId === currentRound.teamId &&
         round.completedAt.getTime() < currentRound.completedAt.getTime()
       )
-      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
 
-    const previousRound = previousRounds[0] || null
+    const previousRound = previousRounds[0] || null;
 
-    return compareRounds(currentRound, previousRound)
-  }
+    return compareRounds(currentRound, previousRound);
+  };
 
   // Group rounds by day
   const groupedRounds = () => {
-    const groups: { [key: string]: SavedRound[] } = {}
+    const groups: { [key: string]: SavedRound[] } = {};
 
     filteredRounds.forEach(round => {
-      const dateKey = round.completedAt.toDateString()
+      const dateKey = round.completedAt.toDateString();
       if (!groups[dateKey]) {
-        groups[dateKey] = []
+        groups[dateKey] = [];
       }
-      groups[dateKey]!.push(round)
-    })
+      groups[dateKey]!.push(round);
+    });
 
     // Sort each group by time (newest first)
     Object.keys(groups).forEach(dateKey => {
-      groups[dateKey]!.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
-    })
+      groups[dateKey]!.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+    });
 
     // Sort groups by date (newest first)
     const sortedGroups = Object.entries(groups).sort(([a], [b]) =>
       new Date(b).getTime() - new Date(a).getTime()
-    )
+    );
 
-    return sortedGroups
-  }
+    return sortedGroups;
+  };
   return (
     <Accordion
       type="multiple"
       defaultValue={(() => {
-        const groups = groupedRounds()
-        return groups.length > 0 && groups[0]?.[0] ? [groups[0][0]] : []
+        const groups = groupedRounds();
+        return groups.length > 0 && groups[0]?.[0] ? [groups[0][0]] : [];
       })()}
       className="space-y-4"
     >
@@ -94,7 +94,7 @@ export function RoundsList({
           <AccordionContent className="px-4 pb-4">
             <div className="space-y-3 pt-2">
               {roundsForDay.map((round) => {
-                const previousComparison = getPreviousTeamComparison(round)
+                const previousComparison = getPreviousTeamComparison(round);
                 return (
                   <RoundCard
                     key={round.id}
@@ -104,12 +104,12 @@ export function RoundsList({
                     onDeleteRound={onDeleteRound}
                     onOpenDetails={onOpenDetails}
                   />
-                )
+                );
               })}
             </div>
           </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
-  )
+  );
 }

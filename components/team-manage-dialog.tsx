@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useEffect } from "react"
-import { Users, Plus, Edit2, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useTeam } from "@/components/team-context"
+import { useState, useCallback, useEffect } from "react";
+import { Users, Plus, Edit2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useTeam } from "@/components/team-context";
 
 interface TeamManageDialogProps {
   open: boolean
@@ -15,52 +15,52 @@ interface TeamManageDialogProps {
 }
 
 export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<TeamManageDialogProps>) {
-  const { teams, createTeam, updateTeam, deleteTeam } = useTeam()
-  const [newTeamName, setNewTeamName] = useState("")
-  const [editingTeam, setEditingTeam] = useState<{ id: string; name: string; color: string; averageAge?: number } | null>(null)
-  const [editTeamName, setEditTeamName] = useState("")
-  const [editTeamAverageAge, setEditTeamAverageAge] = useState<string>("")
+  const { teams, createTeam, updateTeam, deleteTeam } = useTeam();
+  const [newTeamName, setNewTeamName] = useState("");
+  const [editingTeam, setEditingTeam] = useState<{ id: string; name: string; color: string; averageAge?: number } | null>(null);
+  const [editTeamName, setEditTeamName] = useState("");
+  const [editTeamAverageAge, setEditTeamAverageAge] = useState<string>("");
 
   // Set team to edit mode when dialog opens with editTeamId
   useEffect(() => {
     if (open && editTeamId) {
-      const teamToEdit = teams.find(t => t.id === editTeamId)
+      const teamToEdit = teams.find(t => t.id === editTeamId);
       if (teamToEdit) {
-        setEditingTeam(teamToEdit)
-        setEditTeamName(teamToEdit.name)
-        setEditTeamAverageAge(teamToEdit.averageAge?.toString() || "")
+        setEditingTeam(teamToEdit);
+        setEditTeamName(teamToEdit.name);
+        setEditTeamAverageAge(teamToEdit.averageAge?.toString() || "");
       }
     }
-  }, [open, editTeamId, teams])
+  }, [open, editTeamId, teams]);
 
   const handleCreateTeam = useCallback(() => {
-    if (!newTeamName.trim()) return
-    createTeam(newTeamName)
-    setNewTeamName("")
-  }, [newTeamName, createTeam])
+    if (!newTeamName.trim()) return;
+    createTeam(newTeamName);
+    setNewTeamName("");
+  }, [newTeamName, createTeam]);
 
   const handleUpdateTeam = useCallback((teamId: string, newName: string, averageAge?: number) => {
-    if (!newName.trim()) return
-    updateTeam(teamId, newName, averageAge)
-    setEditingTeam(null)
-    setEditTeamName("")
-    setEditTeamAverageAge("")
-  }, [updateTeam])
+    if (!newName.trim()) return;
+    updateTeam(teamId, newName, averageAge);
+    setEditingTeam(null);
+    setEditTeamName("");
+    setEditTeamAverageAge("");
+  }, [updateTeam]);
 
   const handleDeleteTeam = useCallback((teamId: string) => {
-    const confirmDelete = globalThis.confirm("Bist du sicher, dass du diese Gruppe löschen möchtest? Es werden auch alle erfassten Durchgänge der Gruppe gelöscht.")
+    const confirmDelete = globalThis.confirm("Bist du sicher, dass du diese Gruppe löschen möchtest? Es werden auch alle erfassten Durchgänge der Gruppe gelöscht.");
     if (confirmDelete) {
-      deleteTeam(teamId)
+      deleteTeam(teamId);
     }
-  }, [deleteTeam])
+  }, [deleteTeam]);
 
   const handleClose = useCallback(() => {
-    onOpenChange(false)
+    onOpenChange(false);
     // Reset editing state when closing
-    setEditingTeam(null)
-    setEditTeamName("")
-    setEditTeamAverageAge("")
-  }, [onOpenChange])
+    setEditingTeam(null);
+    setEditTeamName("");
+    setEditTeamAverageAge("");
+  }, [onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,13 +115,13 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
                         placeholder="Gruppenname"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
-                            handleUpdateTeam(team.id, editTeamName, avgAge)
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined;
+                            handleUpdateTeam(team.id, editTeamName, avgAge);
                           }
                           if (e.key === 'Escape') {
-                            setEditingTeam(null)
-                            setEditTeamName("")
-                            setEditTeamAverageAge("")
+                            setEditingTeam(null);
+                            setEditTeamName("");
+                            setEditTeamAverageAge("");
                           }
                         }}
                         autoFocus
@@ -136,13 +136,13 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
                         placeholder="Durchschnittsalter (für Punkteberechnung)"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
-                            handleUpdateTeam(team.id, editTeamName, avgAge)
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined;
+                            handleUpdateTeam(team.id, editTeamName, avgAge);
                           }
                           if (e.key === 'Escape') {
-                            setEditingTeam(null)
-                            setEditTeamName("")
-                            setEditTeamAverageAge("")
+                            setEditingTeam(null);
+                            setEditTeamName("");
+                            setEditTeamAverageAge("");
                           }
                         }}
                       />
@@ -162,8 +162,8 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
                       <>
                         <Button
                           onClick={() => {
-                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined
-                            handleUpdateTeam(team.id, editTeamName, avgAge)
+                            const avgAge = editTeamAverageAge ? Number.parseFloat(editTeamAverageAge) : undefined;
+                            handleUpdateTeam(team.id, editTeamName, avgAge);
                           }}
                           size="sm"
                           variant="ghost"
@@ -173,9 +173,9 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
                         </Button>
                         <Button
                           onClick={() => {
-                            setEditingTeam(null)
-                            setEditTeamName("")
-                            setEditTeamAverageAge("")
+                            setEditingTeam(null);
+                            setEditTeamName("");
+                            setEditTeamAverageAge("");
                           }}
                           size="sm"
                           variant="ghost"
@@ -187,9 +187,9 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
                       <>
                         <Button
                           onClick={() => {
-                            setEditingTeam(team)
-                            setEditTeamName(team.name)
-                            setEditTeamAverageAge(team.averageAge?.toString() || "")
+                            setEditingTeam(team);
+                            setEditTeamName(team.name);
+                            setEditTeamAverageAge(team.averageAge?.toString() || "");
                           }}
                           size="sm"
                           variant="ghost"
@@ -224,5 +224,5 @@ export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<Te
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

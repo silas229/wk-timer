@@ -1,4 +1,4 @@
-import { formatTime } from "@/lib/lap-activities"
+import { formatTime } from "@/lib/lap-activities";
 
 interface CurrentActivity {
   name: string
@@ -26,5 +26,5 @@ export function CurrentActivityItem({ currentActivity }: CurrentActivityItemProp
         </div>
       </div>
     </div>
-  )
+  );
 }

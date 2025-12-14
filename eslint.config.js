@@ -51,4 +51,9 @@ export default [
       "next.config.mjs",
     ],
   },
+  {
+    rules: {
+      semi: ["warn", "always"],
+    },
+  },
 ];

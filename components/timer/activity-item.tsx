@@ -1,5 +1,5 @@
-import { formatTime } from "@/lib/lap-activities"
-import type { ActivityTime, ActivityComparison } from "@/lib/lap-activities"
+import { formatTime } from "@/lib/lap-activities";
+import type { ActivityTime, ActivityComparison } from "@/lib/lap-activities";
 
 interface ActivityItemProps {
   activity: ActivityTime
@@ -24,5 +24,5 @@ export function ActivityItem({ activity, comparison }: ActivityItemProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

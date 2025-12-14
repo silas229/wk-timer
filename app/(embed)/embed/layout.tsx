@@ -1,29 +1,29 @@
-import { Geist, Geist_Mono } from "next/font/google"
-import type { Metadata, Viewport } from "next"
+import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 
-import "../../globals.css"
-import { Providers } from "@/components/providers"
+import "../../globals.css";
+import { Providers } from "@/components/providers";
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 export const metadata: Metadata = {
   robots: "noindex, nofollow",
-}
+};
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export default function EmbedLayout({
   children,

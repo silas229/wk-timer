@@ -1,8 +1,8 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatTime } from "@/lib/lap-activities"
-import { calculateTargetTimeMs } from "@/lib/scoring"
-import type { RoundComparison } from "@/lib/lap-activities"
-import type { Lap } from "@/lib/indexeddb"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTime } from "@/lib/lap-activities";
+import { calculateTargetTimeMs } from "@/lib/scoring";
+import type { RoundComparison } from "@/lib/lap-activities";
+import type { Lap } from "@/lib/indexeddb";
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -16,28 +16,28 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ time, state, laps, comparison, teamAverageAge }: TimerDisplayProps) {
   const getStatusText = () => {
-    if (state === "stopped") return "Bereit zu starten"
-    if (state === "running") return `Läuft - Runde ${laps.length + 1}/13`
-    if (state === "finished") return "Durchgang abgeschlossen!"
-    return ""
-  }
+    if (state === "stopped") return "Bereit zu starten";
+    if (state === "running") return `Läuft - Runde ${laps.length + 1}/13`;
+    if (state === "finished") return "Durchgang abgeschlossen!";
+    return "";
+  };
 
   // Calculate target time and difference if team average age is available
   const getTargetTimeInfo = () => {
-    if (!teamAverageAge || state !== "finished") return null
+    if (!teamAverageAge || state !== "finished") return null;
 
-    const targetTime = calculateTargetTimeMs(teamAverageAge)!
-    const currentTime = time
-    const timeDiff = currentTime - targetTime
+    const targetTime = calculateTargetTimeMs(teamAverageAge)!;
+    const currentTime = time;
+    const timeDiff = currentTime - targetTime;
 
     return {
       targetTime,
       timeDiff,
       isFaster: timeDiff < 0
-    }
-  }
+    };
+  };
 
-  const targetTimeInfo = getTargetTimeInfo()
+  const targetTimeInfo = getTargetTimeInfo();
 
   return (
     <Card>
@@ -63,5 +63,5 @@ export function TimerDisplay({ time, state, laps, comparison, teamAverageAge }: 
         </p>
       </CardHeader>
     </Card>
-  )
+  );
 }
