@@ -29,7 +29,7 @@ interface TeamProviderProps {
   children: ReactNode
 }
 
-export function TeamProvider({ children }: TeamProviderProps) {
+export function TeamProvider({ children }: Readonly<TeamProviderProps>) {
   const [teams, setTeams] = useState<Team[]>([])
   const [selectedTeamId, setSelectedTeamId] = useState<string>("")
   const [isInitialized, setIsInitialized] = useState(false)
@@ -180,17 +180,48 @@ export function TeamProvider({ children }: TeamProviderProps) {
     return teams.find(team => team.id === selectedTeamId)
   }, [teams, selectedTeamId])
 
-  const value: TeamContextValue = {
+  // Wrap async functions to provide void-returning versions for context
+  const syncSetSelectedTeamId = useCallback((id: string) => {
+    void handleSetSelectedTeamId(id)
+  }, [handleSetSelectedTeamId])
+
+  const syncLoadTeams = useCallback(() => {
+    void loadTeams()
+  }, [loadTeams])
+
+  const syncCreateTeam = useCallback((name: string) => {
+    void createTeam(name)
+  }, [createTeam])
+
+  const syncUpdateTeam = useCallback((id: string, name: string, averageAge?: number) => {
+    void updateTeam(id, name, averageAge)
+  }, [updateTeam])
+
+  const syncDeleteTeam = useCallback((id: string) => {
+    void deleteTeam(id)
+  }, [deleteTeam])
+
+  const value: TeamContextValue = useMemo(() => ({
     teams,
     selectedTeamId,
-    setSelectedTeamId: handleSetSelectedTeamId,
-    loadTeams,
+    setSelectedTeamId: syncSetSelectedTeamId,
+    loadTeams: syncLoadTeams,
     getCurrentTeam,
-    createTeam,
-    updateTeam,
-    deleteTeam,
+    createTeam: syncCreateTeam,
+    updateTeam: syncUpdateTeam,
+    deleteTeam: syncDeleteTeam,
     isInitialized
-  }
+  }), [
+    teams,
+    selectedTeamId,
+    syncSetSelectedTeamId,
+    syncLoadTeams,
+    getCurrentTeam,
+    syncCreateTeam,
+    syncUpdateTeam,
+    syncDeleteTeam,
+    isInitialized
+  ])
 
   return (
     <TeamContext.Provider value={value}>
