@@ -49,7 +49,12 @@ export async function shareRoundAndPersist(
     throw new Error("Failed to share round");
   }
 
-  const result = (await response.json()) as ShareRoundApiResponse;
+  let result: ShareRoundApiResponse | undefined;
+  try {
+    result = (await response.json()) as ShareRoundApiResponse;
+  } catch {
+    result = undefined;
+  }
 
   if (!result?.sharedUrl) {
     throw new Error("Failed to share round");
