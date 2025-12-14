@@ -1,3 +1,6 @@
+import next from "eslint-config-next";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 import js from "@eslint/js";
 import pluginNext from "@next/eslint-plugin-next";
 import eslintConfigPrettier from "eslint-config-prettier";
@@ -8,6 +11,9 @@ import tseslint from "typescript-eslint";
 
 /** @type {import("eslint").Linter.Config} */
 export default [
+  ...next,
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
@@ -55,5 +61,5 @@ export default [
     rules: {
       semi: ["warn", "always"],
     },
-  },
+  }
 ];
