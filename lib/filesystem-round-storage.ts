@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { RoundStorage, SharedRoundData } from "./round-storage";
+import { logger } from "./logger";
 
 /**
  * Validate round ID: accept only UUIDs
@@ -23,6 +24,12 @@ export class FileSystemRoundStorage implements RoundStorage {
     if (!isSafeId(roundData?.id)) {
       throw new Error("Invalid round ID (potential path traversal detected)");
     }
+    const log = logger.child({
+      event: "storage.filesystem.store",
+      roundId: roundData.id,
+      storageDir: this.storageDir,
+    });
+
     try {
       // Ensure the storage directory exists
       await fs.mkdir(this.storageDir, { recursive: true });
@@ -30,8 +37,9 @@ export class FileSystemRoundStorage implements RoundStorage {
       // Write the round data to a JSON file
       const filePath = path.join(this.storageDir, `${roundData.id}.json`);
       await fs.writeFile(filePath, JSON.stringify(roundData, null, 2), "utf-8");
+      log.info("Round stored on filesystem");
     } catch (error) {
-      console.error(`Failed to store round ${roundData.id}:`, error);
+      log.error({ err: error }, "Failed to store round on filesystem");
       throw new Error(
         `Failed to store round: ${error instanceof Error ? error.message : "Unknown error"}`
       );
@@ -42,9 +50,15 @@ export class FileSystemRoundStorage implements RoundStorage {
     if (!isSafeId(id)) {
       throw new Error("Invalid round ID (potential path traversal detected)");
     }
+    const log = logger.child({
+      event: "storage.filesystem.retrieve",
+      roundId: id,
+      storageDir: this.storageDir,
+    });
     try {
       const filePath = path.join(this.storageDir, `${id}.json`);
       const fileContent = await fs.readFile(filePath, "utf-8");
+      log.debug("Round loaded from filesystem");
       return JSON.parse(fileContent) as SharedRoundData;
     } catch (error) {
       if (
@@ -53,9 +67,10 @@ export class FileSystemRoundStorage implements RoundStorage {
         error.code === "ENOENT"
       ) {
         // File doesn't exist
+        log.warn("Round not found on filesystem");
         return null;
       }
-      console.error(`Failed to retrieve round ${id}:`, error);
+      log.error({ err: error }, "Failed to retrieve round from filesystem");
       throw new Error(
         `Failed to retrieve round: ${error instanceof Error ? error.message : "Unknown error"}`
       );

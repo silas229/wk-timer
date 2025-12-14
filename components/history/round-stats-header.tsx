@@ -1,6 +1,6 @@
-import { Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import type { SavedRound } from "@/lib/indexeddb"
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { SavedRound } from "@/lib/indexeddb";
 
 interface Team {
   id: string
@@ -47,5 +47,5 @@ export function RoundStatsHeader({
         </p>
       </div>
     </div>
-  )
+  );
 }

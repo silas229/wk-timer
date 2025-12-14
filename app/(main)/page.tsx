@@ -1,37 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { useTeam } from "@/components/team-context"
-import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
-import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities"
-import { generateUUID } from "@/lib/utils"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useTeam } from "@/components/team-context";
+import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb";
+import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities";
+import { generateUUID } from "@/lib/utils";
 import {
   createRoundHandlers,
   getAllSavedRoundsFromStorage,
-} from "@/lib/round-client"
-import { PWAInstallPrompt } from "@/components/pwa-install"
-import { TimerDisplay } from "@/components/timer/timer-display"
-import { ActivitiesDisplay } from "@/components/timer/activities-display"
-import { TimerControls } from "@/components/timer/timer-controls"
-import { RoundDetailsDialog } from "@/components/round-details-dialog"
+} from "@/lib/round-client";
+import { PWAInstallPrompt } from "@/components/pwa-install";
+import { TimerDisplay } from "@/components/timer/timer-display";
+import { ActivitiesDisplay } from "@/components/timer/activities-display";
+import { TimerControls } from "@/components/timer/timer-controls";
+import { RoundDetailsDialog } from "@/components/round-details-dialog";
 
 type TimerState = "stopped" | "running" | "finished"
 
 export default function Page() {
-  const { selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
-  const [time, setTime] = useState(0)
-  const [state, setState] = useState<TimerState>("stopped")
-  const [laps, setLaps] = useState<Lap[]>([])
-  const [startTime, setStartTime] = useState<number | null>(null)
-  const [activities, setActivities] = useState<ActivityTime[]>([])
-  const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null)
-  const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
-  const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null)
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
-  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null)
-  const activitiesRef = useRef<HTMLDivElement>(null)
+  const { selectedTeamId, getCurrentTeam, isInitialized } = useTeam();
+  const [time, setTime] = useState(0);
+  const [state, setState] = useState<TimerState>("stopped");
+  const [laps, setLaps] = useState<Lap[]>([]);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [activities, setActivities] = useState<ActivityTime[]>([]);
+  const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null);
+  const [savedRounds, setSavedRounds] = useState<SavedRound[]>([]);
+  const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null);
+  const activitiesRef = useRef<HTMLDivElement>(null);
 
-  const getAverageAge = useCallback(() => getCurrentTeam()?.averageAge, [getCurrentTeam])
+  const getAverageAge = useCallback(() => getCurrentTeam()?.averageAge, [getCurrentTeam]);
 
   const { handleUpdateRound, handleDetailsShare } = useMemo(() => {
     return createRoundHandlers({
@@ -40,54 +40,54 @@ export default function Page() {
       setSavedRounds,
       setRoundToDetail,
       setLastSavedRound,
-    })
-  }, [getAverageAge, savedRounds])
+    });
+  }, [getAverageAge, savedRounds]);
 
   // Calculate activities whenever laps change
   useEffect(() => {
-    const calculatedActivities = calculateActivityTimes(laps)
-    setActivities(calculatedActivities)
-  }, [laps])
+    const calculatedActivities = calculateActivityTimes(laps);
+    setActivities(calculatedActivities);
+  }, [laps]);
 
   // Load saved rounds for comparison
   const loadSavedRounds = useCallback(async () => {
-    if (!isInitialized) return
+    if (!isInitialized) return;
 
-    const rounds = await getAllSavedRoundsFromStorage()
-    setSavedRounds(rounds)
-  }, [isInitialized])
+    const rounds = await getAllSavedRoundsFromStorage();
+    setSavedRounds(rounds);
+  }, [isInitialized]);
 
   // Load rounds when initialized
   useEffect(() => {
     if (isInitialized) {
-      loadSavedRounds()
+      loadSavedRounds();
     }
-  }, [isInitialized, loadSavedRounds])
+  }, [isInitialized, loadSavedRounds]);
 
   // Get last completed round for current team for comparison
   const getLastRoundForComparison = useCallback(() => {
-    if (!selectedTeamId || savedRounds.length === 0) return null
+    if (!selectedTeamId || savedRounds.length === 0) return null;
 
     // Find the most recent completed round for the current team
     const teamRounds = savedRounds
       .filter(round => round.teamId === selectedTeamId)
-      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+      .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
 
-    return teamRounds[0] || null
-  }, [selectedTeamId, savedRounds])
+    return teamRounds[0] || null;
+  }, [selectedTeamId, savedRounds]);
 
   // Get comparison data for current round vs last round
   const getCurrentRoundComparison = useCallback(() => {
-    const lastRound = previousRoundForComparison
-    if (!lastRound || activities.length === 0) return null
+    const lastRound = previousRoundForComparison;
+    if (!lastRound || activities.length === 0) return null;
 
     // For running rounds, only calculate total time diff when finished
     const currentRoundData = {
       totalTime: time,
       laps: laps
-    }
+    };
 
-    const comparison = compareRounds(currentRoundData, lastRound)
+    const comparison = compareRounds(currentRoundData, lastRound);
 
     // Override total time diff to only show when finished
     if (comparison && state !== "finished") {
@@ -95,55 +95,55 @@ export default function Page() {
         ...comparison,
         totalTimeDiff: null,
         isFasterOverall: null
-      }
+      };
     }
 
-    return comparison
-  }, [previousRoundForComparison, activities, laps, time, state])
+    return comparison;
+  }, [previousRoundForComparison, activities, laps, time, state]);
 
   // IndexedDB functions
   const saveRoundToStorage = useCallback(async (round: SavedRound) => {
     if (!isInitialized) {
-      console.warn('Database not initialized, cannot save round')
-      return
+      console.warn('Database not initialized, cannot save round');
+      return;
     }
 
     try {
-      await indexedDB.saveRound(round)
+      await indexedDB.saveRound(round);
       // Reload saved rounds for comparison
-      await loadSavedRounds()
+      await loadSavedRounds();
     } catch (error) {
-      console.error('Failed to save round to IndexedDB:', error)
+      console.error('Failed to save round to IndexedDB:', error);
     }
-  }, [isInitialized, loadSavedRounds])
+  }, [isInitialized, loadSavedRounds]);
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: NodeJS.Timeout | null = null;
 
     if (state === "running") {
       interval = setInterval(() => {
-        setTime(Date.now() - startTime!)
-      }, 10)
+        setTime(Date.now() - startTime!);
+      }, 10);
     }
 
     return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [state, startTime])
+      if (interval) clearInterval(interval);
+    };
+  }, [state, startTime]);
 
   const handleStart = () => {
     // Capture the current last round for comparison before starting the new round
-    const lastRound = getLastRoundForComparison()
-    setPreviousRoundForComparison(lastRound)
+    const lastRound = getLastRoundForComparison();
+    setPreviousRoundForComparison(lastRound);
 
-    setStartTime(Date.now() - time)
-    setState("running")
-  }
+    setStartTime(Date.now() - time);
+    setState("running");
+  };
 
   const handleStop = () => {
-    setState("stopped")
-  }
+    setState("stopped");
+  };
 
   const handleLap = async () => {
     if (state === "running" && laps.length < 13) {
@@ -151,20 +151,20 @@ export default function Page() {
         lapNumber: laps.length + 1,
         time: time,
         timestamp: new Date()
-      }
-      const updatedLaps = [...laps, newLap]
-      setLaps(updatedLaps)
+      };
+      const updatedLaps = [...laps, newLap];
+      setLaps(updatedLaps);
 
       // Scroll to bottom of activities
       setTimeout(() => {
         if (activitiesRef.current) {
-          activitiesRef.current.scrollTop = activitiesRef.current.scrollHeight
+          activitiesRef.current.scrollTop = activitiesRef.current.scrollHeight;
         }
-      }, 100)
+      }, 100);
 
       // If this is the 13th lap, finish the round and automatically save it
       if (updatedLaps.length === 13) {
-        setState("finished")
+        setState("finished");
 
         // Auto-save the round
         const round: SavedRound = {
@@ -174,62 +174,62 @@ export default function Page() {
           laps: updatedLaps,
           teamId: selectedTeamId,
           teamName: getCurrentTeam()?.name || "Unbekannte Gruppe"
-        }
+        };
 
-        setLastSavedRound(round)
-        await saveRoundToStorage(round)
+        setLastSavedRound(round);
+        await saveRoundToStorage(round);
       }
     }
-  }
+  };
 
   const handleRestart = async () => {
-    setTime(0)
-    setLaps([])
-    setActivities([])
-    setState("stopped")
-    setStartTime(null)
-    setLastSavedRound(null)
-    setPreviousRoundForComparison(null)
+    setTime(0);
+    setLaps([]);
+    setActivities([]);
+    setState("stopped");
+    setStartTime(null);
+    setLastSavedRound(null);
+    setPreviousRoundForComparison(null);
     // Reload saved rounds to get fresh comparison data
-    await loadSavedRounds()
-  }
+    await loadSavedRounds();
+  };
 
   const handleDiscardRound = async () => {
     if (lastSavedRound) {
       try {
-        await indexedDB.deleteRound(lastSavedRound.id)
-        setLastSavedRound(null)
-        await handleRestart()
+        await indexedDB.deleteRound(lastSavedRound.id);
+        setLastSavedRound(null);
+        await handleRestart();
       } catch (error) {
-        console.error('Failed to discard round:', error)
+        console.error('Failed to discard round:', error);
       }
     }
-  }
+  };
 
   const handleOpenDetails = (round: SavedRound) => {
-    setRoundToDetail(round)
-    setDetailsDialogOpen(true)
-  }
+    setRoundToDetail(round);
+    setDetailsDialogOpen(true);
+  };
 
   const handleButtonClick = () => {
     if (state === "stopped") {
-      handleStart()
+      handleStart();
       // Scroll to bottom to show current activity
       setTimeout(() => {
         if (activitiesRef.current) {
-          activitiesRef.current.scrollTop = activitiesRef.current.scrollHeight
+          activitiesRef.current.scrollTop = activitiesRef.current.scrollHeight;
         }
-      }, 100)
+      }, 100);
     }
     else if (state === "running") {
       if (laps.length < 13) {
-        handleLap()
+        handleLap();
         // Scrolling is already handled in handleLap
       }
-      else handleStop()
+      else handleStop();
     }
-    else if (state === "finished") handleRestart()
-  }
+    else if (state === "finished") handleRestart();
+  };
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -278,5 +278,5 @@ export default function Page() {
         )}
       </div>
     </div>
-  )
+  );
 }

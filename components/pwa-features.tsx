@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Smartphone,
   Download,
@@ -10,14 +10,14 @@ import {
   Clock,
   X,
   ChevronRight
-} from 'lucide-react'
-import { usePWA } from '@/hooks/use-pwa'
+} from 'lucide-react';
+import { usePWA } from '@/hooks/use-pwa';
 
 export function PWAFeatures() {
-  const [isOpen, setIsOpen] = useState(false)
-  const { isInstalled, canInstall } = usePWA()
+  const [isOpen, setIsOpen] = useState(false);
+  const { isInstalled, canInstall } = usePWA();
 
-  if (isInstalled) return null
+  if (isInstalled) return null;
 
   const features = [
     {
@@ -44,7 +44,7 @@ export function PWAFeatures() {
       title: "Kein App Store nötig",
       description: "Installation direkt über den Browser"
     }
-  ]
+  ];
 
   return (
     <>
@@ -123,5 +123,5 @@ export function PWAFeatures() {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { useState, useCallback } from "react"
-import { History, ChevronDown, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useTeam } from "@/components/team-context"
-import { TeamManageDialog } from "@/components/team-manage-dialog"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useState, useCallback } from "react";
+import { History, ChevronDown, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useTeam } from "@/components/team-context";
+import { TeamManageDialog } from "@/components/team-manage-dialog";
 
 export function Navigation() {
-  const pathname = usePathname()
-  const { teams, setSelectedTeamId, getCurrentTeam } = useTeam()
-  const [showManageDialog, setShowManageDialog] = useState(false)
+  const pathname = usePathname();
+  const { teams, setSelectedTeamId, getCurrentTeam } = useTeam();
+  const [showManageDialog, setShowManageDialog] = useState(false);
 
   const handleTeamSelect = useCallback((teamId: string) => {
-    setSelectedTeamId(teamId)
-  }, [setSelectedTeamId])
+    setSelectedTeamId(teamId);
+  }, [setSelectedTeamId]);
 
   const handleManageDialogOpen = useCallback(() => {
-    setShowManageDialog(true)
-  }, [])
+    setShowManageDialog(true);
+  }, []);
 
-  const currentTeam = getCurrentTeam()
+  const currentTeam = getCurrentTeam();
 
   return (
     <>
@@ -101,5 +101,5 @@ export function Navigation() {
         </div>
       </header>
     </>
-  )
+  );
 }

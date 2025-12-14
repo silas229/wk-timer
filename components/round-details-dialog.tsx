@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { Share2, Edit3, Copy, Check, Loader2Icon, BadgeInfo } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ErrorPointsInput } from "@/components/ui/error-points-input"
-import { useTeam } from "@/components/team-context"
-import { TeamManageDialog } from "@/components/team-manage-dialog"
-import { calculateTotalScore, formatPoints, calculateTargetTimeMs, type ScoringParameters } from "@/lib/scoring"
-import { formatTime } from "@/lib/lap-activities"
-import type { SavedRound } from "@/lib/indexeddb"
+import { useState, useEffect, useCallback } from "react";
+import { Share2, Edit3, Copy, Check, Loader2Icon, BadgeInfo } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ErrorPointsInput } from "@/components/ui/error-points-input";
+import { useTeam } from "@/components/team-context";
+import { TeamManageDialog } from "@/components/team-manage-dialog";
+import { calculateTotalScore, formatPoints, calculateTargetTimeMs, type ScoringParameters } from "@/lib/scoring";
+import { formatTime } from "@/lib/lap-activities";
+import type { SavedRound } from "@/lib/indexeddb";
 
 interface RoundDetailsDialogProps {
   open: boolean
@@ -28,23 +28,23 @@ export function RoundDetailsDialog({
   onUpdateRound,
   onShareRound
 }: Readonly<RoundDetailsDialogProps>) {
-  const { getCurrentTeam } = useTeam()
+  const { getCurrentTeam } = useTeam();
 
   // Form state
-  const [description, setDescription] = useState("")
-  const [aPartErrorPoints, setAPartErrorPoints] = useState("")
-  const [knotTime, setKnotTime] = useState("")
-  const [aPartPenaltySeconds, setAPartPenaltySeconds] = useState("")
-  const [bPartErrorPoints, setBPartErrorPoints] = useState("")
-  const [overallImpression, setOverallImpression] = useState("")
+  const [description, setDescription] = useState("");
+  const [aPartErrorPoints, setAPartErrorPoints] = useState("");
+  const [knotTime, setKnotTime] = useState("");
+  const [aPartPenaltySeconds, setAPartPenaltySeconds] = useState("");
+  const [bPartErrorPoints, setBPartErrorPoints] = useState("");
+  const [overallImpression, setOverallImpression] = useState("");
 
   // UI state
-  const [isSharing, setIsSharing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [copiedToClipboard, setCopiedToClipboard] = useState(false)
-  const [canUseNativeShare, setCanUseNativeShare] = useState(false)
-  const [teamManageDialogOpen, setTeamManageDialogOpen] = useState(false)
+  const [isSharing, setIsSharing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [canUseNativeShare, setCanUseNativeShare] = useState(false);
+  const [teamManageDialogOpen, setTeamManageDialogOpen] = useState(false);
 
   // Check if native sharing is supported
   useEffect(() => {
@@ -57,20 +57,20 @@ export function RoundDetailsDialog({
 
   // Initialize form when round changes
   useEffect(() => {
-    if (!round) return
+    if (!round) return;
 
-    setDescription(round.description || "")
-    setAPartErrorPoints(round.aPartErrorPoints?.toString() || "")
-    setKnotTime(round.knotTime?.toString() || "")
-    setAPartPenaltySeconds(round.aPartPenaltySeconds?.toString() || "0")
-    setBPartErrorPoints(round.bPartErrorPoints?.toString() || "")
-    setOverallImpression(round.overallImpression?.toFixed(1) || "1.0")
-    setHasUnsavedChanges(false)
-  }, [round])
+    setDescription(round.description || "");
+    setAPartErrorPoints(round.aPartErrorPoints?.toString() || "");
+    setKnotTime(round.knotTime?.toString() || "");
+    setAPartPenaltySeconds(round.aPartPenaltySeconds?.toString() || "0");
+    setBPartErrorPoints(round.bPartErrorPoints?.toString() || "");
+    setOverallImpression(round.overallImpression?.toFixed(1) || "1.0");
+    setHasUnsavedChanges(false);
+  }, [round]);
 
   // Track changes
   useEffect(() => {
-    if (!round) return
+    if (!round) return;
 
     const hasChanges =
       description !== (round.description || "") ||
@@ -78,15 +78,15 @@ export function RoundDetailsDialog({
       knotTime !== (round.knotTime?.toString() || "") ||
       aPartPenaltySeconds !== (round.aPartPenaltySeconds?.toString() || "0") ||
       bPartErrorPoints !== (round.bPartErrorPoints?.toString() || "") ||
-      overallImpression !== (round.overallImpression?.toFixed(1) || "1.0")
+      overallImpression !== (round.overallImpression?.toFixed(1) || "1.0");
 
-    setHasUnsavedChanges(hasChanges)
-  }, [round, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression])
+    setHasUnsavedChanges(hasChanges);
+  }, [round, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression]);
 
   const handleSave = useCallback(async () => {
-    if (!round) return
+    if (!round) return;
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       const updatedData: Partial<SavedRound> = {
         description: description.trim() || undefined,
@@ -95,34 +95,34 @@ export function RoundDetailsDialog({
         aPartPenaltySeconds: aPartPenaltySeconds ? Number.parseFloat(aPartPenaltySeconds) : undefined,
         bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
         overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
-      }
+      };
 
-      await onUpdateRound(round.id, updatedData)
-      setHasUnsavedChanges(false)
+      await onUpdateRound(round.id, updatedData);
+      setHasUnsavedChanges(false);
     } catch (error) {
-      console.error('Error saving round:', error)
+      console.error('Error saving round:', error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }, [round, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression, onUpdateRound])
+  }, [round, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression, onUpdateRound]);
 
   const handleShare = useCallback(async () => {
-    if (!round) return
+    if (!round) return;
 
     // Confirmation for first-time sharing
     if (!round.sharedUrl) {
       const confirmShare = globalThis.confirm(
         "Nach dem Teilen können die Daten nicht mehr geändert werden.\n\nBist du sicher, dass alle Werte korrekt sind und du den Durchgang teilen möchtest?"
-      )
-      if (!confirmShare) return
+      );
+      if (!confirmShare) return;
     }
 
     // Save first if there are unsaved changes
     if (hasUnsavedChanges) {
-      await handleSave()
+      await handleSave();
     }
 
-    setIsSharing(true)
+    setIsSharing(true);
     try {
       // Create updated round data with current dialog values
       const updatedRound: SavedRound = {
@@ -133,49 +133,49 @@ export function RoundDetailsDialog({
         aPartPenaltySeconds: aPartPenaltySeconds ? Number.parseFloat(aPartPenaltySeconds) : undefined,
         bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
         overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
-      }
+      };
 
-      await onShareRound(updatedRound)
+      await onShareRound(updatedRound);
       // Link wird automatisch über round.sharedUrl angezeigt
     } catch (error) {
-      console.error('Error sharing round:', error)
+      console.error('Error sharing round:', error);
     } finally {
-      setIsSharing(false)
+      setIsSharing(false);
     }
-  }, [round, hasUnsavedChanges, handleSave, onShareRound, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression])
+  }, [round, hasUnsavedChanges, handleSave, onShareRound, description, aPartErrorPoints, knotTime, aPartPenaltySeconds, bPartErrorPoints, overallImpression]);
 
   const handleCopyUrl = useCallback(async () => {
-    const urlToCopy = round?.sharedUrl
+    const urlToCopy = round?.sharedUrl;
     if (urlToCopy) {
       try {
-        await navigator.clipboard.writeText(urlToCopy)
-        setCopiedToClipboard(true)
-        setTimeout(() => setCopiedToClipboard(false), 2000)
+        await navigator.clipboard.writeText(urlToCopy);
+        setCopiedToClipboard(true);
+        setTimeout(() => setCopiedToClipboard(false), 2000);
       } catch (error) {
-        console.error('Error copying to clipboard:', error)
+        console.error('Error copying to clipboard:', error);
       }
     }
-  }, [round?.sharedUrl])
+  }, [round?.sharedUrl]);
 
   const handleNativeShare = useCallback(async () => {
-    const urlToShare = round?.sharedUrl
-    if (!urlToShare || !canUseNativeShare || !round) return
+    const urlToShare = round?.sharedUrl;
+    if (!urlToShare || !canUseNativeShare || !round) return;
 
     try {
       await navigator.share({
         title: `Durchgang von ${round.teamName}`,
         url: urlToShare,
-      })
+      });
     } catch (error) {
       // User cancelled or error occurred
-      console.log('Native share cancelled or failed:', error)
+      console.log('Native share cancelled or failed:', error);
     }
-  }, [round, canUseNativeShare])
+  }, [round, canUseNativeShare]);
 
-  if (!round) return null
+  if (!round) return null;
 
-  const currentTeam = getCurrentTeam()
-  const teamAverageAge = currentTeam?.averageAge
+  const currentTeam = getCurrentTeam();
+  const teamAverageAge = currentTeam?.averageAge;
 
   // Calculate scoring
   const scoringParams: ScoringParameters = {
@@ -186,13 +186,13 @@ export function RoundDetailsDialog({
     bPartTime: Math.round(round.totalTime / 1000), // § 5.6
     bPartErrorPoints: bPartErrorPoints ? Number.parseFloat(bPartErrorPoints) : undefined,
     overallImpression: overallImpression ? Number.parseFloat(overallImpression) : undefined,
-  }
+  };
 
-  const scoringResult = calculateTotalScore(scoringParams)
-  const isShared = !!round.sharedUrl
-  const canEdit = !isShared
+  const scoringResult = calculateTotalScore(scoringParams);
+  const isShared = !!round.sharedUrl;
+  const canEdit = !isShared;
 
-  const targetTime = calculateTargetTimeMs(teamAverageAge)
+  const targetTime = calculateTargetTimeMs(teamAverageAge);
 
   return (
     <>
@@ -221,8 +221,8 @@ export function RoundDetailsDialog({
                 ⚠️ Durchschnittsalter des Teams fehlt. Für die Punkteberechnung im B-Teil ist das Durchschnittsalter erforderlich.
                 <button
                   onClick={() => {
-                    onOpenChange(false)
-                    setTeamManageDialogOpen(true)
+                    onOpenChange(false);
+                    setTeamManageDialogOpen(true);
                   }}
                   className="ml-2 underline font-semibold hover:text-yellow-900 transition-colors"
                 >
@@ -482,5 +482,5 @@ export function RoundDetailsDialog({
       editTeamId={currentTeam?.id}
     />
     </>
-  )
+  );
 }

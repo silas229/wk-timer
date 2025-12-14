@@ -1,37 +1,37 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Wifi, WifiOff } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { Wifi, WifiOff } from 'lucide-react';
 
 export function NetworkStatus() {
-  const [isOnline, setIsOnline] = useState(true)
-  const [showStatus, setShowStatus] = useState(false)
+  const [isOnline, setIsOnline] = useState(true);
+  const [showStatus, setShowStatus] = useState(false);
 
   useEffect(() => {
     const updateOnlineStatus = () => {
-      const online = navigator.onLine
-      setIsOnline(online)
+      const online = navigator.onLine;
+      setIsOnline(online);
 
       // Show status briefly when it changes
-      setShowStatus(true)
-      const timer = setTimeout(() => setShowStatus(false), 3000)
+      setShowStatus(true);
+      const timer = setTimeout(() => setShowStatus(false), 3000);
 
-      return () => clearTimeout(timer)
-    }
+      return () => clearTimeout(timer);
+    };
 
     // Initial check
-    setIsOnline(navigator.onLine)
+    setIsOnline(navigator.onLine);
 
-    globalThis.addEventListener('online', updateOnlineStatus)
-    globalThis.addEventListener('offline', updateOnlineStatus)
+    globalThis.addEventListener('online', updateOnlineStatus);
+    globalThis.addEventListener('offline', updateOnlineStatus);
 
     return () => {
-      globalThis.removeEventListener('online', updateOnlineStatus)
-      globalThis.removeEventListener('offline', updateOnlineStatus)
-    }
-  }, [])
+      globalThis.removeEventListener('online', updateOnlineStatus);
+      globalThis.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
 
-  if (!showStatus && isOnline) return null
+  if (!showStatus && isOnline) return null;
 
   return (
     <div
@@ -57,5 +57,5 @@ export function NetworkStatus() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card";
 
 interface LoadingStateProps {
   isInitialized: boolean
@@ -16,5 +16,5 @@ export function LoadingState({ isInitialized }: LoadingStateProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

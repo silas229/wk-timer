@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { WifiOff } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WifiOff } from "lucide-react";
 
 export default function OfflinePage() {
   return (
@@ -37,5 +37,5 @@ export default function OfflinePage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

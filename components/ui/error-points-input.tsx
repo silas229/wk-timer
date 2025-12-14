@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ErrorPointsInputProps {
   id: string
@@ -22,16 +22,16 @@ export function ErrorPointsInput({
   className = ""
 }: Readonly<ErrorPointsInputProps>) {
   const handleDecrement = () => {
-    const current = Number.parseFloat(value) || 0
-    const newValue = Math.max(0, current - 5)
-    onChange(newValue.toString())
-  }
+    const current = Number.parseFloat(value) || 0;
+    const newValue = Math.max(0, current - 5);
+    onChange(newValue.toString());
+  };
 
   const handleIncrement = () => {
-    const current = Number.parseFloat(value) || 0
-    const newValue = current + 5
-    onChange(newValue.toString())
-  }
+    const current = Number.parseFloat(value) || 0;
+    const newValue = current + 5;
+    onChange(newValue.toString());
+  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -70,5 +70,5 @@ export function ErrorPointsInput({
         </Button>
       </div>
     </div>
-  )
+  );
 }

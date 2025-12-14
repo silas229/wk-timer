@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Trash2, Calculator } from "lucide-react"
-import type { SavedRound, Lap } from "@/lib/indexeddb"
+import { Button } from "@/components/ui/button";
+import { Trash2, Calculator } from "lucide-react";
+import type { SavedRound, Lap } from "@/lib/indexeddb";
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -18,7 +18,7 @@ const BUTTON_LABELS = [
   "Start Läufer 8",
   "Ende Kuppeln",
   "Start Läufer 9",
-]
+];
 
 interface TimerControlsProps {
   state: TimerState
@@ -38,15 +38,15 @@ export function TimerControls({
   onOpenDetails
 }: TimerControlsProps) {
   const getButtonText = () => {
-    if (state === "stopped") return "Start"
+    if (state === "stopped") return "Start";
     if (state === "running") {
-      if (laps.length === 0) return BUTTON_LABELS[0] // "Start Läufer 1"
-      if (laps.length < BUTTON_LABELS.length) return BUTTON_LABELS[laps.length]
-      return "Ende"
+      if (laps.length === 0) return BUTTON_LABELS[0]; // "Start Läufer 1"
+      if (laps.length < BUTTON_LABELS.length) return BUTTON_LABELS[laps.length];
+      return "Ende";
     }
-    if (state === "finished") return "Neustart"
-    return "Start"
-  }
+    if (state === "finished") return "Neustart";
+    return "Start";
+  };
 
   return (
     <div className="text-center space-y-3">
@@ -82,5 +82,5 @@ export function TimerControls({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,22 +1,22 @@
-import { Geist, Geist_Mono } from "next/font/google"
-import type { Metadata, Viewport } from "next"
+import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 
-import "../globals.css"
-import { Providers } from "@/components/providers"
-import { Navigation } from "@/components/navigation"
-import { TeamProvider } from "@/components/team-context"
-import { NetworkStatus } from "@/components/network-status"
-import { PWAFeatures } from "@/components/pwa-features"
+import "../globals.css";
+import { Providers } from "@/components/providers";
+import { Navigation } from "@/components/navigation";
+import { TeamProvider } from "@/components/team-context";
+import { NetworkStatus } from "@/components/network-status";
+import { PWAFeatures } from "@/components/pwa-features";
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 export const metadata: Metadata = {
   title: "Wettkämpfe Timer",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon-192x192.png",
   },
-}
+};
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -40,7 +40,7 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   themeColor: "#cf2c2a",
-}
+};
 
 export default function RootLayout({
   children,
@@ -84,5 +84,5 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
-  )
+  );
 }

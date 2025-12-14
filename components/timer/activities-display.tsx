@@ -1,10 +1,10 @@
-import { forwardRef } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { LAP_ACTIVITIES } from "@/lib/lap-activities"
-import { ActivityItem } from "./activity-item"
-import { CurrentActivityItem } from "./current-activity-item"
-import type { ActivityTime, RoundComparison } from "@/lib/lap-activities"
-import type { Lap } from "@/lib/indexeddb"
+import { forwardRef } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { LAP_ACTIVITIES } from "@/lib/lap-activities";
+import { ActivityItem } from "./activity-item";
+import { CurrentActivityItem } from "./current-activity-item";
+import type { ActivityTime, RoundComparison } from "@/lib/lap-activities";
+import type { Lap } from "@/lib/indexeddb";
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -20,22 +20,22 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
   ({ activities, comparison, state, time, laps }, ref) => {
     // Get current activities being performed (can be multiple)
     const getCurrentActivities = () => {
-      if (state !== "running" || laps.length >= 13) return []
+      if (state !== "running" || laps.length >= 13) return [];
 
-      const currentActivities = []
+      const currentActivities = [];
 
       // Check each activity to see if it's currently running
       for (const activity of LAP_ACTIVITIES) {
         // Check if we've started this activity but not finished it yet
-        const hasStarted = laps.length >= activity.startIndex
-        const hasFinished = laps.some(lap => lap.lapNumber === activity.endIndex)
+        const hasStarted = laps.length >= activity.startIndex;
+        const hasFinished = laps.some(lap => lap.lapNumber === activity.endIndex);
 
         if (hasStarted && !hasFinished) {
           // Find the start time for this activity
           const startLap = activity.startIndex === 0
             ? null
-            : laps.find(lap => lap.lapNumber === activity.startIndex)
-          const startTime = startLap ? startLap.time : 0
+            : laps.find(lap => lap.lapNumber === activity.startIndex);
+          const startTime = startLap ? startLap.time : 0;
 
           currentActivities.push({
             name: activity.name,
@@ -43,14 +43,14 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
             currentTime: time - startTime,
             totalTime: time,
             endIndex: activity.endIndex
-          })
+          });
         }
       }
 
-      return currentActivities
-    }
+      return currentActivities;
+    };
 
-    const currentActivities = getCurrentActivities()
+    const currentActivities = getCurrentActivities();
 
     return (
       <Card>
@@ -69,14 +69,14 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
             ) : (
               <>
                 {activities.map((activity, index) => {
-                  const activityComparison = comparison?.activityComparisons[activity.name]
+                  const activityComparison = comparison?.activityComparisons[activity.name];
                   return (
                     <ActivityItem
                       key={`${activity.name}-${index}`}
                       activity={activity}
                       comparison={activityComparison}
                     />
-                  )
+                  );
                 })}
 
                 {currentActivities.map((currentActivity, index) => (
@@ -90,8 +90,8 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
-)
+);
 
-ActivitiesDisplay.displayName = "ActivitiesDisplay"
+ActivitiesDisplay.displayName = "ActivitiesDisplay";
