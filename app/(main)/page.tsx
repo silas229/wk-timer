@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities"
-import { generateUUID } from "@/lib/uuid"
+import { generateUUID } from "@/lib/utils"
 import {
   createRoundHandlers,
   getAllSavedRoundsFromStorage,

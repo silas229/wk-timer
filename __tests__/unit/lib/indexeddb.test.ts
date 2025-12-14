@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { Team, SavedRound } from "@/lib/indexeddb";
 import { indexedDB as indexedDBManager } from "@/lib/indexeddb";
-import { generateUUID } from "@/lib/uuid";
+import { generateUUID } from "@/lib/utils";
 
 describe("IndexedDB Manager", () => {
   const DB_NAME = "WkTimerDB";
