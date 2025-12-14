@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ErrorPointsInput } from "@/components/ui/error-points-input"
 import { useTeam } from "@/components/team-context"
+import { TeamManageDialog } from "@/components/team-manage-dialog"
 import { calculateTotalScore, formatPoints, calculateTargetTimeMs, type ScoringParameters } from "@/lib/scoring"
 import { formatTime } from "@/lib/lap-activities"
 import type { SavedRound } from "@/lib/indexeddb"
@@ -43,6 +44,7 @@ export function RoundDetailsDialog({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [copiedToClipboard, setCopiedToClipboard] = useState(false)
   const [canUseNativeShare, setCanUseNativeShare] = useState(false)
+  const [teamManageDialogOpen, setTeamManageDialogOpen] = useState(false)
 
   // Check if native sharing is supported
   useEffect(() => {
@@ -190,10 +192,12 @@ export function RoundDetailsDialog({
   const isShared = !!round.sharedUrl
   const canEdit = !isShared
 
-  const targetTime = calculateTargetTimeMs(teamAverageAge)!
+  const targetTime = calculateTargetTimeMs(teamAverageAge)
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" title={`Durchgangsdetails - ${round.teamName}`}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BadgeInfo className="h-5 w-5" />
@@ -215,6 +219,15 @@ export function RoundDetailsDialog({
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
                 ⚠️ Durchschnittsalter des Teams fehlt. Für die Punkteberechnung im B-Teil ist das Durchschnittsalter erforderlich.
+                <button
+                  onClick={() => {
+                    onOpenChange(false)
+                    setTeamManageDialogOpen(true)
+                  }}
+                  className="ml-2 underline font-semibold hover:text-yellow-900 transition-colors"
+                >
+                  Alter jetzt eintragen
+                </button>
               </p>
             </div>
           )}
@@ -278,7 +291,7 @@ export function RoundDetailsDialog({
             <h3 className="font-semibold">B-Teil (Staffellauf)</h3>
 
             {/* Sollzeit-Anzeige */}
-            {teamAverageAge && (
+            {teamAverageAge && targetTime && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -463,5 +476,11 @@ export function RoundDetailsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <TeamManageDialog 
+      open={teamManageDialogOpen} 
+      onOpenChange={setTeamManageDialogOpen} 
+      editTeamId={currentTeam?.id}
+    />
+    </>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Users, Plus, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -11,14 +11,27 @@ import { useTeam } from "@/components/team-context"
 interface TeamManageDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  editTeamId?: string
 }
 
-export function TeamManageDialog({ open, onOpenChange }: Readonly<TeamManageDialogProps>) {
+export function TeamManageDialog({ open, onOpenChange, editTeamId }: Readonly<TeamManageDialogProps>) {
   const { teams, createTeam, updateTeam, deleteTeam } = useTeam()
   const [newTeamName, setNewTeamName] = useState("")
   const [editingTeam, setEditingTeam] = useState<{ id: string; name: string; color: string; averageAge?: number } | null>(null)
   const [editTeamName, setEditTeamName] = useState("")
   const [editTeamAverageAge, setEditTeamAverageAge] = useState<string>("")
+
+  // Set team to edit mode when dialog opens with editTeamId
+  useEffect(() => {
+    if (open && editTeamId) {
+      const teamToEdit = teams.find(t => t.id === editTeamId)
+      if (teamToEdit) {
+        setEditingTeam(teamToEdit)
+        setEditTeamName(teamToEdit.name)
+        setEditTeamAverageAge(teamToEdit.averageAge?.toString() || "")
+      }
+    }
+  }, [open, editTeamId, teams])
 
   const handleCreateTeam = useCallback(() => {
     if (!newTeamName.trim()) return
@@ -51,7 +64,7 @@ export function TeamManageDialog({ open, onOpenChange }: Readonly<TeamManageDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto" title="Gruppen verwalten">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -116,7 +129,7 @@ export function TeamManageDialog({ open, onOpenChange }: Readonly<TeamManageDial
                       <Input
                         type="number"
                         step="0.1"
-                        min="6"
+                        min="10"
                         max="18"
                         value={editTeamAverageAge}
                         onChange={(e) => setEditTeamAverageAge(e.target.value)}
