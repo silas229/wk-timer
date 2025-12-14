@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { Team, SavedRound } from "@/lib/indexeddb";
 import { indexedDB as indexedDBManager } from "@/lib/indexeddb";
 import { generateUUID } from "@/lib/uuid";
@@ -28,25 +28,28 @@ describe("IndexedDB Manager", () => {
     const manager = indexedDBManager as unknown as { db: IDBDatabase | null };
     try {
       manager.db?.close();
-    } catch {
-      // ignore
+    } finally {
+      manager.db = null;
     }
-    manager.db = null;
+  };
+
+  const cleanupDb = async () => {
+    closeManagerDb();
+    await resetDatabase();
+    closeManagerDb();
+  };
+
+  const initFreshDb = async () => {
+    await cleanupDb();
+    await indexedDBManager.init();
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
-
-    closeManagerDb();
-    await resetDatabase();
-    closeManagerDb();
-    await indexedDBManager.init();
+    await initFreshDb();
   });
 
   afterEach(async () => {
-    closeManagerDb();
-    await resetDatabase();
-    closeManagerDb();
+    await cleanupDb();
   });
 
   describe("Team Operations", () => {
