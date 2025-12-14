@@ -3,6 +3,7 @@ export interface Team {
   name: string;
   color: string;
   createdAt: Date;
+  averageAge?: number; // Durchschnittsalter des Teams
 }
 
 export interface Lap {
@@ -20,10 +21,18 @@ export interface SavedRound {
   teamName: string;
   sharedUrl?: string; // URL for shared round
   description?: string; // User description for shared round
+  // A-Teil (Löschangriff)
+  aPartErrorPoints?: number; // Fehlerpunkte A-Teil
+  knotTime?: number; // Knotenzeit in Sekunden
+  aPartPenaltySeconds?: number; // Strafsekunden bei Zeitüberschreitung A-Teil
+  // B-Teil (Staffellauf)
+  bPartErrorPoints?: number; // Fehlerpunkte B-Teil
+  // Gemeinsamer Gesamteindruck für beide Teile
+  overallImpression?: number; // Gesamteindruck (Durchschnitt mit einer Nachkommastelle)
 }
 
 const DB_NAME = "WkTimerDB";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const TEAMS_STORE = "teams";
 const ROUNDS_STORE = "rounds";
 const SETTINGS_STORE = "settings";
@@ -32,9 +41,24 @@ const SETTINGS_STORE = "settings";
 class IndexedDBManager {
   private db: IDBDatabase | null = null;
 
+  private normalizeAndSortRounds(rawRounds: any[]): SavedRound[] {
+    const rounds = rawRounds.map((round: any) => ({
+      ...round,
+      completedAt: new Date(round.completedAt),
+      laps: round.laps.map((lap: any) => ({
+        ...lap,
+        timestamp: new Date(lap.timestamp),
+      })),
+    }));
+
+    // Sort by completion date (newest first)
+    rounds.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+    return rounds;
+  }
+
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+      const request = globalThis.indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
         reject(new Error("Failed to open IndexedDB"));
@@ -47,6 +71,7 @@ class IndexedDBManager {
 
       request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
         const db = (event.target as IDBOpenDBRequest).result;
+        const oldVersion = event.oldVersion;
 
         // Create teams store
         if (!db.objectStoreNames.contains(TEAMS_STORE)) {
@@ -71,6 +96,13 @@ class IndexedDBManager {
         // Create settings store
         if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
           db.createObjectStore(SETTINGS_STORE, { keyPath: "key" });
+        }
+
+        // Migration from version 1 to 2: Add scoring fields
+        if (oldVersion < 2) {
+          // The scoring fields are optional, so no migration needed
+          // New fields will be undefined for existing records
+          console.log("Database migrated to version 2 with scoring support");
         }
       };
     });
@@ -163,19 +195,7 @@ class IndexedDBManager {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const rounds = request.result.map((round: any) => ({
-          ...round,
-          completedAt: new Date(round.completedAt),
-          laps: round.laps.map((lap: any) => ({
-            ...lap,
-            timestamp: new Date(lap.timestamp),
-          })),
-        }));
-        // Sort by completion date (newest first)
-        rounds.sort(
-          (a, b) => b.completedAt.getTime() - a.completedAt.getTime()
-        );
-        resolve(rounds);
+        resolve(this.normalizeAndSortRounds(request.result));
       };
 
       request.onerror = () => {
@@ -193,19 +213,7 @@ class IndexedDBManager {
       const request = index.getAll(teamId);
 
       request.onsuccess = () => {
-        const rounds = request.result.map((round: any) => ({
-          ...round,
-          completedAt: new Date(round.completedAt),
-          laps: round.laps.map((lap: any) => ({
-            ...lap,
-            timestamp: new Date(lap.timestamp),
-          })),
-        }));
-        // Sort by completion date (newest first)
-        rounds.sort(
-          (a, b) => b.completedAt.getTime() - a.completedAt.getTime()
-        );
-        resolve(rounds);
+        resolve(this.normalizeAndSortRounds(request.result));
       };
 
       request.onerror = () => {

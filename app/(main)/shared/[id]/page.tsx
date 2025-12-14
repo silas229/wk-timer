@@ -90,7 +90,7 @@ export default async function SharedRoundPage({ params }: PageProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Geteilter Durchgang</h1>
           <p className="text-muted-foreground">
-            Dieser Durchgang wurde von einem anderen Nutzer geteilt
+            Dieser Durchgang wurde von einem Nutzer geteilt
           </p>
         </div>
 

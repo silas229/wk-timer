@@ -65,7 +65,7 @@ export function calculateActivityTimes(
 /**
  * Format time in milliseconds with various format options
  */
-export type TimeFormat = "full" | "seconds" | "diff";
+export type TimeFormat = "full" | "seconds" | "diff" | "diff-seconds";
 
 export function formatTime(
   milliseconds: number,
@@ -84,12 +84,18 @@ export function formatTime(
       return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
 
     case "seconds": // ss.ms format
-      return `${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+      return `${totalSeconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
 
     case "diff": {
       // +/-ss.ms format
       const prefix = isNegative ? "-" : "+";
       return `${prefix}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+    }
+
+    case "diff-seconds": {
+      // +/-ss format
+      const prefix = isNegative ? "-" : "+";
+      return `${prefix}${totalSeconds.toString().padStart(2, "0")}`;
     }
 
     default:

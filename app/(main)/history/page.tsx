@@ -1,31 +1,43 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type SavedRound } from "@/lib/indexeddb"
+import {
+  createRoundHandlers,
+  getAllSavedRoundsFromStorage,
+} from "@/lib/round-client"
 import { LoadingState } from "@/components/history/loading-state"
 import { RoundStatsHeader } from "@/components/history/round-stats-header"
 import { EmptyState } from "@/components/history/empty-state"
 import { RoundsList } from "@/components/history/rounds-list"
-import { ShareDialog } from "@/components/share-dialog"
+import { RoundDetailsDialog } from "@/components/round-details-dialog"
 
 export default function HistoryPage() {
   const { teams, selectedTeamId, getCurrentTeam, isInitialized } = useTeam()
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [roundToShare, setRoundToShare] = useState<SavedRound | null>(null)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null)
+
+  const getAverageAge = useCallback(() => getCurrentTeam()?.averageAge, [getCurrentTeam])
+
+  const { handleUpdateRound, handleDetailsShare } = useMemo(() => {
+    return createRoundHandlers({
+      getAverageAge,
+      getRoundById: (roundId: string) => savedRounds.find(r => r.id === roundId),
+      setSavedRounds,
+      setRoundToDetail,
+    })
+  }, [getAverageAge, savedRounds])
 
   const loadSavedRounds = useCallback(async () => {
     if (!isInitialized) return
 
     try {
       setIsLoading(true)
-      const rounds = await indexedDB.getAllRounds()
+      const rounds = await getAllSavedRoundsFromStorage()
       setSavedRounds(rounds)
-    } catch (error) {
-      console.error('Failed to load saved rounds:', error)
-      setSavedRounds([])
     } finally {
       setIsLoading(false)
     }
@@ -64,52 +76,9 @@ export default function HistoryPage() {
     }
   }, [])
 
-  const handleShareRound = (round: SavedRound) => {
-    setRoundToShare(round)
-    setShareDialogOpen(true)
-  }
-
-  const handleShareSubmit = async (description: string): Promise<string | null> => {
-    if (!roundToShare) return null
-
-    try {
-      const response = await fetch('/api/share-round', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundData: roundToShare,
-          description,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to share round')
-      }
-
-      const result = await response.json()
-
-      // Update the round with share information
-      const updatedRound: SavedRound = {
-        ...roundToShare,
-        sharedUrl: result.sharedUrl,
-        description,
-      }
-
-      // Save the updated round to local storage
-      await indexedDB.saveRound(updatedRound)
-
-      // Update the local state
-      setSavedRounds(prevRounds =>
-        prevRounds.map(r => r.id === updatedRound.id ? updatedRound : r)
-      )
-
-      return result.sharedUrl
-    } catch (error) {
-      console.error('Error sharing round:', error)
-      return null
-    }
+  const handleOpenDetails = (round: SavedRound) => {
+    setRoundToDetail(round)
+    setDetailsDialogOpen(true)
   }
 
   // Filter rounds by selected team (only show current team's rounds)
@@ -142,19 +111,20 @@ export default function HistoryPage() {
                 savedRounds={savedRounds}
                 teams={teams}
                 onDeleteRound={deleteRound}
-                onShareRound={handleShareRound}
+                onOpenDetails={handleOpenDetails}
               />
             )}
           </>
         )}
 
-        {/* Share Dialog */}
-        {roundToShare && (
-          <ShareDialog
-            isOpen={shareDialogOpen}
-            onOpenChange={setShareDialogOpen}
-            round={roundToShare}
-            onShare={handleShareSubmit}
+        {/* Round Details Dialog */}
+        {roundToDetail && (
+          <RoundDetailsDialog
+            open={detailsDialogOpen}
+            onOpenChange={setDetailsDialogOpen}
+            round={roundToDetail}
+            onUpdateRound={handleUpdateRound}
+            onShareRound={handleDetailsShare}
           />
         )}
       </div>

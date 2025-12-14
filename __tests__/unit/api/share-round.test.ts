@@ -6,7 +6,6 @@ import {
   resetRoundStorage,
 } from "@/lib/round-storage-factory";
 import { MemoryRoundStorage } from "@/lib/memory-round-storage";
-
 describe("Share Round API Unit Tests", () => {
   let testStorage: MemoryRoundStorage;
 
@@ -30,18 +29,14 @@ describe("Share Round API Unit Tests", () => {
         { lapNumber: 2, time: 10000, timestamp: "2024-01-01T12:00:10Z" },
       ],
       teamName: "Test Team",
+      description: "Test round description",
     };
 
     it("should successfully share a round with valid data", async () => {
-      const requestBody = {
-        roundData: validRoundData,
-        description: "Test round description",
-      };
-
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(validRoundData),
       });
 
       const response = await POST(request);
@@ -56,14 +51,10 @@ describe("Share Round API Unit Tests", () => {
     });
 
     it("should successfully share a round without description", async () => {
-      const requestBody = {
-        roundData: validRoundData,
-      };
-
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(validRoundData),
       });
 
       const response = await POST(request);
@@ -73,22 +64,27 @@ describe("Share Round API Unit Tests", () => {
       expect(data.success).toBe(true);
     });
 
-    it("should return 400 for missing roundData", async () => {
-      const requestBody = {
-        description: "Test description",
-      };
-
+    it("should store description when provided inside roundData", async () => {
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(validRoundData),
       });
 
-      const response = await POST(request);
-      const data = await response.json();
+      const postResponse = await POST(request);
+      const postData = await postResponse.json();
 
-      expect(response.status).toBe(400);
-      expect(data.error).toBe("Invalid round data");
+      expect(postResponse.status).toBe(200);
+      expect(postData.success).toBe(true);
+
+      const getRequest = new NextRequest(
+        `http://localhost:3000/api/share-round?id=${validRoundData.id}`
+      );
+      const getResponse = await GET(getRequest);
+      const getData = await getResponse.json();
+
+      expect(getResponse.status).toBe(200);
+      expect(getData.description).toBe("Test round description");
     });
 
     it("should return 400 for roundData missing required fields", async () => {
@@ -97,14 +93,10 @@ describe("Share Round API Unit Tests", () => {
         // Missing teamName, laps, etc.
       };
 
-      const requestBody = {
-        roundData: invalidRoundData,
-      };
-
       const request = new NextRequest("http://localhost:3000/api/share-round", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(invalidRoundData),
       });
 
       const response = await POST(request);
@@ -157,6 +149,7 @@ describe("Share Round API Unit Tests", () => {
         totalTime: 300000,
         laps: [{ lapNumber: 1, time: 5000, timestamp: "2024-01-01T12:00:05Z" }],
         teamName: "Get Test Team",
+        description: "Test description",
       };
 
       const postRequest = new NextRequest(
@@ -164,7 +157,7 @@ describe("Share Round API Unit Tests", () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roundData, description: "Test description" }),
+          body: JSON.stringify(roundData),
         }
       );
 
@@ -241,9 +234,8 @@ describe("Share Round API Unit Tests", () => {
           { lapNumber: 3, time: 15000, timestamp: "2024-01-01T12:00:15Z" },
         ],
         teamName: "Integration Test Team",
+        description: "Integration test description",
       };
-
-      const description = "Integration test description";
 
       // Step 1: Share the round
       const postRequest = new NextRequest(
@@ -251,7 +243,7 @@ describe("Share Round API Unit Tests", () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roundData, description }),
+          body: JSON.stringify(roundData),
         }
       );
 
@@ -274,7 +266,7 @@ describe("Share Round API Unit Tests", () => {
       expect(getData).toMatchObject({
         id: roundData.id,
         teamName: roundData.teamName,
-        description,
+        description: roundData.description,
         totalTime: roundData.totalTime,
         completedAt: roundData.completedAt,
         laps: roundData.laps,

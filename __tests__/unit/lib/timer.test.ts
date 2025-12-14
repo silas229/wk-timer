@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { generateUUID } from "@/lib/uuid";
+import { generateUUID } from "@/lib/utils";
 
 // Mock timer functionality
 describe("Timer Logic", () => {

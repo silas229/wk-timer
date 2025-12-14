@@ -1,15 +1,19 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTeam } from "@/components/team-context"
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb"
 import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities"
-import { generateUUID } from "@/lib/uuid"
+import { generateUUID } from "@/lib/utils"
+import {
+  createRoundHandlers,
+  getAllSavedRoundsFromStorage,
+} from "@/lib/round-client"
 import { PWAInstallPrompt } from "@/components/pwa-install"
 import { TimerDisplay } from "@/components/timer/timer-display"
 import { ActivitiesDisplay } from "@/components/timer/activities-display"
 import { TimerControls } from "@/components/timer/timer-controls"
-import { ShareDialog } from "@/components/share-dialog"
+import { RoundDetailsDialog } from "@/components/round-details-dialog"
 
 type TimerState = "stopped" | "running" | "finished"
 
@@ -23,8 +27,21 @@ export default function Page() {
   const [lastSavedRound, setLastSavedRound] = useState<SavedRound | null>(null)
   const [savedRounds, setSavedRounds] = useState<SavedRound[]>([])
   const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null)
   const activitiesRef = useRef<HTMLDivElement>(null)
+
+  const getAverageAge = useCallback(() => getCurrentTeam()?.averageAge, [getCurrentTeam])
+
+  const { handleUpdateRound, handleDetailsShare } = useMemo(() => {
+    return createRoundHandlers({
+      getAverageAge,
+      getRoundById: (roundId: string) => savedRounds.find(r => r.id === roundId),
+      setSavedRounds,
+      setRoundToDetail,
+      setLastSavedRound,
+    })
+  }, [getAverageAge, savedRounds])
 
   // Calculate activities whenever laps change
   useEffect(() => {
@@ -36,13 +53,8 @@ export default function Page() {
   const loadSavedRounds = useCallback(async () => {
     if (!isInitialized) return
 
-    try {
-      const rounds = await indexedDB.getAllRounds()
-      setSavedRounds(rounds)
-    } catch (error) {
-      console.error('Failed to load saved rounds:', error)
-      setSavedRounds([])
-    }
+    const rounds = await getAllSavedRoundsFromStorage()
+    setSavedRounds(rounds)
   }, [isInitialized])
 
   // Load rounds when initialized
@@ -194,49 +206,9 @@ export default function Page() {
     }
   }
 
-  const handleShareRound = () => {
-    if (lastSavedRound) {
-      setShareDialogOpen(true)
-    }
-  }
-
-  const handleShareSubmit = async (description: string): Promise<string | null> => {
-    if (!lastSavedRound) return null
-
-    try {
-      const response = await fetch('/api/share-round', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundData: lastSavedRound,
-          description,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to share round')
-      }
-
-      const result = await response.json()
-
-      // Update the round with share information
-      const updatedRound: SavedRound = {
-        ...lastSavedRound,
-        sharedUrl: result.sharedUrl,
-        description,
-      }
-
-      // Save the updated round to local storage
-      await saveRoundToStorage(updatedRound)
-      setLastSavedRound(updatedRound)
-
-      return result.sharedUrl
-    } catch (error) {
-      console.error('Error sharing round:', error)
-      return null
-    }
+  const handleOpenDetails = (round: SavedRound) => {
+    setRoundToDetail(round)
+    setDetailsDialogOpen(true)
   }
 
   const handleButtonClick = () => {
@@ -271,6 +243,7 @@ export default function Page() {
           state={state}
           laps={laps}
           comparison={getCurrentRoundComparison()}
+          teamAverageAge={getCurrentTeam()?.averageAge}
         />
 
         {/* Activities Display */}
@@ -290,16 +263,17 @@ export default function Page() {
           lastSavedRound={lastSavedRound}
           onButtonClick={handleButtonClick}
           onDiscardRound={handleDiscardRound}
-          onShareRound={handleShareRound}
+          onOpenDetails={handleOpenDetails}
         />
 
-        {/* Share Dialog */}
-        {lastSavedRound && (
-          <ShareDialog
-            isOpen={shareDialogOpen}
-            onOpenChange={setShareDialogOpen}
-            round={lastSavedRound}
-            onShare={handleShareSubmit}
+        {/* Round Details Dialog */}
+        {roundToDetail && (
+          <RoundDetailsDialog
+            open={detailsDialogOpen}
+            onOpenChange={setDetailsDialogOpen}
+            round={roundToDetail}
+            onUpdateRound={handleUpdateRound}
+            onShareRound={handleDetailsShare}
           />
         )}
       </div>

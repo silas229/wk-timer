@@ -18,42 +18,49 @@ interface ActivitiesDisplayProps {
 
 export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayProps>(
   ({ activities, comparison, state, time, laps }, ref) => {
-    // Get current activity being performed
-    const getCurrentActivity = () => {
-      if (state !== "running" || laps.length >= 13) return null
+    // Get current activities being performed (can be multiple)
+    const getCurrentActivities = () => {
+      if (state !== "running" || laps.length >= 13) return []
 
-      // Find the last completed lap time
-      const lastLap = laps.length > 0 ? laps[laps.length - 1] : null
-      const lastLapTime = lastLap ? lastLap.time : 0
+      const currentActivities = []
 
-      // Find current activity based on the next lap to be recorded
-      const nextLapIndex = laps.length + 1
-      const currentActivity = LAP_ACTIVITIES.find(activity => activity.endIndex === nextLapIndex)
+      // Check each activity to see if it's currently running
+      for (const activity of LAP_ACTIVITIES) {
+        // Check if we've started this activity but not finished it yet
+        const hasStarted = laps.length >= activity.startIndex
+        const hasFinished = laps.some(lap => lap.lapNumber === activity.endIndex)
 
-      if (currentActivity) {
-        return {
-          name: currentActivity.name,
-          startTime: lastLapTime,
-          currentTime: time - lastLapTime,
-          totalTime: time
+        if (hasStarted && !hasFinished) {
+          // Find the start time for this activity
+          const startLap = activity.startIndex === 0
+            ? null
+            : laps.find(lap => lap.lapNumber === activity.startIndex)
+          const startTime = startLap ? startLap.time : 0
+
+          currentActivities.push({
+            name: activity.name,
+            startTime: startTime,
+            currentTime: time - startTime,
+            totalTime: time,
+            endIndex: activity.endIndex
+          })
         }
       }
 
-      return null
+      return currentActivities
     }
 
-    const currentActivity = getCurrentActivity()
+    const currentActivities = getCurrentActivities()
 
     return (
       <Card>
         <CardContent>
           <div
             ref={ref}
-            className={`space-y-2 transition-all duration-700 ease-in-out ${
-              state === "finished" 
+            className={`space-y-2 transition-all duration-700 ease-in-out ${state === "finished"
                 ? "max-h-[2000px] overflow-y-visible" // Large height, no scroll when finished
                 : "h-64 max-h-64 overflow-y-auto" // Fixed height with scroll during round
-            }`}
+              }`}
           >
             {activities.length === 0 && state === "stopped" ? (
               <p className="text-center text-muted-foreground py-8">
@@ -72,9 +79,12 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
                   )
                 })}
 
-                {currentActivity && (
-                  <CurrentActivityItem currentActivity={currentActivity} />
-                )}
+                {currentActivities.map((currentActivity, index) => (
+                  <CurrentActivityItem
+                    key={`current-${currentActivity.name}-${index}`}
+                    currentActivity={currentActivity}
+                  />
+                ))}
               </>
             )}
           </div>
