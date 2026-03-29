@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
@@ -54,7 +54,7 @@ jobs:
 
       - name: Deploy on server
         run: |
-          ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "cd ${{ vars.SERVER_PATH }} && git pull && npm install --save && supervisorctl restart wk-timer"
+          ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "cd ${{ vars.SERVER_PATH }} && git pull && npm install --save && supervisorctl restart apps-custom:wk-timer"
 
       - name: Wait for application to start
         run: sleep 10
