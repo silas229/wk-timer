@@ -15,9 +15,12 @@ function isSafeId(id: string): boolean {
 
 export class FileSystemRoundStorage implements RoundStorage {
   private readonly storageDir: string;
+  private readonly storageRoot: string;
 
   constructor(storageDir: string = "./data/rounds") {
     this.storageDir = storageDir;
+    // Resolve storage root to an absolute, canonical path
+    this.storageRoot = path.resolve(storageDir);
   }
 
   async store(roundData: SharedRoundData): Promise<void> {
@@ -32,10 +35,17 @@ export class FileSystemRoundStorage implements RoundStorage {
 
     try {
       // Ensure the storage directory exists
-      await fs.mkdir(this.storageDir, { recursive: true });
+      await fs.mkdir(this.storageRoot, { recursive: true });
 
       // Write the round data to a JSON file
-      const filePath = path.join(this.storageDir, `${roundData.id}.json`);
+      const filePath = path.resolve(this.storageRoot, `${roundData.id}.json`);
+      // Verify that the resolved path is within the storage root
+      if (
+        filePath !== this.storageRoot &&
+        !filePath.startsWith(this.storageRoot + path.sep)
+      ) {
+        throw new Error("Resolved path escapes storage directory");
+      }
       await fs.writeFile(filePath, JSON.stringify(roundData, null, 2), "utf-8");
       log.info("Round stored on filesystem");
     } catch (error) {
@@ -56,7 +66,14 @@ export class FileSystemRoundStorage implements RoundStorage {
       storageDir: this.storageDir,
     });
     try {
-      const filePath = path.join(this.storageDir, `${id}.json`);
+      const filePath = path.resolve(this.storageRoot, `${id}.json`);
+      // Verify that the resolved path is within the storage root
+      if (
+        filePath !== this.storageRoot &&
+        !filePath.startsWith(this.storageRoot + path.sep)
+      ) {
+        throw new Error("Resolved path escapes storage directory");
+      }
       const fileContent = await fs.readFile(filePath, "utf-8");
       log.debug("Round loaded from filesystem");
       return JSON.parse(fileContent) as SharedRoundData;
