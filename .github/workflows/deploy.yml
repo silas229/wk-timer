@@ -61,7 +61,7 @@ jobs:
 
       - name: Verify supervisor status
         run: |
-          status_output=$(ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "supervisorctl status wk-timer")
+          status_output=$(ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "supervisorctl status apps-custom:wk-timer")
           echo "$status_output"
           if echo "$status_output" | grep -q "RUNNING"; then
             echo "✅ wk-timer is running"
