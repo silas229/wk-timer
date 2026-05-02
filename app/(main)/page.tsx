@@ -244,6 +244,8 @@ export default function Page() {
           laps={laps}
           comparison={getCurrentRoundComparison()}
           teamAverageAge={getCurrentTeam()?.averageAge}
+          teamId={selectedTeamId}
+          roundId={lastSavedRound?.id}
         />
 
         {/* Activities Display */}
@@ -254,6 +256,8 @@ export default function Page() {
           state={state}
           time={time}
           laps={laps}
+          teamId={selectedTeamId}
+          roundId={lastSavedRound?.id}
         />
 
         {/* Control Button */}

@@ -34,7 +34,7 @@ export interface ActivityTime {
  * @returns Array of activities with calculated time differences
  */
 export function calculateActivityTimes(
-  laps: { lapNumber: number; time: number; timestamp: Date }[]
+  laps: { lapNumber: number; time: number; timestamp: Date }[],
 ): ActivityTime[] {
   const activities: ActivityTime[] = [];
 
@@ -65,11 +65,16 @@ export function calculateActivityTimes(
 /**
  * Format time in milliseconds with various format options
  */
-export type TimeFormat = "full" | "seconds" | "diff" | "diff-seconds";
+export type TimeFormat =
+  | "full"
+  | "seconds"
+  | "diff"
+  | "diff-seconds"
+  | "compact";
 
 export function formatTime(
   milliseconds: number,
-  format: TimeFormat = "full"
+  format: TimeFormat = "full",
 ): string {
   const isNegative = milliseconds < 0;
   const absMilliseconds = Math.abs(milliseconds);
@@ -89,7 +94,7 @@ export function formatTime(
     case "diff": {
       // +/-ss.ms format
       const prefix = isNegative ? "-" : "+";
-      return `${prefix}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+      return `${prefix}${totalSeconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
     }
 
     case "diff-seconds": {
@@ -97,6 +102,9 @@ export function formatTime(
       const prefix = isNegative ? "-" : "+";
       return `${prefix}${totalSeconds.toString().padStart(2, "0")}`;
     }
+
+    case "compact": // m:ss format
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
     default:
       return `${minutes}:${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
@@ -142,7 +150,7 @@ export function compareRounds(
     id: string;
     totalTime: number;
     laps: { lapNumber: number; time: number; timestamp: Date }[];
-  } | null
+  } | null,
 ): RoundComparison | null {
   if (!previousRound) {
     return null;
@@ -160,7 +168,7 @@ export function compareRounds(
 
   currentActivities.forEach((currentActivity) => {
     const previousActivity = previousActivities.find(
-      (p) => p.name === currentActivity.name
+      (p) => p.name === currentActivity.name,
     );
     if (previousActivity) {
       const diff = currentActivity.time - previousActivity.time;

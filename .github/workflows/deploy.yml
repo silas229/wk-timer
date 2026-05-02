@@ -44,6 +44,10 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ vars.SERVER_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Stop application
+        run: |
+          ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "supervisorctl stop apps-custom:wk-timer"
+
       - name: Copy .next directory to server
         run: |
           rsync -avz --delete .next/ ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }}:${{ vars.SERVER_PATH }}/.next/
@@ -54,7 +58,7 @@ jobs:
 
       - name: Deploy on server
         run: |
-          ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "cd ${{ vars.SERVER_PATH }} && git pull && npm install --save && supervisorctl restart apps-custom:wk-timer"
+          ssh -T ${{ vars.SERVER_USER }}@${{ vars.SERVER_HOST }} "cd ${{ vars.SERVER_PATH }} && git pull && npm install --save && supervisorctl start apps-custom:wk-timer"
 
       - name: Wait for application to start
         run: sleep 10

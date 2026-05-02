@@ -1,8 +1,10 @@
 import { Trash2, Share2, BadgeInfo } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateActivityTimes, formatTime, type RoundComparison } from "@/lib/lap-activities";
 import { ActivityList } from "./activity-list";
+import { ActivityChartDialog, TOTAL_TIME_KEY } from "./activity-chart-dialog";
 import { calculateTotalScore, formatPoints, calculateTargetTimeMs } from "@/lib/scoring";
 import type { SavedRound } from "@/lib/indexeddb";
 
@@ -29,6 +31,7 @@ export function RoundCard({
   onDeleteRound,
   onOpenDetails
 }: Readonly<RoundCardProps>) {
+  const [showTotalTimeChart, setShowTotalTimeChart] = useState(false);
   const activities = calculateActivityTimes(round.laps);
 
   const handleOpenDetails = () => {
@@ -89,7 +92,13 @@ export function RoundCard({
                 style={{ backgroundColor: getTeamColor(round.teamId) }}
               />
               <CardTitle className="text-lg">
-                <span className="font-mono">{formatTime(round.totalTime, 'full')}</span>
+                <button
+                  type="button"
+                  onClick={() => setShowTotalTimeChart(true)}
+                  className="font-mono cursor-pointer hover:underline"
+                >
+                  {formatTime(round.totalTime, 'full')}
+                </button>
                 {comparison && comparison.totalTimeDiff !== null && comparison.isFasterOverall !== null && (
                   <span className={`ml-2 font-medium text-xs p-1 align-middle border rounded ${comparison.isFasterOverall ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'}`}>
                     {formatTime(comparison.totalTimeDiff, 'diff')}
@@ -168,8 +177,19 @@ export function RoundCard({
         <ActivityList
           activities={activities}
           comparison={comparison}
+          teamId={round.teamId}
+          roundId={round.id}
         />
       </CardContent>
+
+      <ActivityChartDialog
+        open={showTotalTimeChart}
+        onOpenChange={setShowTotalTimeChart}
+        activityName={TOTAL_TIME_KEY}
+        teamId={round.teamId}
+        referenceY={targetTime}
+        currentRoundId={round.id}
+      />
     </Card>
   );
 }
