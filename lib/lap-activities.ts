@@ -94,7 +94,7 @@ export function formatTime(
     case "diff": {
       // +/-ss.ms format
       const prefix = isNegative ? "-" : "+";
-      return `${prefix}${seconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
+      return `${prefix}${totalSeconds.toString().padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
     }
 
     case "diff-seconds": {

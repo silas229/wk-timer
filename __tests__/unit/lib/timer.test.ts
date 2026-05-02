@@ -19,16 +19,6 @@ describe("Timer Logic", () => {
     vi.useRealTimers();
   });
 
-  function formatTime(milliseconds: number): string {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const ms = Math.floor((milliseconds % 1000) / 10);
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}.${ms.toString().padStart(2, "0")}`;
-  }
-
   function addLap(time: number): void {
     if (laps.length < 13) {
       laps.push({
@@ -38,13 +28,6 @@ describe("Timer Logic", () => {
       });
     }
   }
-
-  it("should format time correctly", () => {
-    expect(formatTime(0)).toBe("00:00.00");
-    expect(formatTime(1000)).toBe("00:01.00");
-    expect(formatTime(61500)).toBe("01:01.50");
-    expect(formatTime(125000)).toBe("02:05.00");
-  });
 
   it("should add laps correctly", () => {
     addLap(30000); // 30 seconds
@@ -164,7 +147,7 @@ describe("Round Data Structure", () => {
 
     expect(mockRound.id).toBeTruthy();
     expect(mockRound.id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
     expect(mockRound.completedAt).toBeInstanceOf(Date);
     expect(mockRound.totalTime).toBeGreaterThan(0);

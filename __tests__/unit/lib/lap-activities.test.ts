@@ -100,7 +100,7 @@ describe("Lap Activities", () => {
 
       const runner5 = activities.find((a) => a.name === "Läufer 5");
       expect(runner5).toBeDefined();
-      expect(runner5?.time).toBe(25000); // 10 seconds (55s -> 80s)
+      expect(runner5?.time).toBe(25000); // 25 seconds (55s -> 80s)
       expect(runner5?.startTime).toBe(55000);
       expect(runner5?.endTime).toBe(80000);
 
@@ -191,6 +191,18 @@ describe("Lap Activities", () => {
         expect(formatTime(0, "seconds")).toBe("00.00");
         expect(formatTime(1500, "seconds")).toBe("01.50");
         expect(formatTime(59999, "seconds")).toBe("59.99");
+        expect(formatTime(60000, "seconds")).toBe("60.00");
+        expect(formatTime(120000, "seconds")).toBe("120.00");
+      });
+    });
+
+    describe("compact format", () => {
+      it("should format as m:ss without milliseconds", () => {
+        expect(formatTime(0, "compact")).toBe("0:00");
+        expect(formatTime(1500, "compact")).toBe("0:01");
+        expect(formatTime(60000, "compact")).toBe("1:00");
+        expect(formatTime(90000, "compact")).toBe("1:30");
+        expect(formatTime(125678, "compact")).toBe("2:05");
       });
     });
 
@@ -199,17 +211,15 @@ describe("Lap Activities", () => {
         expect(formatTime(0, "diff")).toBe("+00.00");
         expect(formatTime(1500, "diff")).toBe("+01.50");
         expect(formatTime(59999, "diff")).toBe("+59.99");
+        expect(formatTime(60000, "diff")).toBe("+60.00");
+        expect(formatTime(120000, "diff")).toBe("+120.00");
       });
 
       it("should format negative differences", () => {
         expect(formatTime(-1500, "diff")).toBe("-01.50");
         expect(formatTime(-59999, "diff")).toBe("-59.99");
         expect(formatTime(-123, "diff")).toBe("-00.12");
-      });
-
-      it("should handle minutes overflow in diff format", () => {
-        expect(formatTime(65000, "diff")).toBe("+05.00"); // 1:05 becomes +05 seconds
-        expect(formatTime(-125678, "diff")).toBe("-05.67"); // -2:05.67 becomes -05.67 seconds
+        expect(formatTime(-120000, "diff")).toBe("-120.00");
       });
     });
 
@@ -254,7 +264,7 @@ describe("Lap Activities", () => {
       // (not exact due to overlapping activities like Anziehen during Läufer 5)
       const totalActivityTime = activities.reduce(
         (sum, activity) => sum + activity.time,
-        0
+        0,
       );
       const totalLapTime = mockLaps[mockLaps.length - 1]?.time || 0;
 
