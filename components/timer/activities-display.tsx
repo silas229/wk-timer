@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LAP_ACTIVITIES } from "@/lib/lap-activities";
-import { ActivityItem } from "./activity-item";
+import { ActivityList } from "@/components/history/activity-list";
 import { CurrentActivityItem } from "./current-activity-item";
 import type { ActivityTime, RoundComparison } from "@/lib/lap-activities";
 import type { Lap } from "@/lib/indexeddb";
@@ -14,10 +14,12 @@ interface ActivitiesDisplayProps {
   state: TimerState
   time: number
   laps: Lap[]
+  teamId?: string
+  roundId?: string
 }
 
 export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayProps>(
-  ({ activities, comparison, state, time, laps }, ref) => {
+  ({ activities, comparison, state, time, laps, teamId, roundId }, ref) => {
     // Get current activities being performed (can be multiple)
     const getCurrentActivities = () => {
       if (state !== "running" || laps.length >= 13) return [];
@@ -58,8 +60,8 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
           <div
             ref={ref}
             className={`space-y-2 transition-all duration-700 ease-in-out ${state === "finished"
-                ? "max-h-[2000px] overflow-y-visible" // Large height, no scroll when finished
-                : "h-64 max-h-64 overflow-y-auto" // Fixed height with scroll during round
+              ? "max-h-[2000px] overflow-y-visible" // Large height, no scroll when finished
+              : "h-64 max-h-64 overflow-y-auto" // Fixed height with scroll during round
               }`}
           >
             {activities.length === 0 && state === "stopped" ? (
@@ -68,16 +70,14 @@ export const ActivitiesDisplay = forwardRef<HTMLDivElement, ActivitiesDisplayPro
               </p>
             ) : (
               <>
-                {activities.map((activity, index) => {
-                  const activityComparison = comparison?.activityComparisons[activity.name];
-                  return (
-                    <ActivityItem
-                      key={`${activity.name}-${index}`}
-                      activity={activity}
-                      comparison={activityComparison}
-                    />
-                  );
-                })}
+                <ActivityList
+                  activities={activities}
+                  comparison={comparison}
+                  layout="single-column"
+                  teamId={teamId}
+                  roundId={roundId}
+                  showTimestamps
+                />
 
                 {currentActivities.map((currentActivity, index) => (
                   <CurrentActivityItem
