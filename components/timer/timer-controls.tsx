@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Trash2, Calculator } from "lucide-react";
+import { STARTABLE_RUNNERS, type StartRunner } from "@/lib/lap-activities";
 import type { SavedRound, Lap } from "@/lib/indexeddb";
 
 type TimerState = "stopped" | "running" | "finished"
@@ -24,6 +25,8 @@ interface TimerControlsProps {
   state: TimerState
   laps: Lap[]
   lastSavedRound: SavedRound | null
+  startRunner: StartRunner
+  onStartRunnerChange: (runner: StartRunner) => void
   onButtonClick: () => void
   onDiscardRound: () => void
   onOpenDetails?: (round: SavedRound) => void
@@ -33,10 +36,12 @@ export function TimerControls({
   state,
   laps,
   lastSavedRound,
+  startRunner,
+  onStartRunnerChange,
   onButtonClick,
   onDiscardRound,
   onOpenDetails
-}: TimerControlsProps) {
+}: Readonly<TimerControlsProps>) {
   const getButtonText = () => {
     if (state === "stopped") return "Start";
     if (state === "running") {
@@ -57,6 +62,24 @@ export function TimerControls({
       >
         {getButtonText()}
       </Button>
+
+      {state === "stopped" && (
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-sm text-muted-foreground">Start bei:</span>
+          <div className="flex gap-1">
+            {STARTABLE_RUNNERS.map((runner) => (
+              <Button
+                key={runner}
+                variant={startRunner === runner ? "default" : "outline"}
+                size="sm"
+                onClick={() => onStartRunnerChange(runner)}
+              >
+                Läufer {runner}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {state === "finished" && lastSavedRound && (
         <div className="space-y-2">

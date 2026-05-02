@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTeam } from "@/components/team-context";
 import { indexedDB, type Lap, type SavedRound } from "@/lib/indexeddb";
-import { calculateActivityTimes, compareRounds, type ActivityTime } from "@/lib/lap-activities";
+import { calculateActivityTimes, compareRounds, SKIP_PENALTY_MS, type ActivityTime, type StartRunner } from "@/lib/lap-activities";
 import { generateUUID } from "@/lib/utils";
 import {
   createRoundHandlers,
@@ -29,6 +29,7 @@ export default function Page() {
   const [previousRoundForComparison, setPreviousRoundForComparison] = useState<SavedRound | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [roundToDetail, setRoundToDetail] = useState<SavedRound | null>(null);
+  const [startRunner, setStartRunner] = useState<StartRunner>(1);
   const activitiesRef = useRef<HTMLDivElement>(null);
 
   const getAverageAge = useCallback(() => getCurrentTeam()?.averageAge, [getCurrentTeam]);
@@ -63,6 +64,11 @@ export default function Page() {
       loadSavedRounds();
     }
   }, [isInitialized, loadSavedRounds]);
+
+  // Reset start runner only when switching to another team.
+  useEffect(() => {
+    setStartRunner(1);
+  }, [selectedTeamId]);
 
   // Get last completed round for current team for comparison
   const getLastRoundForComparison = useCallback(() => {
@@ -121,9 +127,9 @@ export default function Page() {
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (state === "running") {
+    if (state === "running" && startTime !== null) {
       interval = setInterval(() => {
-        setTime(Date.now() - startTime!);
+        setTime(Date.now() - startTime);
       }, 10);
     }
 
@@ -137,7 +143,24 @@ export default function Page() {
     const lastRound = getLastRoundForComparison();
     setPreviousRoundForComparison(lastRound);
 
-    setStartTime(Date.now() - time);
+    const skipped = startRunner - 1;
+    const offset = skipped * SKIP_PENALTY_MS;
+
+    // Insert virtual laps for skipped runners
+    if (skipped > 0) {
+      const virtualLaps: Lap[] = [];
+      for (let i = 1; i <= skipped; i++) {
+        virtualLaps.push({
+          lapNumber: i,
+          time: i * SKIP_PENALTY_MS,
+          timestamp: new Date(),
+        });
+      }
+      setLaps(virtualLaps);
+    }
+
+    // Start timer at offset so total time includes penalty
+    setStartTime(Date.now() - offset);
     setState("running");
   };
 
@@ -265,6 +288,8 @@ export default function Page() {
           state={state}
           laps={laps}
           lastSavedRound={lastSavedRound}
+          startRunner={startRunner}
+          onStartRunnerChange={setStartRunner}
           onButtonClick={handleButtonClick}
           onDiscardRound={handleDiscardRound}
           onOpenDetails={handleOpenDetails}

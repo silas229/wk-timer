@@ -21,6 +21,13 @@ export const LAP_ACTIVITIES: LapActivity[] = [
   { name: "Läufer 9", endIndex: 13, startIndex: 12 }, // R9
 ];
 
+/** Penalty time in ms for each skipped runner */
+export const SKIP_PENALTY_MS = 9000;
+
+/** Runner indices that can be used as start (Läufer 1, 2, or 3) */
+export const STARTABLE_RUNNERS = [1, 2, 3] as const;
+export type StartRunner = (typeof STARTABLE_RUNNERS)[number];
+
 export interface ActivityTime {
   name: string;
   time: number;
