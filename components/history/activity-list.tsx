@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, useState } from "react";
 import { formatTime } from "@/lib/lap-activities";
 import type { ActivityTime, RoundComparison } from "@/lib/lap-activities";
-import { ActivityChartDialog } from "./activity-chart-dialog";
+
+const ActivityChartDialog = lazy(() =>
+  import("./activity-chart-dialog").then((m) => ({ default: m.ActivityChartDialog }))
+);
 
 interface ActivityListProps {
   activities: ActivityTime[]
@@ -54,11 +57,11 @@ export function ActivityList({ activities, comparison, layout = 'grid', teamId, 
         })}
       </div>
 
-      {teamId && (
+      {teamId && selectedActivity !== null && (
         <ActivityChartDialog
-          open={selectedActivity !== null}
+          open
           onOpenChange={(open) => { if (!open) setSelectedActivity(null); }}
-          activityName={selectedActivity ?? ""}
+          activityName={selectedActivity}
           teamId={teamId}
           currentRoundId={roundId}
         />
