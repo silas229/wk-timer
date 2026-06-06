@@ -50,7 +50,7 @@ export function SharedRoundCard({ roundData, activities }: Readonly<SharedRoundC
       knotTime: roundData.knotTime!,
       aPartPenaltySeconds: roundData.aPartPenaltySeconds!,
       overallImpression: roundData.overallImpression!,
-      bPartTime: roundData.totalTime,
+      bPartTime: Math.round(roundData.totalTime / 1000), // § 5.6
       bPartErrorPoints: roundData.bPartErrorPoints!,
     };
     scoringResult = calculateTotalScore(scoringParams);
