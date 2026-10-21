@@ -4,7 +4,7 @@ This project uses [Vitest](https://vitest.dev/) as the testing framework with Re
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22.22.2+, 24.15.0+, or 26+ (CI uses Node.js 24)
 - npm 10+
 
 ## Test Structure

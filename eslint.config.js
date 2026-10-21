@@ -15,6 +15,7 @@ export default tseslint.config(
       "coverage/**",
       "public/**",
       "next.config.mjs",
+      "next-env.d.ts",
     ],
   },
   js.configs.recommended,
@@ -42,6 +43,7 @@ export default tseslint.config(
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs["core-web-vitals"].rules,
+      "react-hooks/set-state-in-effect": "off",
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
