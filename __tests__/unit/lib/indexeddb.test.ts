@@ -157,13 +157,13 @@ describe("IndexedDB Manager", () => {
   describe("Settings Operations", () => {
     it(
       "sets and gets settings values",
+      { timeout: 30000 },
       async () => {
         await indexedDBManager.setSetting("theme", "dark");
         const value = await indexedDBManager.getSetting("theme");
 
         expect(value).toBe("dark");
-      },
-      { timeout: 30000 }
+      }
     );
   });
 });
